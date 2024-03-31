@@ -9,20 +9,21 @@ In this example., we'll scrape data for 13 cleric spell cards, in French. As _To
 The spell identifier is the one visible in the aidedd URL, Example: `toll-the-dead` from https://www.aidedd.org/dnd/sorts.php?vo=toll-the-dead.
 
 ```console
-$ rpg-spell-cards-generator --spells \
-        fr:lumiere \
-        en:toll-the-dead \
-        fr:stabilisation \
-        fr:nappe-de-brouillard \
-        fr:vague-tonnante \
-        fr:mot-de-guerison \
-        fr:soins \
-        fr:benediction \
-        fr:eclair-tracant \
-        fr:bourrasque \
-        fr:fracassement \
-        fr:aide \
-        fr:arme-spirituelle \
+$ rpg-spell-cards-generator \
+    --spells \
+      fr:lumiere \
+      en:toll-the-dead \
+      fr:stabilisation \
+      fr:nappe-de-brouillard \
+      fr:vague-tonnante \
+      fr:mot-de-guerison \
+      fr:soins \
+      fr:benediction \
+      fr:eclair-tracant \
+      fr:bourrasque \
+      fr:fracassement \
+      fr:aide \
+      fr:arme-spirituelle \
     --output bhargrim-cards.json
 Scraping data for lumiere
 Scraping data for toll-the-dead
