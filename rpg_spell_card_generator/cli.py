@@ -5,12 +5,14 @@ import concurrent.futures
 import json
 import re
 from dataclasses import dataclass
+from enum import IntEnum, StrEnum
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup, element
 
 AIDEDD_SPELLS_URL = "https://www.aidedd.org/dnd/sorts.php"
+AIDEDD_MAGIC_ITEMS_URL = "https://www.aidedd.org/dnd/om.php"
 
 # https://coolors.co/palette/f94144-f3722c-f8961e-f9844a-f9c74f-90be6d-43aa8b-4d908e-577590-277da1
 SPELL_COLORS_BY_LEVEL = {
@@ -24,6 +26,48 @@ SPELL_COLORS_BY_LEVEL = {
     7: "F8961E",
     8: "F3722C",
     9: "F94144",
+}
+
+
+class Rarity(IntEnum):
+    common = 0
+    uncommon = 1
+    rare = 2
+    very_rare = 3
+    legendary = 4
+    artifact = 5
+
+
+class ItemType:
+    wondrous_item = "wondrous_item"
+    ring = "ring"
+    weapon = "weapon"
+    wand = "wand"
+    armor = "armor"
+    staff = "staff"
+    potion = "potion"
+    rod = "rod"
+
+
+ITEM_ICON_BY_TYPE = {
+    ItemType.armor: "lamellar",
+    ItemType.weapon: "shard-sword",
+    ItemType.ring: "ring",
+    ItemType.wand: "orb-wand",
+    ItemType.wondrous_item: "eclipse-flare",
+    ItemType.staff: "bo",
+    ItemType.rod: "flanged-mace",
+    ItemType.potion: "potion-ball",
+}
+
+# https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
+MAGIC_ITEM_COLOR_BY_RARITY = {
+    Rarity.common: "FFBA08",
+    Rarity.uncommon: "F48C06",
+    Rarity.rare: "E85D04",
+    Rarity.very_rare: "DC2F02",
+    Rarity.legendary: "9D0208",
+    Rarity.artifact: "370617",
 }
 
 
@@ -128,6 +172,98 @@ class Spell:
         }
 
 
+@dataclass
+class MagicItem:
+    title: str
+    type: ItemType
+    color: str
+    rarity: Rarity
+    attunement: bool
+    text: list[str]
+    lang: str
+    image_url: str
+
+    @property
+    def icon(self):
+        return ITEM_ICON_BY_TYPE[self.type]
+
+    @property
+    def attunement_text(self) -> str:
+        return "harmonisation nécessaire" if self.lang == "fr" else "requires attunment"
+
+    @property
+    def type_text(self) -> str:
+        translations = {
+            "fr": {
+                ItemType.armor: "Armure",
+                ItemType.potion: "Potion",
+                ItemType.ring: "Anneau",
+                ItemType.rod: "Sceptre",
+                ItemType.staff: "Bâton",
+                ItemType.wand: "Baguette",
+                ItemType.weapon: "Arme",
+                ItemType.wondrous_item: "Objet merveilleux",
+            },
+            "en": {
+                ItemType.armor: "Armor",
+                ItemType.potion: "Potion",
+                ItemType.ring: "Ring",
+                ItemType.rod: "Rod",
+                ItemType.staff: "Staff",
+                ItemType.wand: "Wand",
+                ItemType.weapon: "Weapon",
+                ItemType.wondrous_item: "Wondrous item",
+            },
+        }
+        return translations[self.lang][self.type]
+
+    @property
+    def rarity_text(self) -> str:
+        translations = {
+            "fr": {
+                Rarity.common: "commun",
+                Rarity.uncommon: "peu commun",
+                Rarity.rare: "rare",
+                Rarity.very_rare: "très rare",
+                Rarity.legendary: "légendaire",
+                Rarity.artifact: "artéfact",
+            },
+            "en": {
+                Rarity.common: "common",
+                Rarity.uncommon: "uncommun",
+                Rarity.rare: "rare",
+                Rarity.very_rare: "very rare",
+                Rarity.legendary: "legendary",
+                Rarity.artifact: "artifact",
+            },
+        }
+        return translations[self.lang][self.rarity]
+
+    @property
+    def subtitle(self) -> SyntaxWarning:
+        parts = [self.type_text, self.rarity_text]
+        if self.attunement:
+            parts.append(self.attunement_text)
+        return ", ".join(parts)
+
+    def to_card(self) -> dict:
+        card = {
+            "count": 1,
+            "color": self.color,
+            "title": self.title,
+            "icon": self.icon,
+            "icon_back": self.icon,
+            "contents": [
+                f"subtitle | {self.subtitle}",
+                "rule",
+            ]
+            + [f"text | {text_part}" for text_part in self.text],
+        }
+        if self.image_url:
+            card["background_image"] = self.image_url
+        return card
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Scrape spell details from aidedd.org")
     parser.add_argument(
@@ -137,7 +273,18 @@ def parse_args():
             "Space separated <lang>:<spell-slug> items. "
             "Example: fr:lumiere en:toll-the-dead"
         ),
-        required=True,
+        required=False,
+        default=[],
+    )
+    parser.add_argument(
+        "--items",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<object-slug> items. "
+            "Example: fr:balai-volant fr:armure-de-vulnerabilite"
+        ),
+        required=False,
+        default=[],
     )
     parser.add_argument(
         "-o",
@@ -174,7 +321,7 @@ def scrape_spell_texts(div: element.Tag, lang: str) -> tuple[str, str]:
 
 
 def scrape_spell_details(spell: str, lang: str) -> Spell:
-    print(f"Scraping data for {spell}")
+    print(f"Scraping data for spell {spell}")
     lang_param = "vf" if lang == "fr" else "vo"
     resp = requests.get(AIDEDD_SPELLS_URL, params={lang_param: spell})
     resp.raise_for_status()
@@ -212,18 +359,123 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
     return spell
 
 
-def main():
-    args = parse_args()
+def scrape_item_details(item: str, lang: str) -> MagicItem:
+    print(f"Scraping data for item {item}")
+    attunement_text_by_lang = {
+        "fr": "(nécessite un lien)",
+        "en": "(requires attunement)",
+    }
+    rarity_text_by_lang = {
+        "fr": {
+            "commun": Rarity.common,
+            "peu commun": Rarity.uncommon,
+            "rare": Rarity.rare,
+            "très rare": Rarity.very_rare,
+            "légendaire": Rarity.legendary,
+            "artéfact": Rarity.artifact,
+        },
+        "en": {
+            "commun": Rarity.common,
+            "peu commun": Rarity.uncommon,
+            "rare": Rarity.rare,
+            "très rare": Rarity.very_rare,
+            "légendaire": Rarity.legendary,
+            "artéfact": Rarity.artifact,
+        },
+    }
+    type_text_by_lang = {
+        "fr": {
+            "objet merveilleux": ItemType.wondrous_item,
+            "anneau": ItemType.ring,
+            "baguette": ItemType.wand,
+            "armure": ItemType.armor,
+            "bâton": ItemType.staff,
+            "potion": ItemType.potion,
+            "sceptre": ItemType.rod,
+        },
+        "en": {
+            "wondrous item": ItemType.wondrous_item,
+            "ring": ItemType.ring,
+            "wand": ItemType.wand,
+            "armor": ItemType.armor,
+            "staff": ItemType.staff,
+            "potion": ItemType.potion,
+            "rod": ItemType.rod,
+        },
+    }
+    lang_param = "vf" if lang == "fr" else "vo"
+    resp = requests.get(AIDEDD_MAGIC_ITEMS_URL, params={lang_param: item})
+    resp.raise_for_status()
+    attunement_text = attunement_text_by_lang[lang]
+    soup = BeautifulSoup(resp.text, features="html.parser")
+    div_content = soup.find("div", class_="content")
+    item_type_div_text = div_content.find("div", class_="type").text
+    item_type_text, item_rarity = item_type_div_text.split(",")
+    item_rarity = item_rarity.strip()
+    if "Armure" in item_type_text:
+        item_type = ItemType.armor
+    else:
+        item_type = type_text_by_lang[lang][item_type_text.lower()]
+
+    if attunement_text in item_rarity:
+        item_rarity = item_rarity.replace(attunement_text, "").strip()
+        requires_attunement = True
+    else:
+        requires_attunement = False
+    img_elt = soup.find("img")
+    image_url = img_elt.attrs["src"] if img_elt else ""
+    rarity = rarity_text_by_lang[lang][item_rarity]
+    color = MAGIC_ITEM_COLOR_BY_RARITY[rarity]
+    item_description = list(div_content.find("div", class_="description").strings)
+    magic_item = MagicItem(
+        title=div_content.find("h1").text.strip(),
+        type=item_type,
+        attunement=requires_attunement,
+        text=item_description,
+        rarity=rarity,
+        color="#" + color,
+        lang=lang,
+        image_url=image_url,
+    )
+    return magic_item
+
+
+def export_spells_to_cards(spell_names: list[str]) -> list[dict]:
+    if not spell_names:
+        return []
+
     tasks, spells = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        for spell in args.spells:
-            lang, spell = spell.split(":")
-            tasks.append(executor.submit(scrape_spell_details, spell, lang))
+        for spell_name in spell_names:
+            lang, spell_name = spell_name.split(":")
+            tasks.append(executor.submit(scrape_spell_details, spell_name, lang))
         for future in concurrent.futures.as_completed(tasks):
             spells.append(future.result())
-
     spells = sorted(spells, key=lambda spell: (spell.level, spell.title))
     cards = [spell.to_card() for spell in spells]
+    return cards
+
+
+def export_items_to_cards(item_names: list[str]) -> list[dict]:
+    if not item_names:
+        return []
+
+    tasks, items = [], []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        for item_name in item_names:
+            lang, item_name = item_name.split(":")
+            tasks.append(executor.submit(scrape_item_details, item_name, lang))
+        for future in concurrent.futures.as_completed(tasks):
+            items.append(future.result())
+    items = sorted(items, key=lambda item: (item.rarity, item.title))
+    cards = [item.to_card() for item in items]
+    return cards
+
+
+def main():
+    args = parse_args()
+    cards = export_spells_to_cards(args.spells)
+    cards += export_items_to_cards(args.items)
     with open(args.output, "w") as out:
         json.dump(cards, out, indent=2, ensure_ascii=False)
 
