@@ -128,11 +128,24 @@ class Spell:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--spells", nargs="+")
-    parser.add_argument("-o", "--output", type=Path)
+    parser = argparse.ArgumentParser(description="Scrape spell details from aidedd.org")
+    parser.add_argument(
+        "--spells",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<spell-slug> items. "
+            "Example: fr:lumiere en:toll-the-dead"
+        ),
+        required=True,
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        help="File to write scraped spell data to",
+        required=True,
+    )
     return parser.parse_args()
-
 
 
 def scrape_property(div, classname, remove):
