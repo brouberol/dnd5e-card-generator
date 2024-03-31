@@ -71,6 +71,17 @@ MAGIC_ITEM_COLOR_BY_RARITY = {
 }
 
 
+class MagicSchool(StrEnum):
+    abjuration = "abjuration"
+    divination = "divination"
+    enchantment = "enchantment"
+    evocation = "evocation"
+    illusion = "illusion"
+    invocation = "invocation"
+    necromancy = "necromancy"
+    transmutation = "transmutation"
+
+
 def humanize_level(level: int) -> str:
     if level == 1:
         return "1st"
@@ -86,7 +97,7 @@ class Spell:
     title: str
     lang: str
     level: int
-    school: str
+    school: MagicSchool
     casting_time: str
     casting_range: str
     casting_components: str
@@ -105,9 +116,35 @@ class Spell:
                 return f"Niveau {self.level} - {self.school}"
         else:
             if self.level == 0:
-                return f"{self.school} cantrip"
+                return f"{self.school_text} cantrip"
             else:
                 return f"{humanize_level(self.level)}-level - {self.school}"
+
+    @property
+    def school_text(self):
+        translations = {
+            "fr": {
+                MagicSchool.abjuration: "abjuration",
+                MagicSchool.divination: "divination",
+                MagicSchool.enchantment: "enchantement",
+                MagicSchool.evocation: "évocation",
+                MagicSchool.illusion: "illusion",
+                MagicSchool.invocation: "invocation",
+                MagicSchool.necromancy: "nécromancie",
+                MagicSchool.transmutation: "transmutation",
+            },
+            "en": {
+                MagicSchool.abjuration: "abjuration",
+                MagicSchool.divination: "divination",
+                MagicSchool.enchantment: "enchantment",
+                MagicSchool.evocation: "evocation",
+                MagicSchool.illusion: "illusion",
+                MagicSchool.invocation: "invocation",
+                MagicSchool.necromancy: "necromancy",
+                MagicSchool.transmutation: "transmutation",
+            },
+        }
+        return translations[self.school]
 
     @property
     def casting_time_text(self) -> str:
@@ -153,7 +190,6 @@ class Spell:
             "color": self.color,
             "title": self.title,
             "icon": "magic-swirl",
-            "icon_back": "magic-swirl",
             "contents": [
                 f"subtitle | {self.subtitle}",
                 "rule",
@@ -169,6 +205,7 @@ class Spell:
             ]
             + upcasting_parts,
             "tags": self.tags,
+            "background_image": f"https://balthazar-rouberol.com/public/dnd-magic-schools/{str(self.school.value)}.jpg",
         }
 
 
@@ -335,15 +372,40 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         .strip()
     )
     text, upcasting_text = scrape_spell_texts(div_content, lang)
+    school_text = (
+        div_content.find("div", class_="ecole")
+        .text.split(" - ")[1]
+        .strip()
+        .capitalize()
+    )
+    school_by_lang = {
+        "fr": {
+            "abjuration": MagicSchool.abjuration,
+            "divination": MagicSchool.divination,
+            "enchantement": MagicSchool.enchantment,
+            "évocation": MagicSchool.evocation,
+            "illusion": MagicSchool.illusion,
+            "invocation": MagicSchool.invocation,
+            "nécromancie": MagicSchool.necromancy,
+            "transmutation": MagicSchool.transmutation,
+        },
+        "en": {
+            "abjuration": MagicSchool.abjuration,
+            "divination": MagicSchool.divination,
+            "enchantment": MagicSchool.enchantment,
+            "evocation": MagicSchool.evocation,
+            "illusion": MagicSchool.illusion,
+            "invocation": MagicSchool.invocation,
+            "necromancy": MagicSchool.necromancy,
+            "transmutation": MagicSchool.transmutation,
+        },
+    }
     spell = Spell(
         lang=lang,
         color="#" + SPELL_COLORS_BY_LEVEL[level],
         level=level,
         title=div_content.find("h1").text.strip(),
-        school=div_content.find("div", class_="ecole")
-        .text.split(" - ")[1]
-        .strip()
-        .capitalize(),
+        school=school_by_lang[lang][school_text.lower()],
         casting_time=scrape_property(
             div_content, "t", ["Temps d'incantation :", "Casting Time:"]
         ),
