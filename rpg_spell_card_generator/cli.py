@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import concurrent.futures
 import json
 import re
 from dataclasses import dataclass
@@ -173,6 +174,7 @@ def scrape_spell_texts(div: element.Tag, lang: str) -> tuple[str, str]:
 
 
 def scrape_spell_details(spell: str, lang: str) -> Spell:
+    print(f"Scraping data for {spell}")
     lang_param = "vf" if lang == "fr" else "vo"
     resp = requests.get(AIDEDD_SPELLS_URL, params={lang_param: spell})
     resp.raise_for_status()
@@ -212,12 +214,14 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
 
 def main():
     args = parse_args()
-    spells = []
-    for spell in args.spells:
-        lang, spell = spell.split(":")
-        print(f"Scraping data for {spell}")
-        spell_data = scrape_spell_details(spell, lang)
-        spells.append(spell_data)
+    tasks, spells = [], []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        for spell in args.spells:
+            lang, spell = spell.split(":")
+            tasks.append(executor.submit(scrape_spell_details, spell, lang))
+        for future in concurrent.futures.as_completed(tasks):
+            spells.append(future.result())
+
     spells = sorted(spells, key=lambda spell: (spell.level, spell.title))
     cards = [spell.to_card() for spell in spells]
     with open(args.output, "w") as out:
