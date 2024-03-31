@@ -6,6 +6,8 @@ Scrape spell data from https://aidedd.org to generate spell cards with https://r
 
 In this example., we'll scrape data for 13 cleric spell cards, in French. As _Toll the dead_ was never translated, we fallback to the english version.
 
+The spell identifier is the one visible in the aidedd URL, Example: `toll-the-dead` from https://www.aidedd.org/dnd/sorts.php?vo=toll-the-dead.
+
 ```console
 $ rpg-spell-cards-generator --spells \
         fr:lumiere \
@@ -14,7 +16,8 @@ $ rpg-spell-cards-generator --spells \
         fr:nappe-de-brouillard \
         fr:vague-tonnante \
         fr:mot-de-guerison \
-        fr:soins fr:benediction \
+        fr:soins \
+        fr:benediction \
         fr:eclair-tracant \
         fr:bourrasque \
         fr:fracassement \
