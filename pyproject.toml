@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "rpg-spell-card-generator"
+version = "0.1.0"
+description = "Scrape spell data from aidedd.org to generate spell cards with rpg-cards.vercel.app"
+authors = ["Balthazar Rouberol <br@imap.cc>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.3"
+
+[tool.poetry.scripts]
+rpg-spell-card-generator = 'rpg_spell_card_generator.cli:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
