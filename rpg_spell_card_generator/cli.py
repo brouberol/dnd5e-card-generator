@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, element
 
 AIDEDD_SPELLS_URL = "https://www.aidedd.org/dnd/sorts.php"
 
@@ -26,7 +26,7 @@ SPELL_COLORS_BY_LEVEL = {
 }
 
 
-def humanize_level(level):
+def humanize_level(level: int) -> str:
     if level == 1:
         return "1st"
     elif level == 2:
@@ -52,7 +52,7 @@ class Spell:
     color: str
 
     @property
-    def subtitle(self):
+    def subtitle(self) -> str:
         if self.lang == "fr":
             if self.level == 0:
                 return f"Tour de magie - {self.school}"
@@ -65,36 +65,36 @@ class Spell:
                 return f"{humanize_level(self.level)}-level - {self.school}"
 
     @property
-    def casting_time_text(self):
+    def casting_time_text(self) -> str:
         return "Temps d'invocation" if self.lang == "fr" else "Casting time"
 
     @property
-    def casting_range_text(self):
+    def casting_range_text(self) -> str:
         return "Portée" if self.lang == "fr" else "Range"
 
     @property
-    def casting_components_text(self):
+    def casting_components_text(self) -> str:
         return "Composants" if self.lang == "fr" else "Compoments"
 
     @property
-    def effect_duration_text(self):
+    def effect_duration_text(self) -> str:
         return "Durée" if self.lang == "fr" else "Duration"
 
     @property
-    def upcasting_section_title(self):
+    def upcasting_section_title(self) -> str:
         return "Aux niveaux supérieurs" if self.lang == "fr" else "At higher levels"
 
     @property
-    def spell_carac_text(self):
+    def spell_carac_text(self) -> str:
         if self.lang == "fr":
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
-    def highlight_die_value(self, text):
+    def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+( \+ " + self.spell_carac_text + ")?"
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
-    def to_card(self):
+    def to_card(self) -> dict:
         if self.upcasting_text:
             upcasting_parts = [
                 "text |",
@@ -148,14 +148,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def scrape_property(div, classname, remove):
+def scrape_property(div: element.Tag, classname: str, remove: list[str]) -> str:
     prop = div.find("div", class_=classname).text
     for term in remove:
         prop = prop.replace(term, "")
     return prop.strip()
 
 
-def scrape_spell_texts(div, lang):
+def scrape_spell_texts(div: element.Tag, lang: str) -> tuple[str, str]:
     upcasting_indicator_by_lang = {
         "fr": "Aux niveaux supérieurs",
         "en": "At Higher Levels",
@@ -172,7 +172,7 @@ def scrape_spell_texts(div, lang):
     return text, upcasting_text
 
 
-def scrape_spell_details(spell, lang):
+def scrape_spell_details(spell: str, lang: str) -> Spell:
     lang_param = "vf" if lang == "fr" else "vo"
     resp = requests.get(AIDEDD_SPELLS_URL, params={lang_param: spell})
     resp.raise_for_status()
