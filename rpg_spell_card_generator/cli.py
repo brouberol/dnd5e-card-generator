@@ -111,14 +111,14 @@ class Spell:
     def subtitle(self) -> str:
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school}"
+                return f"Tour de magie - {self.school_text}"
             else:
-                return f"Niveau {self.level} - {self.school}"
+                return f"Niveau {self.level} - {self.school_text}"
         else:
             if self.level == 0:
                 return f"{self.school_text} cantrip"
             else:
-                return f"{humanize_level(self.level)}-level - {self.school}"
+                return f"{humanize_level(self.level)}-level - {self.school_text}"
 
     @property
     def school_text(self):
@@ -144,7 +144,7 @@ class Spell:
                 MagicSchool.transmutation: "transmutation",
             },
         }
-        return translations[self.school]
+        return translations[self.lang][self.school].capitalize()
 
     @property
     def casting_time_text(self) -> str:
