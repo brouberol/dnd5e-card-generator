@@ -119,23 +119,30 @@ class Spell:
     casting_range: str
     casting_components: str
     effect_duration: str
+    ritual: bool
     text: list[str]
     upcasting_text: str
     tags: list[str]
     color: str
 
     @property
+    def ritual_text(self):
+        if self.ritual:
+            return "(rituel)" if self.lang == 'fr' else '(ritual)'
+        return ''
+
+    @property
     def subtitle(self) -> str:
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school_text}"
+                return f"Tour de magie - {self.school_text} {self.ritual_text}"
             else:
-                return f"Niveau {self.level} - {self.school_text}"
+                return f"Niveau {self.level} - {self.school_text} {self.ritual_text}"
         else:
             if self.level == 0:
-                return f"{self.school_text} cantrip"
+                return f"{self.school_text} cantrip {self.ritual_text}"
             else:
-                return f"{humanize_level(self.level)}-level - {self.school_text}"
+                return f"{humanize_level(self.level)}-level - {self.school_text} {self.ritual_text}"
 
     @property
     def school_text(self):
@@ -208,7 +215,7 @@ class Spell:
             "title": self.title,
             "icon": "magic-swirl",
             "contents": [
-                f"subtitle | {self.subtitle}",
+                f"subtitle | {self.subtitle.strip()}",
                 "rule",
                 f"property | {self.casting_time_text}: | {self.casting_time}",
                 f"property | {self.casting_range_text}: | {self.casting_range}",
@@ -405,6 +412,12 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         .strip()
         .capitalize()
     )
+    if ritual_match := re.search(r'\((ritual|rituel)\)', school_text):
+        school_text = school_text.replace(ritual_match.group(0), '').strip()
+        ritual = True
+    else:
+        ritual = False
+
     school_by_lang = {
         "fr": {
             "abjuration": MagicSchool.abjuration,
@@ -444,6 +457,7 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         tags=[d.text for d in div_content.find_all("div", class_="classe")],
         text=text,
         upcasting_text=upcasting_text,
+        ritual=ritual
     )
     return spell
 
