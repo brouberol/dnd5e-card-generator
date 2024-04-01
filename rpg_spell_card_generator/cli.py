@@ -219,6 +219,7 @@ class MagicItem:
     text: list[str]
     lang: str
     image_url: str
+    recharges: int
 
     @property
     def icon(self):
@@ -284,6 +285,9 @@ class MagicItem:
         return ", ".join(parts)
 
     def to_card(self) -> dict:
+        extra_content = []
+        if self.recharges:
+            extra_content.extend(['fill | ', f'boxes | {self.recharges} | 1.5']) # 1.5 is in em
         card = {
             "count": 1,
             "color": self.color,
@@ -294,7 +298,7 @@ class MagicItem:
                 f"subtitle | {self.subtitle}",
                 "rule",
             ]
-            + [f"text | {text_part}" for text_part in self.text],
+            + [f"text | {text_part}" for text_part in self.text] + extra_content
         }
         if self.image_url:
             card["background_image"] = self.image_url
@@ -489,6 +493,8 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     rarity = rarity_text_by_lang[lang][item_rarity]
     color = MAGIC_ITEM_COLOR_BY_RARITY[rarity]
     item_description = list(div_content.find("div", class_="description").strings)
+    recharges_match = re.search(r'(\d+) charges', ' '.join(item_description))
+    recharges = recharges_match.group(1) if recharges_match else ''
     magic_item = MagicItem(
         title=div_content.find("h1").text.strip(),
         type=item_type,
@@ -498,6 +504,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         color="#" + color,
         lang=lang,
         image_url=image_url,
+        recharges=recharges
     )
     return magic_item
 
