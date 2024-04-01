@@ -97,6 +97,18 @@ def damage_type_text(lang):
         return r'(de )?dégâts (de )?\w+'
     return r'\w+ damage'
 
+
+def fetch_data(base_url, slug, lang):
+    cached_file = Path(f'/tmp/{lang}:{slug}.html')
+    if cached_file.exists():
+        return cached_file.read_text()
+    lang_param = "vf" if lang == "fr" else "vo"
+    resp = requests.get(base_url, params={lang_param: slug})
+    resp.raise_for_status()
+    cached_file.write_text(resp.text)
+    return resp.text
+
+
 @dataclass
 class Spell:
     title: str
@@ -376,10 +388,8 @@ def scrape_spell_texts(div: element.Tag, lang: str) -> tuple[str, str]:
 
 def scrape_spell_details(spell: str, lang: str) -> Spell:
     print(f"Scraping data for spell {spell}")
-    lang_param = "vf" if lang == "fr" else "vo"
-    resp = requests.get(AIDEDD_SPELLS_URL, params={lang_param: spell})
-    resp.raise_for_status()
-    soup = BeautifulSoup(resp.text, features="html.parser")
+    html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
+    soup = BeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
     level = int(
         div_content.find("div", class_="ecole")
@@ -482,11 +492,9 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
             "rod": ItemType.rod,
         },
     }
-    lang_param = "vf" if lang == "fr" else "vo"
-    resp = requests.get(AIDEDD_MAGIC_ITEMS_URL, params={lang_param: item})
-    resp.raise_for_status()
+    html = fetch_data(AIDEDD_MAGIC_ITEMS_URL, item, lang)
     attunement_text = attunement_text_by_lang[lang]
-    soup = BeautifulSoup(resp.text, features="html.parser")
+    soup = BeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
     item_type_div_text = div_content.find("div", class_="type").text
     item_type_text, _, item_rarity = item_type_div_text.partition(",")
