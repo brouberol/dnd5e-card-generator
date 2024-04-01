@@ -53,7 +53,7 @@ ITEM_ICON_BY_TYPE = {
     ItemType.armor: "lamellar",
     ItemType.weapon: "shard-sword",
     ItemType.ring: "ring",
-    ItemType.wand: "orb-wand",
+    ItemType.wand: "lunar-wand",
     ItemType.wondrous_item: "eclipse-flare",
     ItemType.staff: "bo",
     ItemType.rod: "flanged-mace",
