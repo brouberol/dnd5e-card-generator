@@ -92,6 +92,11 @@ def humanize_level(level: int) -> str:
     return f"{level}th"
 
 
+def damage_type_text(lang):
+    if lang == "fr":
+        return r'(de )?dégâts (de )?\w+'
+    return r'\w+ damage'
+
 @dataclass
 class Spell:
     title: str
@@ -173,7 +178,7 @@ class Spell:
         return "your spellcasting ability modifier"
 
     def highlight_die_value(self, text) -> str:
-        die_value_pattern = r"\dd\d+( \+ " + self.spell_carac_text + ")?"
+        die_value_pattern = r"\dd\d+( \+ " + self.spell_carac_text + r'| ' + damage_type_text(self.lang) + r")?"
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
     def to_card(self) -> dict:
@@ -277,6 +282,11 @@ class MagicItem:
         }
         return translations[self.lang][self.rarity]
 
+
+    def highlight_die_value(self, text) -> str:
+        die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
+        return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
+
     @property
     def subtitle(self) -> SyntaxWarning:
         parts = [self.type_text, self.rarity_text]
@@ -300,7 +310,7 @@ class MagicItem:
                 f"subtitle | {self.subtitle}",
                 "rule",
             ]
-            + [f"text | {text_part}" for text_part in self.text]
+            + [f"text | {self.highlight_die_value(text_part)}" for text_part in self.text]
             + extra_content,
         }
         if self.image_url:
