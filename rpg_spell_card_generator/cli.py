@@ -60,14 +60,14 @@ ITEM_ICON_BY_TYPE = {
     ItemType.potion: "potion-ball",
 }
 
-# https://coolors.co/palette/003049-d62828-f77f00-fcbf49-eae2b7
+# https://colordesigner.io/color-scheme-builder#5C4B51-8CBEB2-F2EBBF-F3B562-F06060
 MAGIC_ITEM_COLOR_BY_RARITY = {
-    Rarity.common: "FFBA08",
-    Rarity.uncommon: "F48C06",
-    Rarity.rare: "E85D04",
-    Rarity.very_rare: "DC2F02",
-    Rarity.legendary: "9D0208",
-    Rarity.artifact: "370617",
+    Rarity.common: "5C4B51",
+    Rarity.uncommon: "8CBEB2",
+    Rarity.rare: "BDD684",
+    Rarity.very_rare: "F3B562",
+    Rarity.legendary: "F06060",
+    Rarity.artifact: "9575CD",
 }
 
 
