@@ -428,8 +428,8 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
 def scrape_item_details(item: str, lang: str) -> MagicItem:
     print(f"Scraping data for item {item}")
     attunement_text_by_lang = {
-        "fr": "(nécessite un lien)",
-        "en": "(requires attunement)",
+        "fr": "nécessite un lien",
+        "en": "requires attunement",
     }
     rarity_text_by_lang = {
         "fr": {
@@ -484,7 +484,8 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         item_type = type_text_by_lang[lang][item_type_text.lower()]
 
     if attunement_text in item_rarity:
-        item_rarity = item_rarity.replace(attunement_text, "").strip()
+        requires_attunement_pattern = r'\(' + attunement_text + r'([\s\w]+)?' + r'\)'
+        item_rarity = re.sub(requires_attunement_pattern, '', item_rarity).strip()
         requires_attunement = True
     else:
         requires_attunement = False
