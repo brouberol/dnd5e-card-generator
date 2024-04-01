@@ -476,7 +476,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     soup = BeautifulSoup(resp.text, features="html.parser")
     div_content = soup.find("div", class_="content")
     item_type_div_text = div_content.find("div", class_="type").text
-    item_type_text, item_rarity = item_type_div_text.split(",")
+    item_type_text, _, item_rarity = item_type_div_text.partition(",")
     item_rarity = item_rarity.strip()
     if "Armure" in item_type_text:
         item_type = ItemType.armor
@@ -484,7 +484,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         item_type = type_text_by_lang[lang][item_type_text.lower()]
 
     if attunement_text in item_rarity:
-        requires_attunement_pattern = r'\(' + attunement_text + r'([\s\w]+)?' + r'\)'
+        requires_attunement_pattern = r'\(' + attunement_text + r'([\s\w\,]+)?' + r'\)'
         item_rarity = re.sub(requires_attunement_pattern, '', item_rarity).strip()
         requires_attunement = True
     else:
