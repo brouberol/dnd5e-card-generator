@@ -478,7 +478,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     item_type_div_text = div_content.find("div", class_="type").text
     item_type_text, _, item_rarity = item_type_div_text.partition(",")
     item_rarity = item_rarity.strip()
-    if "Armure" in item_type_text:
+    if re.match(r'(armor|armure)', item_type_text.lower()):
         item_type = ItemType.armor
     else:
         item_type = type_text_by_lang[lang][item_type_text.lower()]
