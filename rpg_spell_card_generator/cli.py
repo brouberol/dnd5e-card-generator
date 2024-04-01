@@ -75,9 +75,9 @@ class MagicSchool(StrEnum):
     abjuration = "abjuration"
     divination = "divination"
     enchantment = "enchantment"
-    evocation = "evocation"
+    conjuration = "conjuration"
     illusion = "illusion"
-    invocation = "invocation"
+    evocation = "evocation"
     necromancy = "necromancy"
     transmutation = "transmutation"
 
@@ -129,7 +129,7 @@ class Spell:
                 MagicSchool.enchantment: "enchantement",
                 MagicSchool.evocation: "évocation",
                 MagicSchool.illusion: "illusion",
-                MagicSchool.invocation: "invocation",
+                MagicSchool.conjuration: "invocation",
                 MagicSchool.necromancy: "nécromancie",
                 MagicSchool.transmutation: "transmutation",
             },
@@ -139,7 +139,7 @@ class Spell:
                 MagicSchool.enchantment: "enchantment",
                 MagicSchool.evocation: "evocation",
                 MagicSchool.illusion: "illusion",
-                MagicSchool.invocation: "invocation",
+                MagicSchool.conjuration: "conjuration",
                 MagicSchool.necromancy: "necromancy",
                 MagicSchool.transmutation: "transmutation",
             },
@@ -389,7 +389,7 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
             "enchantement": MagicSchool.enchantment,
             "évocation": MagicSchool.evocation,
             "illusion": MagicSchool.illusion,
-            "invocation": MagicSchool.invocation,
+            "invocation": MagicSchool.conjuration,
             "nécromancie": MagicSchool.necromancy,
             "transmutation": MagicSchool.transmutation,
         },
@@ -399,7 +399,7 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
             "enchantment": MagicSchool.enchantment,
             "evocation": MagicSchool.evocation,
             "illusion": MagicSchool.illusion,
-            "invocation": MagicSchool.invocation,
+            "conjuration": MagicSchool.conjuration,
             "necromancy": MagicSchool.necromancy,
             "transmutation": MagicSchool.transmutation,
         },
