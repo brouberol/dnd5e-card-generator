@@ -287,7 +287,9 @@ class MagicItem:
     def to_card(self) -> dict:
         extra_content = []
         if self.recharges:
-            extra_content.extend(['fill | ', f'boxes | {self.recharges} | 1.5']) # 1.5 is in em
+            extra_content.extend(
+                ["fill | ", f"boxes | {self.recharges} | 1.5"]
+            )  # 1.5 is in em
         card = {
             "count": 1,
             "color": self.color,
@@ -298,7 +300,8 @@ class MagicItem:
                 f"subtitle | {self.subtitle}",
                 "rule",
             ]
-            + [f"text | {text_part}" for text_part in self.text] + extra_content
+            + [f"text | {text_part}" for text_part in self.text]
+            + extra_content,
         }
         if self.image_url:
             card["background_image"] = self.image_url
@@ -478,14 +481,16 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     item_type_div_text = div_content.find("div", class_="type").text
     item_type_text, _, item_rarity = item_type_div_text.partition(",")
     item_rarity = item_rarity.strip()
-    if re.match(r'(armor|armure)', item_type_text.lower()):
+    if re.match(r"(armor|armure)", item_type_text.lower()):
         item_type = ItemType.armor
+    elif re.match(r"(arme|weapon)", item_type_text.lower()):
+        item_type = ItemType.weapon
     else:
         item_type = type_text_by_lang[lang][item_type_text.lower()]
 
     if attunement_text in item_rarity:
-        requires_attunement_pattern = r'\(' + attunement_text + r'([\s\w\,]+)?' + r'\)'
-        item_rarity = re.sub(requires_attunement_pattern, '', item_rarity).strip()
+        requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
+        item_rarity = re.sub(requires_attunement_pattern, "", item_rarity).strip()
         requires_attunement = True
     else:
         requires_attunement = False
@@ -494,8 +499,8 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     rarity = rarity_text_by_lang[lang][item_rarity]
     color = MAGIC_ITEM_COLOR_BY_RARITY[rarity]
     item_description = list(div_content.find("div", class_="description").strings)
-    recharges_match = re.search(r'(\d+) charges', ' '.join(item_description))
-    recharges = recharges_match.group(1) if recharges_match else ''
+    recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
+    recharges = recharges_match.group(1) if recharges_match else ""
     magic_item = MagicItem(
         title=div_content.find("h1").text.strip(),
         type=item_type,
@@ -505,7 +510,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         color="#" + color,
         lang=lang,
         image_url=image_url,
-        recharges=recharges
+        recharges=recharges,
     )
     return magic_item
 
