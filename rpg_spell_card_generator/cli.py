@@ -232,6 +232,8 @@ class Spell:
         if concentration_text := self.concentration_text:
             spell_extra.append(concentration_text)
         spell_extra_text = ' '.join(spell_extra)
+        if spell_extra_text:
+            spell_extra_text = f'- {spell_extra_text}'
 
         if self.lang == "fr":
             if self.level == 0:
