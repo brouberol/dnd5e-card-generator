@@ -24,7 +24,7 @@ $ dnd5e-cards-generator \
       fr:fracassement \
       fr:aide \
       fr:arme-spirituelle \
-    --output bhargrim-cards.json
+    --output cleric-cards.json
 Scraping data for lumiere
 Scraping data for toll-the-dead
 Scraping data for stabilisation
@@ -38,22 +38,20 @@ Scraping data for bourrasque
 Scraping data for fracassement
 Scraping data for aide
 Scraping data for arme-spirituelle
-$ cat bhargrim-cards.json | jq '.[0]'
+$ cat cleric-cards.json | jq '.[0]'
 {
   "count": 1,
   "color": "#277DA1",
   "title": "Lumière",
   "icon": "magic-swirl",
-  "icon_back": "magic-swirl",
   "contents": [
-    "subtitle | Tour de magie - Évocation",
+    "subtitle | Tour de magie - Évocation - V M",
     "rule",
     "property | Temps d'invocation: | 1 action",
     "property | Portée: | contact",
-    "property | Composants: | V, M (une luciole ou de la mousse phosphorescente)",
-    "property | Durée: | 1 heure",
+    "property | Durée: | 1 h",
     "rule",
-    "text | Vous touchez un objet qui ne dépasse pas 3 mètres dans toutes les dimensions. Jusqu'à la fin du sort, l'objet émet une lumière vive dans un rayon de 6 mètres et une lumière faible sur 6 mètres supplémentaires. La lumière est de la couleur que vous voulez. Couvrir complètement l'objet avec quelque chose d'opaque bloque la lumière. Le sort se termine si vous le lancez de nouveau ou si vous le dissipez par une action.",
+    "text | Vous touchez un objet qui ne dépasse pas 3 m dans toutes les dimensions. Jusqu'à la fin du sort, l'objet émet une lumière vive dans un rayon de 6 m et une lumière faible sur 6 m supplémentaires. La lumière est de la couleur que vous voulez. Couvrir complètement l'objet avec quelque chose d'opaque bloque la lumière. Le sort se termine si vous le lancez de nouveau ou si vous le dissipez par une action.",
     "text | Si vous ciblez un objet tenu ou porté par une créature hostile, cette créature doit réussir un jet de sauvegarde de Dextérité pour éviter le sort."
   ],
   "tags": [
@@ -61,8 +59,15 @@ $ cat bhargrim-cards.json | jq '.[0]'
     "Clerc",
     "Ensorceleur",
     "Magicien"
-  ]
+  ],
+  "background_image": "data:image/png;base64,iVBORw0...",
 }
 ```
 
-At this point, we can load `bhargrim-cards.json` in https://rpg-cards.vercel.app and export them as we wish.
+At this point, we can load `cleric-cards.json` in https://rpg-cards.vercel.app and export them as we wish.
+
+## Credits
+
+The magic schools symbols were found on [reddit](https://www.reddit.com/r/DnD/comments/71s8s8/art_schools_of_magic_symbols/), created by [`choren64`](https://www.reddit.com/user/choren64), who [authorized reuse](https://www.reddit.com/r/DnD/comments/71s8s8/art_schools_of_magic_symbols/dndhx5b/).
+
+The watercolors images were found on gmbinder. Many thanks to [https://reddit.com/u/flamableconcrete](`/u/flamableconcrete`).
