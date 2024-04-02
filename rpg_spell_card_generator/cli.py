@@ -178,6 +178,10 @@ def humanize_level(level: int) -> str:
     return f"{level}th"
 
 
+def game_icon(icon_name: str) -> str:
+    return f'<icon name="{icon_name}">'
+
+
 def damage_type_text(lang):
     if lang == "fr":
         return r"(de )?dégâts (de )?\w+"
@@ -205,6 +209,7 @@ class Spell:
     casting_range: str
     casting_components: str
     effect_duration: str
+    concentration: bool
     ritual: bool
     text: list[str]
     upcasting_text: str
@@ -213,22 +218,31 @@ class Spell:
 
     @property
     def ritual_text(self):
-        if self.ritual:
-            return "(rituel)" if self.lang == "fr" else "(ritual)"
-        return ""
+        return game_icon('cursed-star') if self.ritual else ''
+
+    @property
+    def concentration_text(self):
+        return game_icon('meditation') if self.concentration else ''
 
     @property
     def subtitle(self) -> str:
+        spell_extra = []
+        if ritual_text := self.ritual_text:
+            spell_extra.append(ritual_text)
+        if concentration_text := self.concentration_text:
+            spell_extra.append(concentration_text)
+        spell_extra_text = ' '.join(spell_extra)
+
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school_text} {self.ritual_text}"
+                return f"Tour de magie - {self.school_text} {spell_extra_text}"
             else:
-                return f"Niveau {self.level} - {self.school_text} {self.ritual_text}"
+                return f"Niveau {self.level} - {self.school_text} {spell_extra_text}"
         else:
             if self.level == 0:
-                return f"{self.school_text} cantrip {self.ritual_text}"
+                return f"{self.school_text} cantrip {spell_extra_text}"
             else:
-                return f"{humanize_level(self.level)}-level - {self.school_text} {self.ritual_text}"
+                return f"{humanize_level(self.level)} level - {self.school_text} {spell_extra_text}"
 
     @property
     def school_text(self):
@@ -346,7 +360,7 @@ class MagicItem:
 
     @property
     def attunement_text(self) -> str:
-        return '<icon name="empty-hourglass">'
+        return game_icon('empty-hourglass')
 
     @property
     def type_text(self) -> str:
@@ -514,6 +528,12 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         ritual = True
     else:
         ritual = False
+    effect_duration = scrape_property(div_content, "d", ["Durée :", "Duration:"])
+    if concentration_match := re.search(r"concentration, ", effect_duration):
+        effect_duration = effect_duration.replace(concentration_match.group(0), '').strip()
+        concentration = True
+    else:
+        concentration = False
 
     school_by_lang = {
         "fr": {
@@ -550,11 +570,12 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         casting_components=scrape_property(
             div_content, "c", ["Composantes :", "Components:"]
         ),
-        effect_duration=scrape_property(div_content, "d", ["Durée :", "Duration:"]),
+        effect_duration=effect_duration,
         tags=[d.text for d in div_content.find_all("div", class_="classe")],
         text=text,
         upcasting_text=upcasting_text,
         ritual=ritual,
+        concentration=concentration
     )
     return spell
 
