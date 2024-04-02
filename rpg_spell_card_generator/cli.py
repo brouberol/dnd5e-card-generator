@@ -207,8 +207,11 @@ class Spell:
     school: MagicSchool
     casting_time: str
     casting_range: str
-    casting_components: str
     effect_duration: str
+    verbal: bool
+    somatic: bool
+    material: bool
+    paying_components: str
     concentration: bool
     ritual: bool
     text: list[str]
@@ -225,7 +228,7 @@ class Spell:
         return game_icon('meditation') if self.concentration else ''
 
     @property
-    def subtitle(self) -> str:
+    def spell_casting_extra(self):
         spell_extra = []
         if ritual_text := self.ritual_text:
             spell_extra.append(ritual_text)
@@ -234,17 +237,32 @@ class Spell:
         spell_extra_text = ' '.join(spell_extra)
         if spell_extra_text:
             spell_extra_text = f'- {spell_extra_text}'
+        return spell_extra_text
 
+    @property
+    def spell_casting_components(self):
+        components = []
+        if self.verbal:
+            components.append('V')
+        if self.somatic:
+            components.append('S')
+        if self.material:
+            components.append('M')
+        return ' '.join(components)
+
+    @property
+    def subtitle(self) -> str:
+        suffix = f'{self.school_text} - {self.spell_casting_components} {self.spell_casting_extra}'
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school_text} {spell_extra_text}"
+                return f"Tour de magie - {suffix}"
             else:
-                return f"Niveau {self.level} - {self.school_text} {spell_extra_text}"
+                return f"Niveau {self.level} - {suffix}"
         else:
             if self.level == 0:
-                return f"{self.school_text} cantrip {spell_extra_text}"
+                return f"Cantrip - {suffix}"
             else:
-                return f"{humanize_level(self.level)} level - {self.school_text} {spell_extra_text}"
+                return f"{humanize_level(self.level)} level - {suffix}"
 
     @property
     def school_text(self):
@@ -347,6 +365,17 @@ class Spell:
             ]
         else:
             upcasting_parts = []
+
+        spell_properties = [
+            f"property | {self.casting_time_text}: | {self.casting_time}",
+        ]
+        if self.paying_components:
+            spell_properties.append(f'property | {self.casting_components_text}: | {self.paying_components}')
+        spell_properties.extend([
+            f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
+            f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
+        ])
+
         return {
             "count": 1,
             "color": self.color,
@@ -355,10 +384,7 @@ class Spell:
             "contents": [
                 f"subtitle | {self.subtitle.strip()}",
                 "rule",
-                f"property | {self.casting_time_text}: | {self.casting_time}",
-                f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
-                f"property | {self.casting_components_text}: | {self.casting_components}",
-                f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
+                *spell_properties,
                 "rule",
             ]
             + [
@@ -563,7 +589,21 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         concentration = True
     else:
         concentration = False
+    casting_components = scrape_property(div_content, "c", ["Composantes :", "Components:"])
+    single_letter_casting_components = re.sub(r'\(.+\)', '', casting_components).strip().split(', ')
+    verbal = 'V' in single_letter_casting_components
+    somatic = 'S' in single_letter_casting_components
+    material = 'M' in single_letter_casting_components
 
+    paying_components_indicator_by_lang = {
+        'fr': 'valant au moins',
+        'en': 'worth at least',
+    }
+    if material:
+        if components_text := re.search(r'\(.+\)', casting_components).group():
+            paying_components = components_text if paying_components_indicator_by_lang[lang] in components_text else ''
+    else:
+        paying_components = ''
     school_by_lang = {
         "fr": {
             "abjuration": MagicSchool.abjuration,
@@ -596,9 +636,10 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
             div_content, "t", ["Temps d'incantation :", "Casting Time:"]
         ),
         casting_range=scrape_property(div_content, "r", ["Portée :", "Range:"]),
-        casting_components=scrape_property(
-            div_content, "c", ["Composantes :", "Components:"]
-        ),
+        somatic=somatic,
+        verbal=verbal,
+        material=material,
+        paying_components=paying_components,
         effect_duration=effect_duration,
         tags=[d.text for d in div_content.find_all("div", class_="classe")],
         text=text,
