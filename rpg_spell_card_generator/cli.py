@@ -251,7 +251,7 @@ class MagicItem:
 
     @property
     def attunement_text(self) -> str:
-        return "harmonisation nécessaire" if self.lang == "fr" else "requires attunment"
+        return '<icon name="empty-hourglass">'
 
     @property
     def type_text(self) -> str:
@@ -308,10 +308,10 @@ class MagicItem:
 
     @property
     def subtitle(self) -> SyntaxWarning:
-        parts = [self.type_text, self.rarity_text]
+        subtitle = f'{self.type_text}, {self.rarity_text}'
         if self.attunement:
-            parts.append(self.attunement_text)
-        return ", ".join(parts)
+            subtitle += f' {self.attunement_text}'
+        return subtitle
 
     def to_card(self) -> dict:
         extra_content = []
