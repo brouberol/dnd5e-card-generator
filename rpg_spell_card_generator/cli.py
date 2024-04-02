@@ -229,7 +229,7 @@ class Spell:
             ]
             + upcasting_parts,
             "tags": self.tags,
-            "background_image": f"https://balthazar-rouberol.com/public/dnd-magic-schools/{str(self.school.value)}.jpg",
+            "background_image": f"https://balthazar-rouberol.com/public/dnd-magic-schools/{str(self.school.value)}.png",
         }
 
 
