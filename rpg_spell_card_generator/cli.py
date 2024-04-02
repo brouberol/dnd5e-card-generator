@@ -134,7 +134,7 @@ def compose_magic_school_logo_and_watercolor(
     magic_school: MagicSchool, color: str
 ) -> Path:
     magic_school_name = magic_school.value
-    watercolor_version = (hash(magic_school_name) % 4) + 1
+    watercolor_version = (list(MagicSchool._member_map_.keys()).index(magic_school_name) % 4) + 1
     watercolor_file_path = IMAGES_DIR / f"watercolor{watercolor_version}.png"
     watercolor_height, watercolor_width = ImageMagick.image_size(watercolor_file_path)
     resized_magic_school_symbol = Path(
