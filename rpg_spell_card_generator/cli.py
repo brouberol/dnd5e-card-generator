@@ -183,12 +183,12 @@ def humanize_level(level: int) -> str:
 
 def damage_type_text(lang):
     if lang == "fr":
-        return r'(de )?dégâts (de )?\w+'
-    return r'\w+ damage'
+        return r"(de )?dégâts (de )?\w+"
+    return r"\w+ damage"
 
 
 def fetch_data(base_url, slug, lang):
-    cached_file = Path(f'/tmp/{lang}:{slug}.html')
+    cached_file = Path(f"/tmp/{lang}:{slug}.html")
     if cached_file.exists():
         return cached_file.read_text()
     lang_param = "vf" if lang == "fr" else "vo"
@@ -217,8 +217,8 @@ class Spell:
     @property
     def ritual_text(self):
         if self.ritual:
-            return "(rituel)" if self.lang == 'fr' else '(ritual)'
-        return ''
+            return "(rituel)" if self.lang == "fr" else "(ritual)"
+        return ""
 
     @property
     def subtitle(self) -> str:
@@ -286,10 +286,19 @@ class Spell:
         return "your spellcasting ability modifier"
 
     def highlight_die_value(self, text) -> str:
-        die_value_pattern = r"\dd\d+( \+ " + self.spell_carac_text + r'| ' + damage_type_text(self.lang) + r")?"
+        die_value_pattern = (
+            r"\dd\d+( \+ "
+            + self.spell_carac_text
+            + r"| "
+            + damage_type_text(self.lang)
+            + r")?"
+        )
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
     def to_card(self) -> dict:
+        b64_background = compose_magic_school_logo_and_watercolor(
+            self.school, self.color
+        )
         if self.upcasting_text:
             upcasting_parts = [
                 "text |",
@@ -390,16 +399,15 @@ class MagicItem:
         }
         return translations[self.lang][self.rarity]
 
-
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
     @property
     def subtitle(self) -> SyntaxWarning:
-        subtitle = f'{self.type_text}, {self.rarity_text}'
+        subtitle = f"{self.type_text}, {self.rarity_text}"
         if self.attunement:
-            subtitle += f' {self.attunement_text}'
+            subtitle += f" {self.attunement_text}"
         return subtitle
 
     def to_card(self) -> dict:
@@ -418,7 +426,10 @@ class MagicItem:
                 f"subtitle | {self.subtitle}",
                 "rule",
             ]
-            + [f"text | {self.highlight_die_value(text_part)}" for text_part in self.text]
+            + [
+                f"text | {self.highlight_die_value(text_part)}"
+                for text_part in self.text
+            ]
             + extra_content,
         }
         if self.image_url:
@@ -501,8 +512,8 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         .strip()
         .capitalize()
     )
-    if ritual_match := re.search(r'\((ritual|rituel)\)', school_text):
-        school_text = school_text.replace(ritual_match.group(0), '').strip()
+    if ritual_match := re.search(r"\((ritual|rituel)\)", school_text):
+        school_text = school_text.replace(ritual_match.group(0), "").strip()
         ritual = True
     else:
         ritual = False
@@ -546,7 +557,7 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         tags=[d.text for d in div_content.find_all("div", class_="classe")],
         text=text,
         upcasting_text=upcasting_text,
-        ritual=ritual
+        ritual=ritual,
     )
     return spell
 
