@@ -52,7 +52,6 @@ class ImageMagick:
         background_image_path: Path,
         geometry: str,
         color: str,
-        tint: int = 70,
     ) -> Path:
         tmpfile = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name
         cmd = [
@@ -66,10 +65,8 @@ class ImageMagick:
             "-composite",
             "-colorspace",
             "gray",
-            "-fill",
-            color,
-            "-tint",
-            str(tint),
+            "+level-colors",
+            f'"{color}",',
             tmpfile,
         ]
         subprocess.run(cmd, capture_output=True)
