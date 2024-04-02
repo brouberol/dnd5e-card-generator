@@ -1,6 +1,6 @@
-# rpg-spell-card-generator
+# dnd5e-card-generator
 
-Scrape spell data from https://aidedd.org to generate spell cards with https://rpg-cards.vercel.app
+Scrape data from https://aidedd.org to generate spell and items cards with https://rpg-cards.vercel.app
 
 ## Example
 
@@ -9,7 +9,7 @@ In this example., we'll scrape data for 13 cleric spell cards, in French. As _To
 The spell identifier is the one visible in the aidedd URL, Example: `toll-the-dead` from https://www.aidedd.org/dnd/sorts.php?vo=toll-the-dead.
 
 ```console
-$ rpg-spell-cards-generator \
+$ dnd5e-cards-generator \
     --spells \
       fr:lumiere \
       en:toll-the-dead \
