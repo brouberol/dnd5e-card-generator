@@ -5,7 +5,9 @@ import base64
 import concurrent.futures
 import json
 import re
+import shutil
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from enum import IntEnum, StrEnum
@@ -34,7 +36,6 @@ SPELL_COLORS_BY_LEVEL = {
 
 
 class ImageMagick:
-
     @staticmethod
     def image_size(image_path: Path):
         cmd = ["identify", "-ping", "-format", "%w %h", image_path]
@@ -788,6 +789,12 @@ def export_items_to_cards(item_names: list[str]) -> list[dict]:
 
 
 def main():
+    if not shutil.which("magick"):
+        print(
+            "Imagemagick is required. Please install it from your package manager or https://imagemagick.org/script/download.php"
+        )
+        sys.exit(1)
+
     args = parse_args()
     cards = export_spells_to_cards(args.spells)
     cards += export_items_to_cards(args.items)
