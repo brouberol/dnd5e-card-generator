@@ -58,7 +58,7 @@ class ImageMagick:
     ) -> Path:
         tmpfile = tempfile.NamedTemporaryFile(suffix=".png", delete=False).name
         cmd = [
-            "convert",
+            "magick",
             "-geometry",
             geometry,
             str(background_image_path),
