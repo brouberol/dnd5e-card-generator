@@ -3,6 +3,7 @@
 import argparse
 import base64
 import concurrent.futures
+import glob
 import json
 import re
 import shutil
@@ -19,6 +20,7 @@ from bs4 import BeautifulSoup, element
 IMAGES_DIR = Path(__file__).parent.parent / "images"
 AIDEDD_SPELLS_URL = "https://www.aidedd.org/dnd/sorts.php"
 AIDEDD_MAGIC_ITEMS_URL = "https://www.aidedd.org/dnd/om.php"
+NUM_WATERCOLORS = len(glob.glob(f"{IMAGES_DIR}/watercolor*.png"))
 
 # https://coolors.co/palette/f94144-f3722c-f8961e-f9844a-f9c74f-90be6d-43aa8b-4d908e-577590-277da1
 SPELL_COLORS_BY_LEVEL = {
@@ -136,7 +138,7 @@ def compose_magic_school_logo_and_watercolor(
 ) -> Path:
     magic_school_name = magic_school.value
     watercolor_version = (
-        list(MagicSchool._member_map_.keys()).index(magic_school_name) % 4
+        list(MagicSchool._member_map_.keys()).index(magic_school_name) % NUM_WATERCOLORS
     ) + 1
     watercolor_file_path = IMAGES_DIR / f"watercolor{watercolor_version}.png"
     watercolor_height, watercolor_width = ImageMagick.image_size(watercolor_file_path)
