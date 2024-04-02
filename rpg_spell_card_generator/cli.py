@@ -322,12 +322,12 @@ class Spell:
     def shorten_spell_text(self, text: str) -> str:
         translations = {
             'fr': {
-                r'(?<=\d) mètre(s)?': 'm',
-                r'(?<=\d) heure(s)?': 'h',
+                r'(?<=\d )mètre(s)?': 'm',
+                r'(?<=\d )heure(s)?': 'h',
             },
             'en': {
-                r'(?<=\d) feet': 'ft',
-                r'(?<=\d) foot': 'ft',
+                r'(?<=\d )feet': 'ft',
+                r'(?<=\d )foot': 'ft',
             }
         }
         for term, replacement in translations[self.lang].items():
