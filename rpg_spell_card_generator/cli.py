@@ -134,7 +134,9 @@ def compose_magic_school_logo_and_watercolor(
     magic_school: MagicSchool, color: str
 ) -> Path:
     magic_school_name = magic_school.value
-    watercolor_version = (list(MagicSchool._member_map_.keys()).index(magic_school_name) % 4) + 1
+    watercolor_version = (
+        list(MagicSchool._member_map_.keys()).index(magic_school_name) % 4
+    ) + 1
     watercolor_file_path = IMAGES_DIR / f"watercolor{watercolor_version}.png"
     watercolor_height, watercolor_width = ImageMagick.image_size(watercolor_file_path)
     resized_magic_school_symbol = Path(
@@ -221,11 +223,11 @@ class Spell:
 
     @property
     def ritual_text(self):
-        return game_icon('cursed-star') if self.ritual else ''
+        return game_icon("cursed-star") if self.ritual else ""
 
     @property
     def concentration_text(self):
-        return game_icon('meditation') if self.concentration else ''
+        return game_icon("meditation") if self.concentration else ""
 
     @property
     def spell_casting_extra(self):
@@ -234,25 +236,25 @@ class Spell:
             spell_extra.append(ritual_text)
         if concentration_text := self.concentration_text:
             spell_extra.append(concentration_text)
-        spell_extra_text = ' '.join(spell_extra)
+        spell_extra_text = " ".join(spell_extra)
         if spell_extra_text:
-            spell_extra_text = f'- {spell_extra_text}'
+            spell_extra_text = f"- {spell_extra_text}"
         return spell_extra_text
 
     @property
     def spell_casting_components(self):
         components = []
         if self.verbal:
-            components.append('V')
+            components.append("V")
         if self.somatic:
-            components.append('S')
+            components.append("S")
         if self.material:
-            components.append('M')
-        return ' '.join(components)
+            components.append("M")
+        return " ".join(components)
 
     @property
     def subtitle(self) -> str:
-        suffix = f'{self.school_text} - {self.spell_casting_components} {self.spell_casting_extra}'
+        suffix = f"{self.school_text} - {self.spell_casting_components} {self.spell_casting_extra}"
         if self.lang == "fr":
             if self.level == 0:
                 return f"Tour de magie - {suffix}"
@@ -328,24 +330,28 @@ class Spell:
 
     def shorten_upcasting_text(self) -> tuple[int, str]:
         upcasting_text = {
-            'fr': r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
-            'en': r' When you cast this spell using a spell slot of \d\w+ level or higher,',
+            "fr": r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
+            "en": r" When you cast this spell using a spell slot of \d\w+ level or higher,",
         }
         if upcasting_match := re.match(upcasting_text[self.lang], self.upcasting_text):
-            shortened_upcasting_text = self.upcasting_text.replace(upcasting_match.group(), '').strip().capitalize()
+            shortened_upcasting_text = (
+                self.upcasting_text.replace(upcasting_match.group(), "")
+                .strip()
+                .capitalize()
+            )
             return shortened_upcasting_text
         return self.upcasting_text
 
     def shorten_spell_text(self, text: str) -> str:
         translations = {
-            'fr': {
-                r'(?<=\d )mètre(s)?': 'm',
-                r'(?<=\d )heure(s)?': 'h',
+            "fr": {
+                r"(?<=\d )mètre(s)?": "m",
+                r"(?<=\d )heure(s)?": "h",
             },
-            'en': {
-                r'(?<=\d )feet': 'ft',
-                r'(?<=\d )foot': 'ft',
-            }
+            "en": {
+                r"(?<=\d )feet": "ft",
+                r"(?<=\d )foot": "ft",
+            },
         }
         for term, replacement in translations[self.lang].items():
             text = re.sub(term, replacement, text)
@@ -370,11 +376,15 @@ class Spell:
             f"property | {self.casting_time_text}: | {self.casting_time}",
         ]
         if self.paying_components:
-            spell_properties.append(f'property | {self.casting_components_text}: | {self.paying_components}')
-        spell_properties.extend([
-            f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
-            f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
-        ])
+            spell_properties.append(
+                f"property | {self.casting_components_text}: | {self.paying_components}"
+            )
+        spell_properties.extend(
+            [
+                f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
+                f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
+            ]
+        )
 
         return {
             "count": 1,
@@ -415,7 +425,7 @@ class MagicItem:
 
     @property
     def attunement_text(self) -> str:
-        return game_icon('empty-hourglass')
+        return game_icon("empty-hourglass")
 
     @property
     def type_text(self) -> str:
@@ -585,25 +595,35 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         ritual = False
     effect_duration = scrape_property(div_content, "d", ["Durée :", "Duration:"])
     if concentration_match := re.search(r"concentration, ", effect_duration):
-        effect_duration = effect_duration.replace(concentration_match.group(0), '').strip()
+        effect_duration = effect_duration.replace(
+            concentration_match.group(0), ""
+        ).strip()
         concentration = True
     else:
         concentration = False
-    casting_components = scrape_property(div_content, "c", ["Composantes :", "Components:"])
-    single_letter_casting_components = re.sub(r'\(.+\)', '', casting_components).strip().split(', ')
-    verbal = 'V' in single_letter_casting_components
-    somatic = 'S' in single_letter_casting_components
-    material = 'M' in single_letter_casting_components
+    casting_components = scrape_property(
+        div_content, "c", ["Composantes :", "Components:"]
+    )
+    single_letter_casting_components = (
+        re.sub(r"\(.+\)", "", casting_components).strip().split(", ")
+    )
+    verbal = "V" in single_letter_casting_components
+    somatic = "S" in single_letter_casting_components
+    material = "M" in single_letter_casting_components
 
     paying_components_indicator_by_lang = {
-        'fr': 'valant au moins',
-        'en': 'worth at least',
+        "fr": "valant au moins",
+        "en": "worth at least",
     }
     if material:
-        if components_text := re.search(r'\(.+\)', casting_components).group():
-            paying_components = components_text if paying_components_indicator_by_lang[lang] in components_text else ''
+        if components_text := re.search(r"\(.+\)", casting_components).group():
+            paying_components = (
+                components_text
+                if paying_components_indicator_by_lang[lang] in components_text
+                else ""
+            )
     else:
-        paying_components = ''
+        paying_components = ""
     school_by_lang = {
         "fr": {
             "abjuration": MagicSchool.abjuration,
@@ -645,7 +665,7 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
         text=text,
         upcasting_text=upcasting_text,
         ritual=ritual,
-        concentration=concentration
+        concentration=concentration,
     )
     return spell
 
