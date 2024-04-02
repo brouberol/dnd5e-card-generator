@@ -310,14 +310,13 @@ class Spell:
 
     def shorten_upcasting_text(self) -> tuple[int, str]:
         upcasting_text = {
-            'fr': r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau (\d) ou supérieur,",
-            'en': r' When you cast this spell using a spell slot of (\d)\w+ level or higher,',
+            'fr': r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
+            'en': r' When you cast this spell using a spell slot of \d\w+ level or higher,',
         }
         if upcasting_match := re.match(upcasting_text[self.lang], self.upcasting_text):
             shortened_upcasting_text = self.upcasting_text.replace(upcasting_match.group(), '').strip().capitalize()
-            upcasting_level_start = int(upcasting_match.group(1))
-            return upcasting_level_start, shortened_upcasting_text
-        return 0, self.upcasting_text
+            return shortened_upcasting_text
+        return self.upcasting_text
 
     def shorten_spell_text(self, text: str) -> str:
         translations = {
@@ -339,11 +338,11 @@ class Spell:
             self.school, self.color
         )
         if self.upcasting_text:
-            upcasting_start_level, shortened_upcasting_text = self.shorten_upcasting_text()
+            shortened_upcasting_text = self.shorten_upcasting_text()
             shortened_upcasting_text = self.shorten_spell_text(shortened_upcasting_text)
             upcasting_parts = [
                 "text |",
-                f"section | {self.upcasting_section_title} (≥ {upcasting_start_level})",
+                f"section | {self.upcasting_section_title}",
                 f"text | {shortened_upcasting_text}",
             ]
         else:
