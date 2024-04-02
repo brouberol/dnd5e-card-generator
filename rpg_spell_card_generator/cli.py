@@ -306,15 +306,43 @@ class Spell:
         )
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
+    def shorten_upcasting_text(self) -> tuple[int, str]:
+        upcasting_text = {
+            'fr': r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau (\d) ou supérieur,",
+            'en': r' When you cast this spell using a spell slot of (\d)\w+ level or higher,',
+        }
+        if upcasting_match := re.match(upcasting_text[self.lang], self.upcasting_text):
+            shortened_upcasting_text = self.upcasting_text.replace(upcasting_match.group(), '').strip().capitalize()
+            upcasting_level_start = int(upcasting_match.group(1))
+            return upcasting_level_start, shortened_upcasting_text
+        return 0, self.upcasting_text
+
+    def shorten_spell_text(self, text: str) -> str:
+        translations = {
+            'fr': {
+                r'(?<=\d) mètre(s)?': 'm',
+                r'(?<=\d) heure(s)?': 'h',
+            },
+            'en': {
+                r'(?<=\d) feet': 'ft',
+                r'(?<=\d) foot': 'ft',
+            }
+        }
+        for term, replacement in translations[self.lang].items():
+            text = re.sub(term, replacement, text)
+        return text
+
     def to_card(self) -> dict:
         b64_background = compose_magic_school_logo_and_watercolor(
             self.school, self.color
         )
         if self.upcasting_text:
+            upcasting_start_level, shortened_upcasting_text = self.shorten_upcasting_text()
+            shortened_upcasting_text = self.shorten_spell_text(shortened_upcasting_text)
             upcasting_parts = [
                 "text |",
-                f"section | {self.upcasting_section_title}",
-                f"text | {self.upcasting_text}",
+                f"section | {self.upcasting_section_title} (≥ {upcasting_start_level})",
+                f"text | {shortened_upcasting_text}",
             ]
         else:
             upcasting_parts = []
@@ -327,13 +355,13 @@ class Spell:
                 f"subtitle | {self.subtitle.strip()}",
                 "rule",
                 f"property | {self.casting_time_text}: | {self.casting_time}",
-                f"property | {self.casting_range_text}: | {self.casting_range}",
+                f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
                 f"property | {self.casting_components_text}: | {self.casting_components}",
-                f"property | {self.effect_duration_text}: | {self.effect_duration}",
+                f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
                 "rule",
             ]
             + [
-                f"text | {self.highlight_die_value(text_part)}"
+                f"text | {self.shorten_spell_text(self.highlight_die_value(text_part))}"
                 for text_part in self.text
             ]
             + upcasting_parts,
