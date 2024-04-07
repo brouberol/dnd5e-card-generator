@@ -1,7 +1,7 @@
 :root {
-    --font-size: 8px;
-    --card-height: 85mm;
-    --card-width: 65mm;
+    --font-size: 9px;
+    --card-height: 113mm;
+    --card-width: 70mm;
 }
 
 /* Insert margins between cards to let us make a clean cut */
@@ -48,3 +48,6 @@
     font-size: 1.1em;
 }
 
+.card-property-name {
+    font-size: var(--font-size);
+}
