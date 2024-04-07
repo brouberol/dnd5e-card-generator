@@ -77,9 +77,9 @@ class Spell:
         return " ".join(components)
 
     @property
-    def spell_damage_type(self):
+    def spell_damage_type_icon(self):
         if not self.damage_type:
-            return ""
+            return "magic-swirl"
         return self.damage_type.icon
 
     @property
@@ -201,7 +201,7 @@ class Spell:
             "count": 1,
             "color": self.color,
             "title": self.title,
-            "icon": self.spell_damage_type or "magic-swirl",
+            "icon": self.spell_damage_type_icon,
             "contents": [
                 f"subtitle | {self.subtitle}",
                 "rule",
