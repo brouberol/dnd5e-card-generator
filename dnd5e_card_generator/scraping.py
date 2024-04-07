@@ -1,10 +1,12 @@
-from bs4 import element, BeautifulSoup
 import re
-from .utils import fetch_data
+
+from bs4 import BeautifulSoup, element
+
 from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_URL
-from .spell import Spell
 from .magic_item import MagicItem
-from .models import MagicSchool, ItemType, Rarity
+from .models import ItemType, MagicSchool, Rarity
+from .spell import Spell
+from .utils import fetch_data
 
 
 def scrape_property(div: element.Tag, classname: str, remove: list[str]) -> str:

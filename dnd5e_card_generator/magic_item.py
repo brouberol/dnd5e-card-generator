@@ -1,7 +1,8 @@
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
+
 from .models import ItemType, Rarity
-from .utils import game_icon, damage_type_text
+from .utils import damage_type_text, game_icon
 
 
 @dataclass

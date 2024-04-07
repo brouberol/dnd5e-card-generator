@@ -1,6 +1,6 @@
-import requests
-
 from pathlib import Path
+
+import requests
 
 
 def humanize_level(level: int) -> str:

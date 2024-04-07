@@ -1,11 +1,10 @@
 import base64
 import subprocess
 import tempfile
-
 from pathlib import Path
 
+from .const import IMAGES_DIR, NUM_WATERCOLORS
 from .models import MagicSchool
-from .const import NUM_WATERCOLORS, IMAGES_DIR
 
 
 class ImageMagick:

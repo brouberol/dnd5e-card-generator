@@ -1,5 +1,4 @@
-from enum import StrEnum, IntEnum
-
+from enum import IntEnum, StrEnum
 from pathlib import Path
 
 from .const import IMAGES_DIR

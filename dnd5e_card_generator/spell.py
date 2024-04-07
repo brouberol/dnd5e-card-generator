@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
-from .models import MagicSchool
 from .inagemagick import ImageMagick
-from .utils import game_icon, humanize_level, damage_type_text
+from .models import MagicSchool
+from .utils import damage_type_text, game_icon, humanize_level
 
 
 @dataclass

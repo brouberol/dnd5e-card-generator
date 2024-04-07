@@ -1,6 +1,5 @@
-from pathlib import Path
-
 import glob
+from pathlib import Path
 
 IMAGES_DIR = Path(__file__).parent.parent / "images"
 AIDEDD_SPELLS_URL = "https://www.aidedd.org/dnd/sorts.php"
