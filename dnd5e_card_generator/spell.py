@@ -203,7 +203,7 @@ class Spell:
             "title": self.title,
             "icon": self.spell_damage_type or "magic-swirl",
             "contents": [
-                f"subtitle | {self.subtitle.strip()}",
+                f"subtitle | {self.subtitle}",
                 "rule",
                 *spell_properties,
                 "rule",
