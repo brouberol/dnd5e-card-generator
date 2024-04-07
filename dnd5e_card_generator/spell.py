@@ -154,17 +154,20 @@ class Spell:
 
     def shorten_upcasting_text(self) -> tuple[int, str]:
         upcasting_text = {
-            "fr": r"Lorsque vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
-            "en": r" When you cast this spell using a spell slot of \d\w+ level or higher,",
+            "fr": [
+                r"(Lorsque|Si) vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
+                r" d'emplacement au-delà du niveau \d",
+            ],
+            "en": [
+                r" When you cast this spell using a spell slot of \d\w+ level or higher,",
+                r" for each slot level above \d(st|nd|rd|th)",
+            ],
         }
-        if upcasting_match := re.match(upcasting_text[self.lang], self.upcasting_text):
-            shortened_upcasting_text = (
-                self.upcasting_text.replace(upcasting_match.group(), "")
-                .strip()
-                .capitalize()
-            )
-            return shortened_upcasting_text
-        return self.upcasting_text
+        text = self.upcasting_text[:]
+        for pattern in upcasting_text[self.lang]:
+            if upcasting_match := re.search(pattern, text):
+                text = text.replace(upcasting_match.group(), "").strip().capitalize()
+        return text
 
     def to_card(self) -> dict:
         b64_background = ImageMagick.compose_magic_school_logo_and_watercolor(
