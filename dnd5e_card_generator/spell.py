@@ -79,7 +79,7 @@ class Spell:
     @property
     def spell_damage_type_icon(self):
         if not self.damage_type:
-            return "magic-swirl"
+            return "scroll-unfurled"
         return self.damage_type.icon
 
     @property
