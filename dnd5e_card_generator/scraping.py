@@ -3,6 +3,7 @@ import re
 from bs4 import BeautifulSoup
 
 from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_URL
+from .damage import DamageType
 from .magic_item import MagicItem
 from .models import ItemType, MagicSchool, Rarity
 from .spell import Spell
@@ -17,6 +18,14 @@ class SpellScraper:
     paying_components_indicator_by_lang = {
         "fr": "valant au moins",
         "en": "worth at least",
+    }
+    spell_damage_by_lang = {
+        "fr": r"dégâts (de )?(type )?(?P<dmg>\w+)s?",
+        "en": r"(?P<dmg>\w+) damage",
+    }
+    spell_heal_by_lang = {
+        "fr": r"récupère [\w\s]+ points de vie",
+        "en": r"regains [\w\s]+ hit points",
     }
     effect_duration_by_lang = {"fr": "Durée :", "en": "Duration:"}
     components_by_lang = {"fr": "Composantes :", "en": "Components:"}
@@ -49,7 +58,7 @@ class SpellScraper:
             .strip()
         )
 
-    def scrape_spell_texts(self) -> tuple[str, str]:
+    def scrape_spell_texts(self) -> tuple[list[str], str]:
         text = list(self.div_content.find("div", class_="description").strings)
         upcasting_indicator = self.upcasting_indicator_by_lang[self.lang]
         if upcasting_indicator not in text:
@@ -125,6 +134,19 @@ class SpellScraper:
                 )
         else:
             paying_components = ""
+
+        if damage_type_match := re.search(
+            self.spell_damage_by_lang[self.lang], "\n".join(text)
+        ):
+            damage_type_str = damage_type_match.group("dmg")
+            if damage_type_str.endswith("s"):
+                damage_type_str = damage_type_str.rstrip("s")
+            damage_type = DamageType.from_str(damage_type_str, self.lang)
+        elif re.search(self.spell_heal_by_lang[self.lang], "\n".join(text)):
+            damage_type = DamageType.healing
+        else:
+            damage_type = None
+
         return Spell(
             lang=self.lang,
             level=self.scrape_level(),
@@ -142,6 +164,7 @@ class SpellScraper:
             upcasting_text=upcasting_text,
             ritual=ritual,
             concentration=concentration,
+            damage_type=damage_type,
         )
 
 

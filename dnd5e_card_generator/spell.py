@@ -1,6 +1,8 @@
 import re
 from dataclasses import dataclass
+from typing import Optional
 
+from .damage import DamageType
 from .inagemagick import ImageMagick
 from .models import MagicSchool
 from .utils import damage_type_text, game_icon, humanize_level
@@ -24,6 +26,7 @@ class Spell:
     text: list[str]
     upcasting_text: str
     tags: list[str]
+    damage_type: Optional[DamageType]
 
     @property
     def color(self) -> str:
@@ -74,8 +77,15 @@ class Spell:
         return " ".join(components)
 
     @property
+    def spell_damage_type(self):
+        if not self.damage_type:
+            return ""
+        return self.damage_type.icon
+
+    @property
     def subtitle(self) -> str:
         suffix = f"{self.school_text} - {self.spell_casting_components} {self.spell_casting_extra}"
+        suffix = suffix.strip()
         if self.lang == "fr":
             if self.level == 0:
                 return f"Tour de magie - {suffix}"
@@ -189,7 +199,7 @@ class Spell:
             "count": 1,
             "color": self.color,
             "title": self.title,
-            "icon": "magic-swirl",
+            "icon": self.spell_damage_type or "magic-swirl",
             "contents": [
                 f"subtitle | {self.subtitle.strip()}",
                 "rule",
