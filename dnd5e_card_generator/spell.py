@@ -166,21 +166,6 @@ class Spell:
             return shortened_upcasting_text
         return self.upcasting_text
 
-    def shorten_spell_text(self, text: str) -> str:
-        translations = {
-            "fr": {
-                r"(?<=\d )mètre(s)?": "m",
-                r"(?<=\d )heure(s)?": "h",
-            },
-            "en": {
-                r"(?<=\d )feet": "ft",
-                r"(?<=\d )foot": "ft",
-            },
-        }
-        for term, replacement in translations[self.lang].items():
-            text = re.sub(term, replacement, text)
-        return text
-
     def to_card(self) -> dict:
         b64_background = ImageMagick.compose_magic_school_logo_and_watercolor(
             self.school, self.color
@@ -190,7 +175,6 @@ class Spell:
             shortened_upcasting_text = self.highlight_spell_text(
                 shortened_upcasting_text
             )
-            shortened_upcasting_text = self.shorten_spell_text(shortened_upcasting_text)
             upcasting_parts = [
                 "text |",
                 f"section | {self.upcasting_section_title}",
@@ -208,8 +192,8 @@ class Spell:
             )
         spell_properties.extend(
             [
-                f"property | {self.casting_range_text}: | {self.shorten_spell_text(self.casting_range)}",
-                f"property | {self.effect_duration_text}: | {self.shorten_spell_text(self.effect_duration)}",
+                f"property | {self.casting_range_text}: | {self.casting_range}",
+                f"property | {self.effect_duration_text}: | {self.effect_duration}",
             ]
         )
 
@@ -225,7 +209,7 @@ class Spell:
                 "rule",
             ]
             + [
-                f"text | {self.highlight_spell_text(self.shorten_spell_text(text_part))}"
+                f"text | {self.highlight_spell_text(text_part)}"
                 for text_part in self.text
             ]
             + upcasting_parts,
