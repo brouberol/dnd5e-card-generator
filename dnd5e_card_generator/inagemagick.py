@@ -73,7 +73,7 @@ class ImageMagick:
         ImageMagick.resize(
             image_path=resized_magic_school_symbol,
             result_image_path=resized_magic_school_symbol,
-            resize_factor="70%",
+            resize_factor="80%",
         )
         resized_magic_school_symbol_height, resized_magic_school_symbol_width = (
             ImageMagick.image_size(resized_magic_school_symbol)
