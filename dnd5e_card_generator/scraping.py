@@ -1,6 +1,6 @@
 import re
 
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup
 
 from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_URL
 from .magic_item import MagicItem
@@ -9,131 +9,145 @@ from .spell import Spell
 from .utils import fetch_data
 
 
-def scrape_property(div: element.Tag, classname: str, remove: list[str]) -> str:
-    prop = div.find("div", class_=classname).text
-    for term in remove:
-        prop = prop.replace(term, "")
-    return prop.strip()
-
-
-def scrape_spell_texts(div: element.Tag, lang: str) -> tuple[str, str]:
+class SpellScraper:
     upcasting_indicator_by_lang = {
         "fr": "Aux niveaux supérieurs",
         "en": "At Higher Levels",
     }
-    text = list(div.find("div", class_="description").strings)
-    upcasting_indicator = upcasting_indicator_by_lang[lang]
-    if upcasting_indicator not in text:
-        return text, ""
-    upcasting_text_element_index = text.index(upcasting_indicator)
-    upcasting_text_parts = text[upcasting_text_element_index + 1 :]
-    upcasting_text_parts = [re.sub(r"^\. ", "", part) for part in upcasting_text_parts]
-    upcasting_text = "\n".join(upcasting_text_parts)
-    text = text[:upcasting_text_element_index]
-    return text, upcasting_text
-
-
-def scrape_spell_details(spell: str, lang: str) -> Spell:
-    print(f"Scraping data for spell {spell}")
-    html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
-    soup = BeautifulSoup(html, features="html.parser")
-    div_content = soup.find("div", class_="content")
-    if div_content is None:
-        raise ValueError(f"{spell} not found!")
-
-    level = int(
-        div_content.find("div", class_="ecole")
-        .text.split(" - ")[0]
-        .replace("niveau", "")
-        .replace("level", "")
-        .strip()
-    )
-    text, upcasting_text = scrape_spell_texts(div_content, lang)
-    school_text = (
-        div_content.find("div", class_="ecole")
-        .text.split(" - ")[1]
-        .strip()
-        .capitalize()
-    )
-    if ritual_match := re.search(r"\((ritual|rituel)\)", school_text):
-        school_text = school_text.replace(ritual_match.group(0), "").strip()
-        ritual = True
-    else:
-        ritual = False
-    effect_duration = scrape_property(div_content, "d", ["Durée :", "Duration:"])
-    if concentration_match := re.search(r"concentration, ", effect_duration):
-        effect_duration = effect_duration.replace(
-            concentration_match.group(0), ""
-        ).strip()
-        concentration = True
-    else:
-        concentration = False
-    casting_components = scrape_property(
-        div_content, "c", ["Composantes :", "Components:"]
-    )
-    single_letter_casting_components = (
-        re.sub(r"\(.+\)", "", casting_components).strip().split(", ")
-    )
-    verbal = "V" in single_letter_casting_components
-    somatic = "S" in single_letter_casting_components
-    material = "M" in single_letter_casting_components
-
     paying_components_indicator_by_lang = {
         "fr": "valant au moins",
         "en": "worth at least",
     }
-    if material:
-        if components_text := re.search(r"\(.+\)", casting_components).group():
-            paying_components = (
-                components_text
-                if paying_components_indicator_by_lang[lang] in components_text
-                else ""
-            )
-    else:
-        paying_components = ""
-    school_by_lang = {
-        "fr": {
-            "abjuration": MagicSchool.abjuration,
-            "divination": MagicSchool.divination,
-            "enchantement": MagicSchool.enchantment,
-            "évocation": MagicSchool.evocation,
-            "illusion": MagicSchool.illusion,
-            "invocation": MagicSchool.conjuration,
-            "nécromancie": MagicSchool.necromancy,
-            "transmutation": MagicSchool.transmutation,
-        },
-        "en": {
-            "abjuration": MagicSchool.abjuration,
-            "divination": MagicSchool.divination,
-            "enchantment": MagicSchool.enchantment,
-            "evocation": MagicSchool.evocation,
-            "illusion": MagicSchool.illusion,
-            "conjuration": MagicSchool.conjuration,
-            "necromancy": MagicSchool.necromancy,
-            "transmutation": MagicSchool.transmutation,
-        },
-    }
-    spell = Spell(
-        lang=lang,
-        level=level,
-        title=div_content.find("h1").text.strip(),
-        school=school_by_lang[lang][school_text.lower()],
-        casting_time=scrape_property(
-            div_content, "t", ["Temps d'incantation :", "Casting Time:"]
-        ),
-        casting_range=scrape_property(div_content, "r", ["Portée :", "Range:"]),
-        somatic=somatic,
-        verbal=verbal,
-        material=material,
-        paying_components=paying_components,
-        effect_duration=effect_duration,
-        tags=[d.text for d in div_content.find_all("div", class_="classe")],
-        text=text,
-        upcasting_text=upcasting_text,
-        ritual=ritual,
-        concentration=concentration,
-    )
-    return spell
+    effect_duration_by_lang = {"fr": "Durée :", "en": "Duration:"}
+    components_by_lang = {"fr": "Composantes :", "en": "Components:"}
+    casting_time_by_lang = {"fr": "Temps d'incantation :", "en": "Casting Time:"}
+    casting_range_by_lang = {"fr": "Portée :", "en": "Range:"}
+    ritual_pattern = r"\((ritual|rituel)\)"
+    concentration_pattern = r"concentration, "
+
+    def __init__(self, spell: str, lang: str):
+        self.spell = spell
+        self.lang = lang
+        html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
+        self.soup = BeautifulSoup(html, features="html.parser")
+        self.div_content = self.soup.find("div", class_="content")
+        if self.div_content is None:
+            raise ValueError(f"{spell} not found!")
+
+    def _scrape_property(self, classname: str, remove: list[str]) -> str:
+        prop = self.div_content.find("div", class_=classname).text
+        for term in remove:
+            prop = prop.replace(term, "")
+        return prop.strip()
+
+    def scrape_level(self) -> int:
+        return int(
+            self.div_content.find("div", class_="ecole")
+            .text.split(" - ")[0]
+            .replace("niveau", "")
+            .replace("level", "")
+            .strip()
+        )
+
+    def scrape_spell_texts(self) -> tuple[str, str]:
+        text = list(self.div_content.find("div", class_="description").strings)
+        upcasting_indicator = self.upcasting_indicator_by_lang[self.lang]
+        if upcasting_indicator not in text:
+            return text, ""
+
+        upcasting_text_element_index = text.index(upcasting_indicator)
+        upcasting_text_parts = text[upcasting_text_element_index + 1 :]
+        upcasting_text_parts = [
+            re.sub(r"^\. ", "", part) for part in upcasting_text_parts
+        ]
+        upcasting_text = "\n".join(upcasting_text_parts)
+        text = text[:upcasting_text_element_index]
+        return text, upcasting_text
+
+    def scrape_school_text(self) -> str:
+        return (
+            self.div_content.find("div", class_="ecole")
+            .text.split(" - ")[1]
+            .strip()
+            .capitalize()
+        )
+
+    def scrape_title(self) -> str:
+        return self.div_content.find("h1").text.strip()
+
+    def scrape_casting_range(self) -> str:
+        return self._scrape_property("r", list(self.casting_range_by_lang.values()))
+
+    def scrape_casting_time(self) -> str:
+        return self._scrape_property("t", list(self.casting_time_by_lang.values()))
+
+    def scrape_effect_duration(self) -> str:
+        return self._scrape_property("d", list(self.effect_duration_by_lang.values()))
+
+    def scrape_text(self) -> str:
+        return [d.text for d in self.div_content.find_all("div", class_="classe")]
+
+    def scrape_spell(self) -> Spell:
+        print(f"Scraping data for spell {self.spell}")
+        text, upcasting_text = self.scrape_spell_texts()
+        school_text = self.scrape_school_text()
+        if ritual_match := re.search(self.ritual_pattern, school_text):
+            school_text = school_text.replace(ritual_match.group(0), "").strip()
+            ritual = True
+        else:
+            ritual = False
+        effect_duration = self.scrape_effect_duration()
+        if concentration_match := re.search(
+            self.concentration_pattern, effect_duration
+        ):
+            effect_duration = effect_duration.replace(
+                concentration_match.group(0), ""
+            ).strip()
+            concentration = True
+        else:
+            concentration = False
+        casting_components = self._scrape_property(
+            "c", list(self.components_by_lang.values())
+        )
+        single_letter_casting_components = (
+            re.sub(r"\(.+\)", "", casting_components).strip().split(", ")
+        )
+        verbal = "V" in single_letter_casting_components
+        somatic = "S" in single_letter_casting_components
+        material = "M" in single_letter_casting_components
+        if material:
+            if components_text := re.search(r"\(.+\)", casting_components).group():
+                paying_components = (
+                    components_text
+                    if self.paying_components_indicator_by_lang[self.lang]
+                    in components_text
+                    else ""
+                )
+        else:
+            paying_components = ""
+        return Spell(
+            lang=self.lang,
+            level=self.scrape_level(),
+            title=self.scrape_title(),
+            school=MagicSchool.from_str(school_text.lower(), self.lang),
+            casting_time=self.scrape_casting_time(),
+            casting_range=self.scrape_casting_range(),
+            somatic=somatic,
+            verbal=verbal,
+            material=material,
+            paying_components=paying_components,
+            effect_duration=effect_duration,
+            tags=self.scrape_text(),
+            text=text,
+            upcasting_text=upcasting_text,
+            ritual=ritual,
+            concentration=concentration,
+        )
+
+
+def scrape_spell_details(spell: str, lang: str) -> Spell:
+    scraper = SpellScraper(spell, lang)
+    return scraper.scrape_spell()
 
 
 def scrape_item_details(item: str, lang: str) -> MagicItem:

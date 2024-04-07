@@ -61,6 +61,34 @@ class MagicSchool(StrEnum):
     necromancy = "necromancy"
     transmutation = "transmutation"
 
+    @classmethod
+    def from_str(cls, school: str, lang: str) -> "MagicSchool":
+        school_by_lang = {
+            "fr": {
+                "abjuration": MagicSchool.abjuration,
+                "divination": MagicSchool.divination,
+                "enchantement": MagicSchool.enchantment,
+                "évocation": MagicSchool.evocation,
+                "illusion": MagicSchool.illusion,
+                "invocation": MagicSchool.conjuration,
+                "nécromancie": MagicSchool.necromancy,
+                "transmutation": MagicSchool.transmutation,
+            },
+            "en": {
+                "abjuration": MagicSchool.abjuration,
+                "divination": MagicSchool.divination,
+                "enchantment": MagicSchool.enchantment,
+                "evocation": MagicSchool.evocation,
+                "illusion": MagicSchool.illusion,
+                "conjuration": MagicSchool.conjuration,
+                "necromancy": MagicSchool.necromancy,
+                "transmutation": MagicSchool.transmutation,
+            },
+        }
+        return school_by_lang[lang][school]
+
+    def translate(self) -> str: ...
+
     @property
     def symbol_file_path(self) -> Path:
         return IMAGES_DIR / f"{self.value}.png"
