@@ -1,16 +1,37 @@
-from enum import IntEnum, StrEnum
 from pathlib import Path
 
 from .const import IMAGES_DIR
+from .translator import TranslatedStrEnum
 
 
-class Rarity(IntEnum):
-    common = 0
-    uncommon = 1
-    rare = 2
-    very_rare = 3
-    legendary = 4
-    artifact = 5
+class Rarity(TranslatedStrEnum):
+    common = "common"
+    uncommon = "uncommon"
+    rare = "rare"
+    very_rare = "very rare"
+    legendary = "legendary"
+    artifact = "artifact"
+
+    def __int__(self):
+        return {
+            "common": 0,
+            "uncommon": 1,
+            "rare": 2,
+            "very_rare": 3,
+            "legendary": 4,
+            "artifact": 5,
+        }[self.name]
+
+    @classmethod
+    def fr_translations(self) -> dict:
+        return {
+            "common": "commun",
+            "uncommon": "peu commun",
+            "rare": "rare",
+            "very_rare": "très rare",
+            "legendary": "légendaire",
+            "artifact": "artéfact",
+        }
 
     @property
     def color(self) -> str:
@@ -26,7 +47,7 @@ class Rarity(IntEnum):
         return colors_by_rarity[self.value]
 
 
-class ItemType:
+class ItemType(TranslatedStrEnum):
     wondrous_item = "wondrous_item"
     ring = "ring"
     weapon = "weapon"
@@ -35,6 +56,19 @@ class ItemType:
     staff = "staff"
     potion = "potion"
     rod = "rod"
+
+    @classmethod
+    def fr_translations(cls):
+        return {
+            "armor": "armure",
+            "potion": "potion",
+            "ring": "anneau",
+            "rod": "sceptre",
+            "staff": "bâton",
+            "wand": "baguette",
+            "weapon": "arme",
+            "wondrous_item": "objet merveilleux",
+        }
 
     @property
     def icon(self) -> str:
@@ -51,7 +85,7 @@ class ItemType:
         return icon_by_type[self.value]
 
 
-class MagicSchool(StrEnum):
+class MagicSchool(TranslatedStrEnum):
     abjuration = "abjuration"
     divination = "divination"
     enchantment = "enchantment"
@@ -62,32 +96,17 @@ class MagicSchool(StrEnum):
     transmutation = "transmutation"
 
     @classmethod
-    def from_str(cls, school: str, lang: str) -> "MagicSchool":
-        school_by_lang = {
-            "fr": {
-                "abjuration": MagicSchool.abjuration,
-                "divination": MagicSchool.divination,
-                "enchantement": MagicSchool.enchantment,
-                "évocation": MagicSchool.evocation,
-                "illusion": MagicSchool.illusion,
-                "invocation": MagicSchool.conjuration,
-                "nécromancie": MagicSchool.necromancy,
-                "transmutation": MagicSchool.transmutation,
-            },
-            "en": {
-                "abjuration": MagicSchool.abjuration,
-                "divination": MagicSchool.divination,
-                "enchantment": MagicSchool.enchantment,
-                "evocation": MagicSchool.evocation,
-                "illusion": MagicSchool.illusion,
-                "conjuration": MagicSchool.conjuration,
-                "necromancy": MagicSchool.necromancy,
-                "transmutation": MagicSchool.transmutation,
-            },
+    def fr_translations(cls):
+        return {
+            "abjuration": "abjuration",
+            "divination": "divination",
+            "enchantment": "enchantement",
+            "evocation": "évocation",
+            "illusion": "illusion",
+            "conjuration": "invocation",
+            "necromancy": "nécromancie",
+            "transmutation": "transmutation",
         }
-        return school_by_lang[lang][school]
-
-    def translate(self) -> str: ...
 
     @property
     def symbol_file_path(self) -> Path:

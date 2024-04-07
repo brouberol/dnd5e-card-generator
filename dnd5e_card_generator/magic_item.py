@@ -27,51 +27,11 @@ class MagicItem:
 
     @property
     def type_text(self) -> str:
-        translations = {
-            "fr": {
-                ItemType.armor: "Armure",
-                ItemType.potion: "Potion",
-                ItemType.ring: "Anneau",
-                ItemType.rod: "Sceptre",
-                ItemType.staff: "Bâton",
-                ItemType.wand: "Baguette",
-                ItemType.weapon: "Arme",
-                ItemType.wondrous_item: "Objet merveilleux",
-            },
-            "en": {
-                ItemType.armor: "Armor",
-                ItemType.potion: "Potion",
-                ItemType.ring: "Ring",
-                ItemType.rod: "Rod",
-                ItemType.staff: "Staff",
-                ItemType.wand: "Wand",
-                ItemType.weapon: "Weapon",
-                ItemType.wondrous_item: "Wondrous item",
-            },
-        }
-        return translations[self.lang][self.type]
+        return ItemType.translate(self.type, self.lang).capitalize()
 
     @property
     def rarity_text(self) -> str:
-        translations = {
-            "fr": {
-                Rarity.common: "commun",
-                Rarity.uncommon: "peu commun",
-                Rarity.rare: "rare",
-                Rarity.very_rare: "très rare",
-                Rarity.legendary: "légendaire",
-                Rarity.artifact: "artéfact",
-            },
-            "en": {
-                Rarity.common: "common",
-                Rarity.uncommon: "uncommun",
-                Rarity.rare: "rare",
-                Rarity.very_rare: "very rare",
-                Rarity.legendary: "legendary",
-                Rarity.artifact: "artifact",
-            },
-        }
-        return translations[self.lang][self.rarity]
+        return self.rarity.translate(self.lang)
 
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)

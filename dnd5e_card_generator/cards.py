@@ -30,6 +30,6 @@ def export_items_to_cards(item_names: list[str]) -> list[dict]:
             tasks.append(executor.submit(scrape_item_details, item_name, lang))
         for future in concurrent.futures.as_completed(tasks):
             items.append(future.result())
-    items = sorted(items, key=lambda item: (item.rarity, item.title))
+    items = sorted(items, key=lambda item: (int(item.rarity), item.title))
     cards = [item.to_card() for item in items]
     return cards

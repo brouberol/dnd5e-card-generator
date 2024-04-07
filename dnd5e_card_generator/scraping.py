@@ -156,44 +156,6 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         "fr": "nécessite un lien",
         "en": "requires attunement",
     }
-    rarity_text_by_lang = {
-        "fr": {
-            "commun": Rarity.common,
-            "peu commun": Rarity.uncommon,
-            "rare": Rarity.rare,
-            "très rare": Rarity.very_rare,
-            "légendaire": Rarity.legendary,
-            "artéfact": Rarity.artifact,
-        },
-        "en": {
-            "commun": Rarity.common,
-            "peu commun": Rarity.uncommon,
-            "rare": Rarity.rare,
-            "très rare": Rarity.very_rare,
-            "légendaire": Rarity.legendary,
-            "artéfact": Rarity.artifact,
-        },
-    }
-    type_text_by_lang = {
-        "fr": {
-            "objet merveilleux": ItemType.wondrous_item,
-            "anneau": ItemType.ring,
-            "baguette": ItemType.wand,
-            "armure": ItemType.armor,
-            "bâton": ItemType.staff,
-            "potion": ItemType.potion,
-            "sceptre": ItemType.rod,
-        },
-        "en": {
-            "wondrous item": ItemType.wondrous_item,
-            "ring": ItemType.ring,
-            "wand": ItemType.wand,
-            "armor": ItemType.armor,
-            "staff": ItemType.staff,
-            "potion": ItemType.potion,
-            "rod": ItemType.rod,
-        },
-    }
     html = fetch_data(AIDEDD_MAGIC_ITEMS_URL, item, lang)
     attunement_text = attunement_text_by_lang[lang]
     soup = BeautifulSoup(html, features="html.parser")
@@ -209,7 +171,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     elif re.match(r"(arme|weapon)", item_type_text.lower()):
         item_type = ItemType.weapon
     else:
-        item_type = type_text_by_lang[lang][item_type_text.lower()]
+        item_type = ItemType.from_str(item_type_text.lower(), lang)
 
     if attunement_text in item_rarity:
         requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
@@ -219,8 +181,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         requires_attunement = False
     img_elt = soup.find("img")
     image_url = img_elt.attrs["src"] if img_elt else ""
-    rarity = rarity_text_by_lang[lang][item_rarity]
-    color = rarity.color
+    rarity = Rarity.from_str(item_rarity, lang)
     item_description = list(div_content.find("div", class_="description").strings)
     recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
     recharges = recharges_match.group(1) if recharges_match else ""
@@ -230,7 +191,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         attunement=requires_attunement,
         text=item_description,
         rarity=rarity,
-        color="#" + color,
+        color="#" + rarity.color,
         lang=lang,
         image_url=image_url,
         recharges=recharges,

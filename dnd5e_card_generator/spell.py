@@ -89,29 +89,7 @@ class Spell:
 
     @property
     def school_text(self):
-        translations = {
-            "fr": {
-                MagicSchool.abjuration: "abjuration",
-                MagicSchool.divination: "divination",
-                MagicSchool.enchantment: "enchantement",
-                MagicSchool.evocation: "évocation",
-                MagicSchool.illusion: "illusion",
-                MagicSchool.conjuration: "invocation",
-                MagicSchool.necromancy: "nécromancie",
-                MagicSchool.transmutation: "transmutation",
-            },
-            "en": {
-                MagicSchool.abjuration: "abjuration",
-                MagicSchool.divination: "divination",
-                MagicSchool.enchantment: "enchantment",
-                MagicSchool.evocation: "evocation",
-                MagicSchool.illusion: "illusion",
-                MagicSchool.conjuration: "conjuration",
-                MagicSchool.necromancy: "necromancy",
-                MagicSchool.transmutation: "transmutation",
-            },
-        }
-        return translations[self.lang][self.school].capitalize()
+        return self.school.translate(self.lang).capitalize()
 
     @property
     def casting_time_text(self) -> str:
