@@ -38,6 +38,9 @@ def scrape_spell_details(spell: str, lang: str) -> Spell:
     html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
     soup = BeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
+    if div_content is None:
+        raise ValueError(f"{spell} not found!")
+
     level = int(
         div_content.find("div", class_="ecole")
         .text.split(" - ")[0]
@@ -181,6 +184,9 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     attunement_text = attunement_text_by_lang[lang]
     soup = BeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
+    if div_content is None:
+        raise ValueError(f"{item} not found!")
+
     item_type_div_text = div_content.find("div", class_="type").text
     item_type_text, _, item_rarity = item_type_div_text.partition(",")
     item_rarity = item_rarity.strip()
