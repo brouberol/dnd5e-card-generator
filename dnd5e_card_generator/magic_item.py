@@ -38,7 +38,7 @@ class MagicItem:
         return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
     @property
-    def subtitle(self) -> SyntaxWarning:
+    def subtitle(self) -> str:
         subtitle = f"{self.type_text}, {self.rarity_text}"
         if self.attunement:
             subtitle += f" {self.attunement_text}"
