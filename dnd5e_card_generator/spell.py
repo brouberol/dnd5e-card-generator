@@ -127,7 +127,17 @@ class Spell:
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
-    def highlight_die_value(self, text) -> str:
+    def _highlight(self, pattern: str, text: str) -> str:
+        return re.sub(pattern, lambda match: f"<b>{match.group(0)}</b>", text)
+
+    def highlight_saving_throw(self, text: str) -> str:
+        saving_throw_pattern_by_lang = {
+            "fr": r"jet de sauvegarde de \w+",
+            "en": r"\w+ saving throw",
+        }
+        return self._highlight(saving_throw_pattern_by_lang[self.lang], text)
+
+    def highlight_die_value(self, text: str) -> str:
         die_value_pattern = (
             r"\dd\d+( \+ "
             + self.spell_carac_text
@@ -135,7 +145,12 @@ class Spell:
             + damage_type_text(self.lang)
             + r")?"
         )
-        return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
+        return self._highlight(die_value_pattern, text)
+
+    def highlight_spell_text(self, text: str) -> str:
+        text = self.highlight_die_value(text)
+        text = self.highlight_saving_throw(text)
+        return text
 
     def shorten_upcasting_text(self) -> tuple[int, str]:
         upcasting_text = {
@@ -172,6 +187,9 @@ class Spell:
         )
         if self.upcasting_text:
             shortened_upcasting_text = self.shorten_upcasting_text()
+            shortened_upcasting_text = self.highlight_spell_text(
+                shortened_upcasting_text
+            )
             shortened_upcasting_text = self.shorten_spell_text(shortened_upcasting_text)
             upcasting_parts = [
                 "text |",
@@ -207,7 +225,7 @@ class Spell:
                 "rule",
             ]
             + [
-                f"text | {self.shorten_spell_text(self.highlight_die_value(text_part))}"
+                f"text | {self.highlight_spell_text(self.shorten_spell_text(text_part))}"
                 for text_part in self.text
             ]
             + upcasting_parts,
