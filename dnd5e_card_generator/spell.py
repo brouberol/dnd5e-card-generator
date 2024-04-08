@@ -145,7 +145,7 @@ class Spell:
 
     def highlight_die_value(self, text: str) -> str:
         die_value_pattern = (
-            r"\dd\d+( \+ "
+            r"\d+d\d+( \+ "
             + self.spell_carac_text
             + r"| "
             + damage_type_text(self.lang)
