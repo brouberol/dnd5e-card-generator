@@ -154,7 +154,7 @@ class DamageType(TranslatedStrEnum):
             "acid": "acid",
             "bludgeoning": "hammer-drop",
             "cold": "ice-spear",
-            "fire": "fire-ray",
+            "fire": "celebration-fire",
             "force": "mighty-force",
             "lightning": "lightning-tree",
             "necrotic": "burning-skull",
