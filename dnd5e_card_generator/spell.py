@@ -202,7 +202,6 @@ class Spell:
                 shortened_upcasting_text
             )
             upcasting_parts = [
-                "text |",
                 f"section | {self.upcasting_section_title}",
                 f"text | {shortened_upcasting_text}",
             ]
