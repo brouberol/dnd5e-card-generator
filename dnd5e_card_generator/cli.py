@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .cards import export_items_to_cards, export_spells_to_cards
+from .scraping import resolve_spell_filter
 
 
 def parse_args():
@@ -20,6 +21,14 @@ def parse_args():
         ),
         required=False,
         default=[],
+    )
+    parser.add_argument(
+        "--spell-filter",
+        help=(
+            "Filter resolved to a list of spells, of form <class>:<start-lvl>:<end-level>. "
+            "Example: cleric:0:1"
+        ),
+        required=False,
     )
     parser.add_argument(
         "--items",
@@ -49,7 +58,12 @@ def main():
         sys.exit(1)
 
     args = parse_args()
-    cards = export_spells_to_cards(args.spells)
+    spells = args.spells
+    if args.spell_filter:
+        spells += resolve_spell_filter(args.spell_filter)
+        spells = list(set(spells))
+
+    cards = export_spells_to_cards(spells)
     cards += export_items_to_cards(args.items)
     with open(args.output, "w") as out:
         json.dump(cards, out, indent=2, ensure_ascii=False)

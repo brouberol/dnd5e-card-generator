@@ -1,12 +1,92 @@
 import re
+from dataclasses import dataclass
+from typing import Self
+from urllib.parse import parse_qs, urlparse
 
+import requests
 from bs4 import BeautifulSoup
 
-from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_URL
+from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_FILTER_URL, AIDEDD_SPELLS_URL
 from .magic_item import MagicItem
 from .models import DamageType, ItemType, MagicSchool, Rarity, SpellShape
 from .spell import Spell
 from .utils import fetch_data
+
+
+@dataclass
+class SpellFilter:
+    class_name: str
+    min_lvl: int
+    max_lvl: int
+
+    @staticmethod
+    def class_name_synonyms():
+        return {
+            "artificer": "a",
+            "artificier": "a",
+            "bard": "b",
+            "barde": "b",
+            "cleric": "c",
+            "clerc": "c",
+            "druid": "d",
+            "druide": "d",
+            "sorcerer": "e",
+            "ensorceleur": "e",
+            "wizard": "m",
+            "magicien": "m",
+            "warlock": "o",
+            "occultiste": "o",
+            "paladin": "p",
+            "ranger": "r",
+            "rodeur": "r",
+        }
+
+    @classmethod
+    def from_str(cls, s: str) -> Self:
+        class_name, min_lvl, max_lvl = s.split(":")
+        resolved_class_name = cls.class_name_synonyms().get(class_name, class_name)
+        return SpellFilter(
+            class_name=resolved_class_name, min_lvl=int(min_lvl), max_lvl=int(max_lvl)
+        )
+
+    def request(self) -> requests.Response:
+        resp = requests.post(
+            AIDEDD_SPELLS_FILTER_URL,
+            headers={
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            data={
+                "Filtre1[]": [self.class_name],
+                "nivMin": self.min_lvl,
+                "nivMax": self.max_lvl,
+                "source[]": ["base", "xgte", "tcoe", "ftod"],
+                "opt_tcoe": "S",
+                "colE": "on",
+                "colI": "on",
+                "colC": "on",
+                "colR": "on",
+                "filtrer": "FILTRER",
+            },
+        )
+        resp.raise_for_status()
+        return resp
+
+    def resolve(self) -> list[str]:
+        out = []
+        resp = self.request()
+        soup = BeautifulSoup(resp.text, features="html.parser")
+        spell_cells = soup.find("table").find_all("td", class_="item")
+        for spell_cell in spell_cells:
+            link = spell_cell.find("a")
+            query = parse_qs(urlparse(link.attrs["href"]).query)
+            out.append(f"fr:{query['vf'][0]}")
+        return out
+
+
+def resolve_spell_filter(spell_filter: int):
+    return SpellFilter.from_str(spell_filter).resolve()
 
 
 class SpellScraper:
