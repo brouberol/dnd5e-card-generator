@@ -130,6 +130,12 @@ class Spell:
     def _highlight(self, pattern: str, text: str) -> str:
         return re.sub(pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
+    def fix_translation_mistakes(self, text: str) -> str:
+        replacements = {"fr": {"de un dé": "d'un dé"}}
+        for term, replacement in replacements.get(self.lang, {}).items():
+            text = text.replace(term, replacement)
+        return text
+
     def highlight_saving_throw(self, text: str) -> str:
         saving_throw_pattern_by_lang = {
             "fr": r"jet de sauvegarde de \w+",
@@ -175,6 +181,9 @@ class Spell:
         )
         if self.upcasting_text:
             shortened_upcasting_text = self.shorten_upcasting_text()
+            shortened_upcasting_text = self.fix_translation_mistakes(
+                shortened_upcasting_text
+            )
             shortened_upcasting_text = self.highlight_spell_text(
                 shortened_upcasting_text
             )
@@ -212,7 +221,7 @@ class Spell:
                 "rule",
             ]
             + [
-                f"text | {self.highlight_spell_text(text_part)}"
+                f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
                 for text_part in self.text
             ]
             + upcasting_parts,
