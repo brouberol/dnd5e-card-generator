@@ -19,7 +19,7 @@ class SpellScraper:
         "en": "worth at least",
     }
     spell_damage_by_lang = {
-        "fr": r"dégâts (de )?(type )?(?P<dmg>\w+)s?",
+        "fr": r"dégâts (de )?(type )?(?P<dmg>[^\.\sà,]+)s?",
         "en": r"(?P<dmg>\w+) damage",
     }
     spell_heal_by_lang = {
@@ -144,7 +144,10 @@ class SpellScraper:
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
-            damage_type = DamageType.from_str(damage_type_str, self.lang)
+            try:
+                damage_type = DamageType.from_str(damage_type_str, self.lang)
+            except KeyError:
+                damage_type = None
         elif re.search(self.spell_heal_by_lang[self.lang], search_text):
             damage_type = DamageType.healing
         else:
