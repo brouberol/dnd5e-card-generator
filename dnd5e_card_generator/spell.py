@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from .inagemagick import ImageMagick
-from .models import DamageType, MagicSchool
+from .models import DamageType, MagicSchool, SpellShape
 from .utils import damage_type_text, game_icon, humanize_level
 
 
@@ -26,6 +26,7 @@ class Spell:
     upcasting_text: str
     tags: list[str]
     damage_type: Optional[DamageType]
+    shape: Optional[SpellShape]
 
     @property
     def color(self) -> str:
@@ -174,6 +175,20 @@ class Spell:
                 text = text.replace(upcasting_match.group(), "").strip().capitalize()
         return text
 
+    @property
+    def casting_range_text_value(self) -> str:
+        parts = []
+        if self.shape:
+            shape_name = self.shape.translate(self.lang)
+            shape_icon = game_icon(self.shape.icon)
+            if shape_name in self.casting_range:
+                parts.append(self.casting_range.replace(shape_name, shape_icon))
+            else:
+                parts.extend([self.casting_range, "-", shape_icon])
+        else:
+            parts = [self.casting_range]
+        return " ".join(parts)
+
     def to_card(self) -> dict:
         b64_background = ImageMagick.compose_magic_school_logo_and_watercolor(
             self.school, self.color
@@ -203,7 +218,7 @@ class Spell:
             )
         spell_properties.extend(
             [
-                f"property | {self.casting_range_text}: | {self.casting_range}",
+                f"property | {self.casting_range_text}: | {self.casting_range_text_value}",
                 f"property | {self.effect_duration_text}: | {self.effect_duration}",
             ]
         )

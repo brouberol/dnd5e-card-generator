@@ -167,3 +167,29 @@ class DamageType(TranslatedStrEnum):
             "healing": "health-potion",
         }
         return damage_to_icon.get(self.value)
+
+
+class SpellShape(TranslatedStrEnum):
+    sphere = "sphere"
+    cube = "cube"
+    cone = "cone"
+    line = "line"
+
+    @classmethod
+    def fr_translations(self) -> dict:
+        return {
+            "sphere": "sphère",
+            "cube": "cube",
+            "cone": "cône",
+            "line": "ligne",
+        }
+
+    @property
+    def icon(self) -> str:
+        shape_to_icon = {
+            "sphere": "glass-ball",
+            "cube": "cube",
+            "cone": "ringed-beam",
+            "line": "straight-pipe",
+        }
+        return shape_to_icon.get(self.value)

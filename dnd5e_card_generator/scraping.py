@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_URL
 from .magic_item import MagicItem
-from .models import DamageType, ItemType, MagicSchool, Rarity
+from .models import DamageType, ItemType, MagicSchool, Rarity, SpellShape
 from .spell import Spell
 from .utils import fetch_data
 
@@ -92,12 +92,15 @@ class SpellScraper:
     def scrape_effect_duration(self) -> str:
         return self._scrape_property("d", list(self.effect_duration_by_lang.values()))
 
+    def scrape_casting_components(self) -> str:
+        return self._scrape_property("c", list(self.components_by_lang.values()))
+
     def scrape_text(self) -> str:
         return [d.text for d in self.div_content.find_all("div", class_="classe")]
 
     def scrape_spell(self) -> Spell:
         print(f"Scraping data for spell {self.spell}")
-        text, upcasting_text = self.scrape_spell_texts()
+        spell_text, upcasting_text = self.scrape_spell_texts()
         school_text = self.scrape_school_text()
         if ritual_match := re.search(self.ritual_pattern, school_text):
             school_text = school_text.replace(ritual_match.group(0), "").strip()
@@ -114,9 +117,9 @@ class SpellScraper:
             concentration = True
         else:
             concentration = False
-        casting_components = self._scrape_property(
-            "c", list(self.components_by_lang.values())
-        )
+
+        casting_range = self.scrape_casting_range()
+        casting_components = self.scrape_casting_components()
         single_letter_casting_components = (
             re.sub(r"\(.+\)", "", casting_components).strip().split(", ")
         )
@@ -134,17 +137,26 @@ class SpellScraper:
         else:
             paying_components = ""
 
+        search_text = "\n".join(spell_text)
         if damage_type_match := re.search(
-            self.spell_damage_by_lang[self.lang], "\n".join(text)
+            self.spell_damage_by_lang[self.lang], search_text
         ):
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
             damage_type = DamageType.from_str(damage_type_str, self.lang)
-        elif re.search(self.spell_heal_by_lang[self.lang], "\n".join(text)):
+        elif re.search(self.spell_heal_by_lang[self.lang], search_text):
             damage_type = DamageType.healing
         else:
             damage_type = None
+
+        spell_shape_pattern = SpellShape.to_pattern(self.lang)
+        for text in (search_text, casting_range):
+            if spell_shape_match := re.search(spell_shape_pattern, text):
+                spell_shape = SpellShape.from_str(spell_shape_match.group(), self.lang)
+                break
+        else:
+            spell_shape = None
 
         return Spell(
             lang=self.lang,
@@ -152,18 +164,19 @@ class SpellScraper:
             title=self.scrape_title(),
             school=MagicSchool.from_str(school_text.lower(), self.lang),
             casting_time=self.scrape_casting_time(),
-            casting_range=self.scrape_casting_range(),
+            casting_range=casting_range,
             somatic=somatic,
             verbal=verbal,
             material=material,
             paying_components=paying_components,
             effect_duration=effect_duration,
             tags=self.scrape_text(),
-            text=text,
+            text=spell_text,
             upcasting_text=upcasting_text,
             ritual=ritual,
             concentration=concentration,
             damage_type=damage_type,
+            shape=spell_shape,
         )
 
 

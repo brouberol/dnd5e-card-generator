@@ -45,3 +45,7 @@ class TranslatedStrEnum(StrEnum):
     @classmethod
     def from_str(cls, s: str, lang: str) -> Self:
         return cls.reversed_translations()[lang][s]
+
+    @classmethod
+    def to_pattern(cls, lang: str) -> str:
+        return r"(" + r"|".join(cls.translations()[lang].values()) + r")"
