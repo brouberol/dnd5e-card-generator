@@ -2,9 +2,8 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
-from .damage import DamageType
 from .inagemagick import ImageMagick
-from .models import MagicSchool
+from .models import DamageType, MagicSchool
 from .utils import damage_type_text, game_icon, humanize_level
 
 
