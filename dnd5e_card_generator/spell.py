@@ -98,10 +98,6 @@ class Spell:
         return self.school.translate(self.lang).capitalize()
 
     @property
-    def ritual_text(self):
-        return "Rituel" if self.lang == "fr" else "Ritual"
-
-    @property
     def casting_components_text(self) -> str:
         return "Composants" if self.lang == "fr" else "Compoments"
 
@@ -257,9 +253,7 @@ class Spell:
         if self.concentration:
             parts.append(f"property_inline | {game_icon('meditation')} | C")
         if self.ritual:
-            parts.append(
-                f"property_inline | {game_icon('pentacle')} | {self.ritual_text}"
-            )
+            parts.append(f"property_inline | {game_icon('pentacle')} | R")
         return parts
 
     @property
