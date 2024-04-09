@@ -170,7 +170,7 @@ class Spell:
         return self.shorten_time_text(text)
 
     def shorten_distance_text(self, text: str) -> str:
-        replacements = {"fr": {"mètres": "m"}, "en": {"meters": "m"}}
+        replacements = {"fr": {"mètres": "m"}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
