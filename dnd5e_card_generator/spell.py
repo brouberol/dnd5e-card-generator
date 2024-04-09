@@ -99,7 +99,7 @@ class Spell:
 
     @property
     def casting_components_text(self) -> str:
-        return "Composants" if self.lang == "fr" else "Compoments"
+        return "Matériaux" if self.lang == "fr" else "Materials"
 
     @property
     def upcasting_section_title(self) -> str:
