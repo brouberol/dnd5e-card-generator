@@ -102,20 +102,8 @@ class Spell:
         return "Rituel" if self.lang == "fr" else "Ritual"
 
     @property
-    def casting_time_text(self) -> str:
-        return "Temps d'invocation" if self.lang == "fr" else "Casting time"
-
-    @property
-    def casting_range_text(self) -> str:
-        return "Portée" if self.lang == "fr" else "Range"
-
-    @property
     def casting_components_text(self) -> str:
         return "Composants" if self.lang == "fr" else "Compoments"
-
-    @property
-    def effect_duration_text(self) -> str:
-        return "Durée" if self.lang == "fr" else "Duration"
 
     @property
     def upcasting_section_title(self) -> str:
@@ -182,18 +170,14 @@ class Spell:
         return text
 
     @property
-    def casting_range_text_value(self) -> str:
-        parts = []
-        if self.shape:
-            shape_name = self.shape.translate(self.lang)
-            shape_icon = game_icon(self.shape.icon)
-            if shape_name in self.casting_range:
-                parts.append(self.casting_range.replace(shape_name, shape_icon))
-            else:
-                parts.extend([self.casting_range, "-", shape_icon])
+    def casting_range_text(self) -> str:
+        if not self.shape:
+            return self.casting_range
+        shape_name = self.shape.translate(self.lang)
+        if shape_name in self.casting_range:
+            return re.sub(r"\([^\)]+\)", "", self.casting_range).strip()
         else:
-            parts = [self.casting_range]
-        return " ".join(parts)
+            return self.casting_range
 
     @property
     def spell_parts(self) -> list[str]:
@@ -201,6 +185,21 @@ class Spell:
             f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
             for text_part in self.text
         ]
+
+    @property
+    def casting_shape_text(self):
+        if not self.shape:
+            return ""
+        shape_name = self.shape.translate(self.lang)
+        casting_shape_dimension_pattern = r"(?P<dim>\d+([,\.]\d+)? m)ètres"
+        for text in [self.casting_range] + self.spell_parts:
+            if shape_name not in text:
+                continue
+            if casting_shape_dimension_match := re.search(
+                casting_shape_dimension_pattern, text
+            ):
+                return casting_shape_dimension_match.group("dim").strip().capitalize()
+        return ""
 
     @property
     def upcasting_parts(self) -> list[str]:
@@ -219,17 +218,21 @@ class Spell:
 
     @property
     def spell_properties_parts(self) -> list[str]:
-        parts = []
-        parts.append(f"property_inline | {game_icon('duration')} | {self.casting_time}")
-        parts.append(
-            f"property_inline | {game_icon('measure-tape')} | {self.casting_range_text_value}"
-        )
-        parts.append(
-            f"property_inline | {game_icon('sands-of-time')} | {self.shorten_effect_duration_text(self.effect_duration)}"
-        )
-        parts.append(
-            f"property_inline | {game_icon('drink-me')} | {self.spell_casting_components}"
-        )
+        def property_inline(icon: str, text: str) -> str:
+            return f"property_inline | {game_icon(icon)} | {text}"
+
+        parts = [
+            property_inline("duration", self.casting_time),
+            property_inline("measure-tape", self.casting_range_text),
+        ]
+        if self.shape:
+            parts.append(property_inline(self.shape.icon, self.casting_shape_text))
+        parts += [
+            property_inline(
+                "sands-of-time", self.shorten_effect_duration_text(self.effect_duration)
+            ),
+            property_inline("drink-me", self.spell_casting_components),
+        ]
         if self.concentration:
             parts.append(f"property_inline | {game_icon('meditation')} | C")
         if self.ritual:
