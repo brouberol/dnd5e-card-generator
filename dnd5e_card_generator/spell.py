@@ -1,8 +1,8 @@
+import base64
 import re
 from dataclasses import dataclass
 from typing import Optional
 
-from .inagemagick import ImageMagick
 from .models import DamageType, MagicSchool, SpellShape
 from .utils import damage_type_text, game_icon, humanize_level
 
@@ -52,6 +52,12 @@ class Spell:
     @property
     def concentration_text(self):
         return game_icon("meditation") if self.concentration else ""
+
+    @property
+    def background_image_base64(self):
+        return base64.b64encode(self.school.background_file_path.read_bytes()).decode(
+            "utf-8"
+        )
 
     @property
     def spell_casting_extra(self):
@@ -190,9 +196,6 @@ class Spell:
         return " ".join(parts)
 
     def to_card(self) -> dict:
-        b64_background = ImageMagick.compose_magic_school_logo_and_watercolor(
-            self.school, self.color
-        )
         if self.upcasting_text:
             shortened_upcasting_text = self.shorten_upcasting_text()
             shortened_upcasting_text = self.fix_translation_mistakes(
@@ -239,5 +242,5 @@ class Spell:
             ]
             + upcasting_parts,
             "tags": self.tags,
-            "background_image": f"data:image/png;base64,{b64_background}",
+            "background_image": f"data:image/png;base64,{self.background_image_base64}",
         }

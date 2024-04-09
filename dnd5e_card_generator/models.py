@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .const import IMAGES_DIR
+from .const import BACKGROUNDS_DIR, SYMBOLS_DIR
 from .translator import TranslatedStrEnum
 
 
@@ -110,7 +110,11 @@ class MagicSchool(TranslatedStrEnum):
 
     @property
     def symbol_file_path(self) -> Path:
-        return IMAGES_DIR / f"{self.value}.png"
+        return SYMBOLS_DIR / f"{self.value}.png"
+
+    @property
+    def background_file_path(self) -> Path:
+        return BACKGROUNDS_DIR / f"{self.value}.png"
 
 
 class DamageType(TranslatedStrEnum):
