@@ -169,6 +169,12 @@ class Spell:
             text = text.replace(term, replacement)
         return text
 
+    def shorten_distance_text(self, text: str) -> str:
+        replacements = {"fr": {"mètres": "m"}, "en": {"meters": "m"}}
+        for term, replacement in replacements.get(self.lang, {}).items():
+            text = text.replace(term, replacement)
+        return text
+
     @property
     def casting_range_text(self) -> str:
         if not self.shape:
@@ -191,7 +197,7 @@ class Spell:
         if not self.shape:
             return ""
         shape_name = self.shape.translate(self.lang)
-        casting_shape_dimension_pattern = r"(?P<dim>\d+([,\.]\d+)? m)ètres"
+        casting_shape_dimension_pattern = r"(?P<dim>\d+([,\.]\d+)? m\w+)"
         for text in [self.casting_range] + self.spell_parts:
             if shape_name not in text:
                 continue
@@ -223,10 +229,16 @@ class Spell:
 
         parts = [
             property_inline("duration", self.casting_time),
-            property_inline("measure-tape", self.casting_range_text),
+            property_inline(
+                "measure-tape", self.shorten_distance_text(self.casting_range_text)
+            ),
         ]
         if self.shape:
-            parts.append(property_inline(self.shape.icon, self.casting_shape_text))
+            parts.append(
+                property_inline(
+                    self.shape.icon, self.shorten_distance_text(self.casting_shape_text)
+                )
+            )
         parts += [
             property_inline(
                 "sands-of-time", self.shorten_effect_duration_text(self.effect_duration)
