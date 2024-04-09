@@ -46,14 +46,6 @@ class Spell:
         return "#" + spell_colors_by_level[self.level]
 
     @property
-    def ritual_text(self):
-        return game_icon("cursed-star") if self.ritual else ""
-
-    @property
-    def concentration_text(self):
-        return game_icon("meditation") if self.concentration else ""
-
-    @property
     def background_image_base64(self):
         return base64.b64encode(self.school.background_file_path.read_bytes()).decode(
             "utf-8"
@@ -90,22 +82,24 @@ class Spell:
 
     @property
     def subtitle(self) -> str:
-        suffix = f"{self.school_text} - {self.spell_casting_components} {self.spell_casting_extra}"
-        suffix = suffix.strip()
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {suffix}"
+                return f"Tour de magie - {self.school_text}"
             else:
-                return f"Niveau {self.level} - {suffix}"
+                return f"Niveau {self.level} - {self.school_text}"
         else:
             if self.level == 0:
-                return f"Cantrip - {suffix}"
+                return f"Cantrip - {self.school_text}"
             else:
-                return f"{humanize_level(self.level)} level - {suffix}"
+                return f"{humanize_level(self.level)} level - {self.school_text}"
 
     @property
     def school_text(self):
         return self.school.translate(self.lang).capitalize()
+
+    @property
+    def ritual_text(self):
+        return "Rituel" if self.lang == "fr" else "Ritual"
 
     @property
     def casting_time_text(self) -> str:
@@ -181,6 +175,12 @@ class Spell:
                 text = text.replace(upcasting_match.group(), "").strip().capitalize()
         return text
 
+    def shorten_effect_duration_text(self, text: str) -> str:
+        replacements = {"fr": {"Jusqu'à": "≤"}}
+        for term, replacement in replacements.get(self.lang, {}).items():
+            text = text.replace(term, replacement)
+        return text
+
     @property
     def casting_range_text_value(self) -> str:
         parts = []
@@ -195,52 +195,76 @@ class Spell:
             parts = [self.casting_range]
         return " ".join(parts)
 
-    def to_card(self) -> dict:
-        if self.upcasting_text:
-            shortened_upcasting_text = self.shorten_upcasting_text()
-            shortened_upcasting_text = self.fix_translation_mistakes(
-                shortened_upcasting_text
-            )
-            shortened_upcasting_text = self.highlight_spell_text(
-                shortened_upcasting_text
-            )
-            upcasting_parts = [
-                f"section | {self.upcasting_section_title}",
-                f"text | {shortened_upcasting_text}",
-            ]
-        else:
-            upcasting_parts = []
-
-        spell_properties = [
-            f"property | {self.casting_time_text}: | {self.casting_time}",
+    @property
+    def spell_parts(self) -> list[str]:
+        return [
+            f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
+            for text_part in self.text
         ]
-        if self.paying_components:
-            spell_properties.append(
-                f"property | {self.casting_components_text}: | {self.paying_components}"
+
+    @property
+    def upcasting_parts(self) -> list[str]:
+        if not self.upcasting_text:
+            return []
+        shortened_upcasting_text = self.shorten_upcasting_text()
+        shortened_upcasting_text = self.fix_translation_mistakes(
+            shortened_upcasting_text
+        )
+        shortened_upcasting_text = self.highlight_spell_text(shortened_upcasting_text)
+
+        return [
+            f"section | {self.upcasting_section_title}",
+            f"text | {shortened_upcasting_text}",
+        ]
+
+    @property
+    def spell_properties_parts(self) -> list[str]:
+        parts = []
+        parts.append(f"property_inline | {game_icon('duration')} | {self.casting_time}")
+        parts.append(
+            f"property_inline | {game_icon('measure-tape')} | {self.casting_range_text_value}"
+        )
+        parts.append(
+            f"property_inline | {game_icon('sands-of-time')} | {self.shorten_effect_duration_text(self.effect_duration)}"
+        )
+        parts.append(
+            f"property_inline | {game_icon('drink-me')} | {self.spell_casting_components}"
+        )
+        if self.concentration:
+            parts.append(f"property_inline | {game_icon('meditation')} | C")
+        if self.ritual:
+            parts.append(
+                f"property_inline | {game_icon('pentacle')} | {self.ritual_text}"
             )
-        spell_properties.extend(
-            [
-                f"property | {self.casting_range_text}: | {self.casting_range_text_value}",
-                f"property | {self.effect_duration_text}: | {self.effect_duration}",
-            ]
+        return parts
+
+    @property
+    def paying_components_parts(self) -> list[str]:
+        if not self.paying_components:
+            return []
+        return [
+            f"section | {self.casting_components_text}",
+            f"text | {self.paying_components}",
+        ]
+
+    @property
+    def contents_text(self) -> str:
+        subtitle_text = f"subtitle | {self.subtitle}"
+        level_text = f"level | {self.level}"
+        return (
+            [subtitle_text, level_text]
+            + self.spell_properties_parts
+            + self.spell_parts
+            + self.upcasting_parts
+            + self.paying_components_parts
         )
 
+    def to_card(self) -> dict:
         return {
             "count": 1,
             "color": self.color,
             "title": self.title,
             "icon": self.spell_damage_type_icon,
-            "contents": [
-                f"subtitle | {self.subtitle}",
-                "rule",
-                *spell_properties,
-                "rule",
-            ]
-            + [
-                f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
-                for text_part in self.text
-            ]
-            + upcasting_parts,
-            "tags": self.tags,
+            "contents": self.contents_text,
             "background_image": f"data:image/png;base64,{self.background_image_base64}",
         }

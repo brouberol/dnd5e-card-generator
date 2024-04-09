@@ -207,13 +207,15 @@ class SpellScraper:
         somatic = "S" in single_letter_casting_components
         material = "M" in single_letter_casting_components
         if material:
-            if components_text := re.search(r"\(.+\)", casting_components).group():
+            if components_text := re.search(r"\((.+)\)", casting_components).group(1):
                 paying_components = (
-                    components_text
+                    components_text.capitalize()
                     if self.paying_components_indicator_by_lang[self.lang]
                     in components_text
                     else ""
                 )
+                if paying_components and not paying_components.endswith("."):
+                    paying_components = f"{paying_components}."
         else:
             paying_components = ""
 
@@ -246,13 +248,13 @@ class SpellScraper:
             level=self.scrape_level(),
             title=self.scrape_title(),
             school=MagicSchool.from_str(school_text.lower(), self.lang),
-            casting_time=self.scrape_casting_time(),
-            casting_range=casting_range,
+            casting_time=self.scrape_casting_time().capitalize(),
+            casting_range=casting_range.capitalize(),
             somatic=somatic,
             verbal=verbal,
             material=material,
-            paying_components=paying_components,
-            effect_duration=effect_duration,
+            paying_components=paying_components.capitalize(),
+            effect_duration=effect_duration.capitalize(),
             tags=self.scrape_text(),
             text=spell_text,
             upcasting_text=upcasting_text,
