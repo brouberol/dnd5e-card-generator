@@ -167,10 +167,19 @@ class Spell:
         replacements = {"fr": {"Jusqu'à": "≤"}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
-        return text
+        return self.shorten_time_text(text)
 
     def shorten_distance_text(self, text: str) -> str:
         replacements = {"fr": {"mètres": "m"}, "en": {"meters": "m"}}
+        for term, replacement in replacements.get(self.lang, {}).items():
+            text = text.replace(term, replacement)
+        return text
+
+    def shorten_time_text(self, text: str) -> str:
+        replacements = {
+            "fr": {"heures": "h", "heure": "h", "minutes": "min", "minute": "min"},
+            "en": {"hours": "h", "hour": "h", "minutes": "min", "minute": "min"},
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
