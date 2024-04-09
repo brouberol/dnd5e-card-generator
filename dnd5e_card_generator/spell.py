@@ -160,21 +160,39 @@ class Spell:
         return text
 
     def shorten_effect_duration_text(self, text: str) -> str:
-        replacements = {"fr": {"Jusqu'à": "≤"}}
+        replacements = {"fr": {"Jusqu'à": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
-        return self.shorten_time_text(text)
+        return self.shorten_time_text(text).capitalize()
 
     def shorten_distance_text(self, text: str) -> str:
-        replacements = {"fr": {"mètres": "m"}}
+        replacements = {"fr": {"mètres": "m", "Personnelle": "Perso."}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
 
+    def shorten_casting_time_text(self, text: str) -> str:
+        replacements = {"fr": {"1 action bonus": "a. bonus", "1 action": "action"}}
+        for term, replacement in replacements.get(self.lang, {}).items():
+            text = text.replace(term, replacement)
+        return text.capitalize()
+
     def shorten_time_text(self, text: str) -> str:
         replacements = {
-            "fr": {"heures": "h", "heure": "h", "minutes": "min", "minute": "min"},
-            "en": {"hours": "h", "hour": "h", "minutes": "min", "minute": "min"},
+            "fr": {
+                "heures": "h",
+                "heure": "h",
+                "minutes": "min",
+                "minute": "min",
+                "Instantanée": "Instant.",
+            },
+            "en": {
+                "hours": "h",
+                "hour": "h",
+                "minutes": "min",
+                "minute": "min",
+                "Instantaneous": "Instant.",
+            },
         }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
@@ -233,7 +251,9 @@ class Spell:
             return f"property_inline | {game_icon(icon)} | {text}"
 
         parts = [
-            property_inline("player-time", self.casting_time),
+            property_inline(
+                "player-time", self.shorten_casting_time_text(self.casting_time)
+            ),
             property_inline(
                 "measure-tape", self.shorten_distance_text(self.casting_range_text)
             ),
