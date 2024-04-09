@@ -233,7 +233,7 @@ class Spell:
             return f"property_inline | {game_icon(icon)} | {text}"
 
         parts = [
-            property_inline("duration", self.casting_time),
+            property_inline("player-time", self.casting_time),
             property_inline(
                 "measure-tape", self.shorten_distance_text(self.casting_range_text)
             ),
