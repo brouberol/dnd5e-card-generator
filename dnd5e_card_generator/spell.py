@@ -165,13 +165,13 @@ class Spell:
         return text
 
     def shorten_effect_duration_text(self, text: str) -> str:
-        replacements = {"fr": {"Jusqu'à": ""}}
+        replacements = {"fr": {"Jusqu'à": "", "(voir ci-dessous)": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return self.shorten_time_text(text).capitalize()
 
     def shorten_distance_text(self, text: str) -> str:
-        replacements = {"fr": {"mètres": "m", "Personnelle": "Perso."}}
+        replacements = {"fr": {"mètres": "m", "mètre": "m", "Personnelle": "Perso."}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
