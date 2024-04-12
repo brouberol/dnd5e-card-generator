@@ -174,26 +174,44 @@ class DamageType(TranslatedStrEnum):
 
 
 class SpellShape(TranslatedStrEnum):
-    sphere = "sphere"
-    cube = "cube"
+    circle = "circle"
     cone = "cone"
+    cube = "cube"
+    cylinder = "cylinder"
+    hemisphere = "hemisphere"
     line = "line"
+    radius = "radius"
+    sphere = "sphere"
+    square = "square"
+    wall = "wall"
 
     @classmethod
     def fr_translations(self) -> dict:
         return {
-            "sphere": "sphère",
-            "cube": "cube",
+            "circle": "cercle",
             "cone": "cône",
+            "cube": "cube",
+            "cylinder": "cylindre",
+            "hemisphere": "hémisphère",
             "line": "ligne",
+            "sphere": "sphère",
+            "square": "carré",
+            "wall": "mur",
+            "radius": "rayon",
         }
 
     @property
     def icon(self) -> str:
         shape_to_icon = {
-            "sphere": "glass-ball",
-            "cube": "cube",
+            "circle": "circle",
             "cone": "ringed-beam",
+            "cube": "cube",
+            "cylinder": "database",
+            "hemisphere": "onigori",
             "line": "straight-pipe",
+            "radius": "circle",
+            "sphere": "glass-ball",
+            "square": "square",
+            "wall": "brick-wall",
         }
         return shape_to_icon.get(self.value)
