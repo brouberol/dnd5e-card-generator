@@ -6,11 +6,21 @@ from urllib.parse import parse_qs, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from .const import AIDEDD_MAGIC_ITEMS_URL, AIDEDD_SPELLS_FILTER_URL, AIDEDD_SPELLS_URL
-from .magic_item import MagicItem
-from .models import DamageType, ItemType, MagicSchool, Rarity, SpellShape
-from .spell import Spell
-from .utils import fetch_data
+from dnd5e_card_generator.const import (
+    AIDEDD_MAGIC_ITEMS_URL,
+    AIDEDD_SPELLS_FILTER_URL,
+    AIDEDD_SPELLS_URL,
+)
+from dnd5e_card_generator.magic_item import MagicItem
+from dnd5e_card_generator.models import (
+    DamageType,
+    ItemType,
+    MagicSchool,
+    Rarity,
+    SpellShape,
+)
+from dnd5e_card_generator.spell import Spell
+from dnd5e_card_generator.utils import fetch_data
 
 
 @dataclass
@@ -85,10 +95,6 @@ class SpellFilter:
         return out
 
 
-def resolve_spell_filter(spell_filter: int):
-    return SpellFilter.from_str(spell_filter).resolve()
-
-
 class SpellScraper:
     upcasting_indicator_by_lang = {
         "fr": "Aux niveaux supérieurs",
@@ -102,10 +108,7 @@ class SpellScraper:
         "fr": r"dégâts (de )?(type )?(?P<dmg>[^\.\sà,]+)s?",
         "en": r"(?P<dmg>\w+) damage",
     }
-    spell_heal_by_lang = {
-        "fr": r"récupère [\w\s]+ points de vie",
-        "en": r"regains [\w\s]+ hit points",
-    }
+
     effect_duration_by_lang = {"fr": "Durée :", "en": "Duration:"}
     components_by_lang = {"fr": "Composantes :", "en": "Components:"}
     casting_time_by_lang = {"fr": "Temps d'incantation :", "en": "Casting Time:"}
@@ -163,6 +166,11 @@ class SpellScraper:
 
     def scrape_title(self) -> str:
         return self.div_content.find("h1").text.strip()
+
+    def scrape_en_title(self) -> str:
+        if self.lang == "en":
+            return self.scrape_title()
+        return self.div_content.find("div", class_="trad").find("a").text
 
     def scrape_casting_range(self) -> str:
         return self._scrape_property("r", list(self.casting_range_by_lang.values()))
@@ -238,8 +246,6 @@ class SpellScraper:
                 damage_type = DamageType.from_str(damage_type_str, self.lang)
             except KeyError:
                 damage_type = None
-        elif re.search(self.spell_heal_by_lang[self.lang], search_text):
-            damage_type = DamageType.healing
         else:
             damage_type = None
 
@@ -255,6 +261,7 @@ class SpellScraper:
             lang=self.lang,
             level=self.scrape_level(),
             title=self.scrape_title(),
+            en_title=self.scrape_en_title(),
             school=MagicSchool.from_str(school_text.lower(), self.lang),
             casting_time=casting_time,
             casting_range=casting_range.capitalize(),
@@ -272,11 +279,6 @@ class SpellScraper:
             shape=spell_shape,
             reaction_condition=reaction_condition,
         )
-
-
-def scrape_spell_details(spell: str, lang: str) -> Spell:
-    scraper = SpellScraper(spell, lang)
-    return scraper.scrape_spell()
 
 
 def scrape_item_details(item: str, lang: str) -> MagicItem:
