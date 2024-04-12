@@ -176,7 +176,12 @@ class Spell:
         text = self.upcasting_text[:]
         for pattern in upcasting_text[self.lang]:
             if upcasting_match := re.search(pattern, text):
-                text = text.replace(upcasting_match.group(), "").strip().capitalize()
+                text = text.replace(upcasting_match.group(), "").strip()
+
+        # We do this instead of .capitalize() because capitalize does not work
+        # well on multi-sentence blocks.
+        if text[0].islower():
+            text = text[0].upper() + text[1:]
         return text
 
     def shorten_effect_duration_text(self, text: str) -> str:
