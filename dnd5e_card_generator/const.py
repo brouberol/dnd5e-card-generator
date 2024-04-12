@@ -2,6 +2,7 @@ import glob
 from pathlib import Path
 
 IMAGES_DIR = Path(__file__).parent.parent / "images"
+DATA_DIR = Path(__file__).parent.parent / "data"
 SYMBOLS_DIR = IMAGES_DIR / "symbols"
 BACKGROUNDS_DIR = IMAGES_DIR / "backgrounds"
 WATERCOLORS_DIR = IMAGES_DIR / "watercolors"

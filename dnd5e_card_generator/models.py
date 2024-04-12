@@ -1,3 +1,4 @@
+from enum import StrEnum
 from pathlib import Path
 
 from .const import BACKGROUNDS_DIR, SYMBOLS_DIR
@@ -168,7 +169,6 @@ class DamageType(TranslatedStrEnum):
             "radiant": "sunbeams",
             "slashing": "axe-sword",
             "thunder": "crowned-explosion",
-            "healing": "health-potion",
         }
         return damage_to_icon.get(self.value)
 
@@ -215,3 +215,22 @@ class SpellShape(TranslatedStrEnum):
             "wall": "brick-wall",
         }
         return shape_to_icon.get(self.value)
+
+
+class SpellType(StrEnum):
+    aoe = "aoe"
+    buff = "buff"
+    debuff = "debuff"
+    utility = "utility"
+    healing = "healing"
+
+    @property
+    def icon(self):
+        type_to_icon = {
+            "aoe": "fire-ring",
+            "buff": "armor-upgrade",
+            "debuff": "armor-downgrade",
+            "healing": "health-potion",
+            "utility": "toolbox",
+        }
+        return type_to_icon.get(self.value)

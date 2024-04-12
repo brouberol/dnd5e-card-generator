@@ -1,15 +1,19 @@
 import base64
+import json
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Optional
 
-from .models import DamageType, MagicSchool, SpellShape
+from .const import DATA_DIR
+from .models import DamageType, MagicSchool, SpellShape, SpellType
 from .utils import damage_type_text, game_icon, humanize_level
 
 
 @dataclass
 class Spell:
     title: str
+    en_title: str
     lang: str
     level: int
     school: MagicSchool
@@ -47,6 +51,15 @@ class Spell:
         return "#" + spell_colors_by_level[self.level]
 
     @property
+    def spell_types(self):
+        return json.load(open(DATA_DIR / "spell_by_types.json", "r"))
+
+    @cached_property
+    def spell_type(self):
+        if spell_type := self.spell_types.get(self.en_title):
+            return getattr(SpellType, spell_type)
+
+    @property
     def background_image_base64(self):
         return base64.b64encode(self.school.background_file_path.read_bytes()).decode(
             "utf-8"
@@ -77,9 +90,14 @@ class Spell:
 
     @property
     def spell_damage_type_icon(self):
-        if not self.damage_type:
-            return "scroll-unfurled"
-        return self.damage_type.icon
+        if self.spell_type and not (
+            # We favor damage type over utility
+            self.damage_type and self.spell_type == SpellType.utility
+        ):
+            return self.spell_type.icon
+        elif self.damage_type:
+            return self.damage_type.icon
+        return "scroll-unfurled"
 
     @property
     def subtitle(self) -> str:
