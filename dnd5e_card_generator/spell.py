@@ -126,8 +126,11 @@ class Spell:
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
+    def _strong(self, text: str) -> str:
+        return f"<b>{text}</b>"
+
     def _highlight(self, pattern: str, text: str) -> str:
-        return re.sub(pattern, lambda match: f"<b>{match.group(0)}</b>", text)
+        return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
 
     def fix_translation_mistakes(self, text: str) -> str:
         replacements = {"fr": {"de un dé": "d'un dé"}}
@@ -240,11 +243,20 @@ class Spell:
         else:
             return self.casting_range
 
+    def fix_text_with_subparts(self, text: list[str]) -> str:
+        text_copy = text.copy()
+        for i, part in enumerate(self.text):
+            if part.startswith(". "):
+                text_copy[i - 1] = self._strong(text_copy[i - 1]) + part
+                text_copy[i] = ""
+        return [part for part in text_copy if part]
+
     @property
     def spell_parts(self) -> list[str]:
+        text_parts = self.fix_text_with_subparts(self.text)
         return [
             f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
-            for text_part in self.text
+            for text_part in text_parts
         ]
 
     @property
