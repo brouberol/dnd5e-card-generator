@@ -172,6 +172,14 @@ class DamageType(TranslatedStrEnum):
         }
         return damage_to_icon.get(self.value)
 
+    @classmethod
+    def to_pattern(cls, lang: str) -> str:
+        return (
+            r"dégâts (de (type )?|d')?("
+            + r"|".join(cls.translations()[lang].values())
+            + r")s?"
+        )
+
 
 class SpellShape(TranslatedStrEnum):
     circle = "circle"

@@ -89,14 +89,9 @@ class Spell:
         return " ".join(components)
 
     @property
-    def spell_damage_type_icon(self):
-        if self.spell_type and not (
-            # We favor damage type over utility
-            self.damage_type and self.spell_type == SpellType.utility
-        ):
+    def spell_type_icon(self):
+        if self.spell_type:
             return self.spell_type.icon
-        elif self.damage_type:
-            return self.damage_type.icon
         return "scroll-unfurled"
 
     @property
@@ -177,6 +172,15 @@ class Spell:
             + r")?"
         )
         return self._highlight(die_value_pattern, text)
+
+    def highlight_damage_type(self, text: str) -> str:
+        if not self.damage_type:
+            return text
+        return re.sub(
+            DamageType.to_pattern(self.lang),
+            lambda m: m.group() + f" {game_icon(self.damage_type.icon)}",
+            text,
+        )
 
     def highlight_spell_text(self, text: str) -> str:
         text = self.highlight_die_value(text)
@@ -273,7 +277,7 @@ class Spell:
     def spell_parts(self) -> list[str]:
         text_parts = self.fix_text_with_subparts(self.text)
         return [
-            f"text | {self.fix_translation_mistakes(self.highlight_spell_text(text_part))}"
+            f"text | {self.highlight_damage_type(self.fix_translation_mistakes(self.highlight_spell_text(text_part)))}"
             for text_part in text_parts
         ]
 
@@ -300,6 +304,7 @@ class Spell:
         upcasting_text = self.fix_translation_mistakes(upcasting_text)
         upcasting_text = self.highlight_spell_text(upcasting_text)
         upcasting_text = self.highlight_extra_targets(upcasting_text)
+        upcasting_text = self.highlight_damage_type(upcasting_text)
 
         return [
             f"section | {self.upcasting_section_title}",
@@ -373,7 +378,7 @@ class Spell:
             "count": 1,
             "color": self.color,
             "title": self.title,
-            "icon": self.spell_damage_type_icon,
+            "icon": self.spell_type_icon,
             "contents": self.contents_text,
             "background_image": f"data:image/png;base64,{self.background_image_base64}",
         }
