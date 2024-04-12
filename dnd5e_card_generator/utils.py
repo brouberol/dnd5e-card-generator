@@ -20,7 +20,7 @@ def game_icon(icon_name: str) -> str:
 
 def damage_type_text(lang):
     if lang == "fr":
-        return r"(de )?dégâts (de )?\w+"
+        return r"(de )?dégâts (de |d')?\w+"
     return r"\w+ damage"
 
 
