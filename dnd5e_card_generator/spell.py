@@ -27,6 +27,7 @@ class Spell:
     tags: list[str]
     damage_type: Optional[DamageType]
     shape: Optional[SpellShape]
+    reaction_condition: str
 
     @property
     def color(self) -> str:
@@ -104,6 +105,20 @@ class Spell:
     @property
     def upcasting_section_title(self) -> str:
         return "Aux niveaux supérieurs" if self.lang == "fr" else "At higher levels"
+
+    @property
+    def reaction_section_title(self) -> str:
+        return "Réaction" if self.lang == "fr" else "Reaction"
+
+    @property
+    def reaction_condition_text(self) -> str:
+        if not self.reaction_condition:
+            return ""
+        if self.lang == "fr":
+            prefix = "Vous lancez ce sort via votre réaction"
+        else:
+            prefix = "Vous cast this spell using your reaction"
+        return "".join((prefix, self.reaction_condition))
 
     @property
     def spell_carac_text(self) -> str:
@@ -291,6 +306,15 @@ class Spell:
         ]
 
     @property
+    def reaction_condition_parts(self) -> list[str]:
+        if not self.reaction_condition:
+            return []
+        return [
+            f"section | {self.reaction_section_title}",
+            f"text | {self.reaction_condition_text}",
+        ]
+
+    @property
     def contents_text(self) -> str:
         subtitle_text = f"subtitle | {self.subtitle}"
         level_text = f"level | {self.level}"
@@ -300,6 +324,7 @@ class Spell:
             + self.spell_parts
             + self.upcasting_parts
             + self.paying_components_parts
+            + self.reaction_condition_parts
         )
 
     def to_card(self) -> dict:

@@ -111,6 +111,7 @@ class SpellScraper:
     casting_time_by_lang = {"fr": "Temps d'incantation :", "en": "Casting Time:"}
     casting_range_by_lang = {"fr": "Portée :", "en": "Range:"}
     ritual_pattern = r"\((ritual|rituel)\)"
+    reaction_pattern = r"\d r[ée]action"
     concentration_pattern = r"concentration, "
 
     def __init__(self, spell: str, lang: str):
@@ -199,6 +200,13 @@ class SpellScraper:
             concentration = False
 
         casting_range = self.scrape_casting_range()
+        casting_time = self.scrape_casting_time().capitalize()
+        if reaction_match := re.match(self.reaction_pattern, casting_time):
+            reaction_condition = casting_time.replace(reaction_match.group(), "")
+            casting_time = reaction_match.group()
+        else:
+            reaction_condition = ""
+
         casting_components = self.scrape_casting_components()
         single_letter_casting_components = (
             re.sub(r"\(.+\)", "", casting_components).strip().split(", ")
@@ -248,7 +256,7 @@ class SpellScraper:
             level=self.scrape_level(),
             title=self.scrape_title(),
             school=MagicSchool.from_str(school_text.lower(), self.lang),
-            casting_time=self.scrape_casting_time().capitalize(),
+            casting_time=casting_time,
             casting_range=casting_range.capitalize(),
             somatic=somatic,
             verbal=verbal,
@@ -262,6 +270,7 @@ class SpellScraper:
             concentration=concentration,
             damage_type=damage_type,
             shape=spell_shape,
+            reaction_condition=reaction_condition,
         )
 
 
