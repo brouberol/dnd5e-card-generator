@@ -111,7 +111,7 @@ class ImageMagick:
         self.to_gray(blended_file, final_file)
 
 
-def generate_magic_schools_symbols():
+def main():
     im = ImageMagick()
     for magic_school in MagicSchool:
         im.compose_magic_school_logo_and_watercolor(magic_school)

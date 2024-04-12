@@ -14,7 +14,7 @@ beautifulsoup4 = "^4.12.3"
 
 [tool.poetry.scripts]
 dnd5e-card-generator = 'dnd5e_card_generator.cli:main'
-generate-background-images = 'dnd5e_card_generator.imagemagick:generate_magic_schools_symbols'
+generate-background-images = 'dnd5e_card_generator.imagemagick:main'
 scrape-spell-types = 'dnd5e_card_generator.scraping.dndlounge:main'
 
 [build-system]
