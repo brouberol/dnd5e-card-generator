@@ -105,7 +105,7 @@ class SpellScraper:
         "en": "worth at least",
     }
     spell_damage_by_lang = {
-        "fr": r"dégâts (de )?(type )?(?P<dmg>[^\.\sà,]+)s?",
+        "fr": r"dégâts (de |d')?(type )?(?P<dmg>[^\.\sà,]+)s?",
         "en": r"(?P<dmg>\w+) damage",
     }
 
