@@ -162,6 +162,13 @@ class Spell:
         text = self.highlight_saving_throw(text)
         return text
 
+    def highlight_extra_targets(self, text: str) -> str:
+        pattern_by_lang = {
+            "fr": r"un(e)? \w+ supplémentaire",
+            "en": r"one additional \w+ (?=for)",
+        }
+        return self._highlight(pattern_by_lang[self.lang], text)
+
     def shorten_upcasting_text(self) -> tuple[int, str]:
         upcasting_text = {
             "fr": [
@@ -259,15 +266,14 @@ class Spell:
     def upcasting_parts(self) -> list[str]:
         if not self.upcasting_text:
             return []
-        shortened_upcasting_text = self.shorten_upcasting_text()
-        shortened_upcasting_text = self.fix_translation_mistakes(
-            shortened_upcasting_text
-        )
-        shortened_upcasting_text = self.highlight_spell_text(shortened_upcasting_text)
+        upcasting_text = self.shorten_upcasting_text()
+        upcasting_text = self.fix_translation_mistakes(upcasting_text)
+        upcasting_text = self.highlight_spell_text(upcasting_text)
+        upcasting_text = self.highlight_extra_targets(upcasting_text)
 
         return [
             f"section | {self.upcasting_section_title}",
-            f"text | {shortened_upcasting_text}",
+            f"text | {upcasting_text}",
         ]
 
     @property
