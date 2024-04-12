@@ -121,11 +121,16 @@ class Spell:
         return text
 
     def highlight_saving_throw(self, text: str) -> str:
-        saving_throw_pattern_by_lang = {
-            "fr": r"jet de sauvegarde de \w+",
-            "en": r"\w+ saving throw",
+        saving_throw_patterns_by_lang = {
+            "fr": [
+                r"jet de sauvegarde de [A-Z]\w+",
+                "la moitié de ces dégâts en cas de réussite",
+            ],
+            "en": [r"\w+ saving throw", "half as much damage on a successful one"],
         }
-        return self._highlight(saving_throw_pattern_by_lang[self.lang], text)
+        for pattern in saving_throw_patterns_by_lang[self.lang]:
+            text = self._highlight(pattern, text)
+        return text
 
     def highlight_die_value(self, text: str) -> str:
         die_value_pattern = (
