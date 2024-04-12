@@ -48,4 +48,6 @@ class TranslatedStrEnum(StrEnum):
 
     @classmethod
     def to_pattern(cls, lang: str) -> str:
-        return r"(" + r"|".join(cls.translations()[lang].values()) + r")"
+        return (
+            r"(?<=[\s\()])(" + r"|".join(cls.translations()[lang].values()) + r")(?=\s)"
+        )
