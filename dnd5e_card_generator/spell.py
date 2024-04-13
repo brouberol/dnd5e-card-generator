@@ -139,6 +139,9 @@ class Spell:
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
+    def _li(self, text: str) -> str:
+        return f"<li>{text}</li>"
+
     def _strong(self, text: str) -> str:
         return f"<b>{text}</b>"
 
@@ -267,19 +270,41 @@ class Spell:
 
     def fix_text_with_subparts(self, text: list[str]) -> str:
         text_copy = text.copy()
-        for i, part in enumerate(self.text):
+        for i, part in enumerate(text):
             if part.startswith(". "):
                 text_copy[i - 1] = self._strong(text_copy[i - 1]) + part
                 text_copy[i] = ""
         return [part for part in text_copy if part]
 
+    def format_bullet_point(self, text: str) -> str:
+        text = text.replace("• ", "")
+        if m := re.match(r"((\w+)\s)+(?=:)", text):
+            text = text.replace(m.group(), self._strong(m.group()))
+        return self._li(text)
+
+    def fix_text_with_bullet_points(self, text: list[str]) -> str:
+        out = []
+        for part in text:
+            if not part.startswith("• "):
+                out.append(part)
+            elif not out:
+                out.append(self.format_bullet_point(part))
+            else:
+                out[-1] += self.format_bullet_point(part)
+        return out
+
+    def render_spell_parts_text(self, text: list[str]) -> list[str]:
+        text_parts = self.fix_text_with_subparts(text)
+        text_parts = self.fix_text_with_bullet_points(text_parts)
+        text_parts = [self.highlight_spell_text(part) for part in text_parts]
+        text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
+        text_parts = [self.highlight_damage_type(part) for part in text_parts]
+        return text_parts
+
     @property
     def spell_parts(self) -> list[str]:
-        text_parts = self.fix_text_with_subparts(self.text)
-        return [
-            f"text | {self.highlight_damage_type(self.fix_translation_mistakes(self.highlight_spell_text(text_part)))}"
-            for text_part in text_parts
-        ]
+        text_parts = self.render_spell_parts_text(self.text)
+        return [f"text | {text_part}" for text_part in text_parts]
 
     @property
     def casting_shape_text(self):
