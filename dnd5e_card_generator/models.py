@@ -224,6 +224,7 @@ class SpellType(StrEnum):
     debuff = "debuff"
     utility = "utility"
     healing = "healing"
+    damage = "damage"
 
     @property
     def icon(self):
@@ -233,6 +234,7 @@ class SpellType(StrEnum):
             "debuff": "armor-downgrade",
             "healing": "health-potion",
             "utility": "toolbox",
+            "damage": "bloody-sword",
         }
         return type_to_icon.get(self.value)
 

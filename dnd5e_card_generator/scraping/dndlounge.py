@@ -26,6 +26,7 @@ class DndLoungeScraper:
             SpellType.debuff,
             SpellType.utility,
             SpellType.healing,
+            SpellType.damage,
         ]:
             url = f"https://www.dndlounge.com/{spell_type.name}-spells-5e/"
             spells_of_type = self.parse_spell_names(url)
