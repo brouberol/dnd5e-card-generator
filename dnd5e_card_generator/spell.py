@@ -6,8 +6,15 @@ from functools import cached_property
 from typing import Optional
 
 from .const import DATA_DIR
-from .models import DamageType, MagicSchool, SpellShape, SpellType
-from .utils import damage_type_text, game_icon, humanize_level
+from .models import (
+    DamageDie,
+    DamageFormula,
+    DamageType,
+    MagicSchool,
+    SpellShape,
+    SpellType,
+)
+from .utils import game_icon, humanize_level
 
 
 @dataclass
@@ -139,6 +146,11 @@ class Spell:
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
+    def damage_type_text(self, lang):
+        if lang == "fr":
+            return r"(de )?dégâts (de |d')?(?P<damage_type>\w+)"
+        return r"\w+ damage"
+
     def _li(self, text: str) -> str:
         return f"<li>{text}</li>"
 
@@ -166,27 +178,37 @@ class Spell:
             text = self._highlight(pattern, text)
         return text
 
-    def highlight_die_value(self, text: str) -> str:
+    def highlight_damage_formula(self, text: str) -> str:
         die_value_pattern = (
-            r"\d+d\d+( \+ "
+            r"(?P<prefix>(one |un )?)(?P<num_die>\d+)?(?P<die_type>d\d+)( (?P<dmg_extra>\+ "
             + self.spell_carac_text
-            + r"| "
-            + damage_type_text(self.lang)
+            + r")| "
+            + self.damage_type_text(self.lang)
             + r")?"
         )
-        return self._highlight(die_value_pattern, text)
-
-    def highlight_damage_type(self, text: str) -> str:
-        if not self.damage_type:
+        matches = list(re.finditer(die_value_pattern, text))
+        if not matches:
             return text
-        return re.sub(
-            DamageType.to_pattern(self.lang),
-            lambda m: m.group() + f" {game_icon(self.damage_type.icon)}",
-            text,
-        )
+
+        for match in matches:
+            parts = match.groupdict()
+            damage_formula = DamageFormula(
+                num_die=int(parts.get("num_die") or 1),
+                damage_die=DamageDie.from_str(parts["die_type"]),
+                damage_type=DamageType.from_str(
+                    parts["damage_type"].rstrip("s"), self.lang
+                )
+                if parts.get("damage_type")
+                else None,
+            )
+            text = text.replace(
+                match.group(),
+                self._strong(damage_formula.render() + (parts.get("dmg_extra") or "")),
+            )
+        return text
 
     def highlight_spell_text(self, text: str) -> str:
-        text = self.highlight_die_value(text)
+        text = self.highlight_damage_formula(text)
         text = self.highlight_saving_throw(text)
         return text
 
@@ -298,7 +320,6 @@ class Spell:
         text_parts = self.fix_text_with_bullet_points(text_parts)
         text_parts = [self.highlight_spell_text(part) for part in text_parts]
         text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
-        text_parts = [self.highlight_damage_type(part) for part in text_parts]
         return text_parts
 
     @property
@@ -329,7 +350,6 @@ class Spell:
         upcasting_text = self.fix_translation_mistakes(upcasting_text)
         upcasting_text = self.highlight_spell_text(upcasting_text)
         upcasting_text = self.highlight_extra_targets(upcasting_text)
-        upcasting_text = self.highlight_damage_type(upcasting_text)
 
         return [
             f"section | {self.upcasting_section_title}",

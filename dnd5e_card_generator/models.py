@@ -1,6 +1,9 @@
+from dataclasses import dataclass
 from enum import StrEnum
+from typing import Self
 
 from .translator import TranslatedStrEnum
+from .utils import game_icon
 
 
 class Rarity(TranslatedStrEnum):
@@ -232,3 +235,33 @@ class SpellType(StrEnum):
             "utility": "toolbox",
         }
         return type_to_icon.get(self.value)
+
+
+class DamageDie(StrEnum):
+    d4 = "a"
+    d6 = "b"
+    d8 = "c"
+    d10 = "d"
+    d12 = "e"
+    d20 = "f"
+
+    def __str__(self):
+        return f"<dice>{self.value}</dice>"
+
+    @classmethod
+    def from_str(self, s: str) -> Self:
+        return getattr(DamageDie, s)
+
+
+@dataclass
+class DamageFormula:
+    num_die: int
+    damage_die: DamageDie
+    damage_type: DamageType
+
+    def render(self) -> str:
+        dice = f" {self.num_die}{str(self.damage_die)}"
+        if self.damage_type:
+            return f"{dice}{game_icon(self.damage_type.icon)}"
+        else:
+            return dice
