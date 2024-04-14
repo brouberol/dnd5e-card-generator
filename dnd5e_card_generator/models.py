@@ -159,7 +159,7 @@ class DamageType(TranslatedStrEnum):
             "piercing": "arrowhead",
             "poison": "poison-bottle",
             "psychic": "psychic-waves",
-            "radiant": "sunbeams",
+            "radiant": "sun",
             "slashing": "axe-sword",
             "thunder": "crowned-explosion",
         }
