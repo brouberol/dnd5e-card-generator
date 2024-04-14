@@ -25,7 +25,7 @@ def damage_type_text(lang):
 
 
 def fetch_data(base_url, slug, lang):
-    cached_file = Path(f"/{tempfile.gettempdir()}/{lang}:{slug}.html")
+    cached_file = Path(f"{tempfile.gettempdir()}/{lang}:{slug}.html")
     if cached_file.exists():
         return cached_file.read_text()
     lang_param = "vf" if lang == "fr" else "vo"
