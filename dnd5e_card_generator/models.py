@@ -1,7 +1,5 @@
 from enum import StrEnum
-from pathlib import Path
 
-from .const import BACKGROUNDS_DIR, SYMBOLS_DIR
 from .translator import TranslatedStrEnum
 
 
@@ -108,14 +106,6 @@ class MagicSchool(TranslatedStrEnum):
             "necromancy": "nécromancie",
             "transmutation": "transmutation",
         }
-
-    @property
-    def symbol_file_path(self) -> Path:
-        return SYMBOLS_DIR / f"{self.value}.png"
-
-    @property
-    def background_file_path(self) -> Path:
-        return BACKGROUNDS_DIR / f"{self.value}.png"
 
 
 class DamageType(TranslatedStrEnum):

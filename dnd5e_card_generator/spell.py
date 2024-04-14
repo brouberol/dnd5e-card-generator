@@ -389,8 +389,9 @@ class Spell:
     def contents_text(self) -> str:
         subtitle_text = f"subtitle | {self.subtitle}"
         level_text = f"level | {self.level}"
+        spell_school_text = f"spell_school | {self.school}"
         return (
-            [subtitle_text, level_text]
+            [subtitle_text, level_text, spell_school_text]
             + self.spell_properties_parts
             + self.spell_parts
             + self.upcasting_parts
@@ -405,5 +406,4 @@ class Spell:
             "title": self.title,
             "icon": self.spell_type_icon,
             "contents": self.contents_text,
-            "background_image": f"data:image/png;base64,{self.background_image_base64}",
         }
