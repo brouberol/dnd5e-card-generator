@@ -7,6 +7,7 @@ from typing import Optional
 
 from .const import DATA_DIR
 from .models import (
+    Card,
     DamageDie,
     DamageFormula,
     DamageType,
@@ -420,10 +421,10 @@ class Spell:
         )
 
     def to_card(self) -> dict:
-        return {
-            "count": 1,
-            "color": self.color,
-            "title": self.title,
-            "icon": self.spell_type_icon,
-            "contents": self.contents_text,
-        }
+        card = Card(
+            color=self.color,
+            title=self.title,
+            icon=self.spell_type_icon,
+            contents=self.contents_text,
+        )
+        return card.to_dict()

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Self
 
@@ -267,3 +267,15 @@ class DamageFormula:
             return f"{dice}{game_icon(self.damage_type.icon)}"
         else:
             return dice
+
+
+@dataclass
+class Card:
+    color: str
+    title: str
+    icon: str
+    contents: list[str]
+    count: int = field(default=1)
+
+    def to_dict(self):
+        return asdict(self)
