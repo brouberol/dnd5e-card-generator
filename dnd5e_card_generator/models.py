@@ -227,7 +227,7 @@ class SpellType(TranslatedStrEnum):
     @classmethod
     def fr_translations(self) -> dict:
         return {
-            "aoe": "aire de dégâts",
+            "aoe": "zone",
             "buff": "bonus",
             "debuff": "malus",
             "healing": "soins",

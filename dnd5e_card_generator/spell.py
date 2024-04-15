@@ -16,7 +16,8 @@ from .models import (
     SpellShape,
     SpellType,
 )
-from .utils import game_icon, humanize_level
+from .translator import TranslatedStrEnum
+from .utils import game_icon, humanize_level, strip_accents
 
 
 @dataclass
@@ -435,6 +436,22 @@ class SpellLegend:
     def __init__(self, lang: str):
         self.lang = lang
 
+    def table(self, elements: list[TranslatedStrEnum], columns: int) -> list[str]:
+        out, properties = ["text|"], []
+        for element in elements:
+            properties.append(
+                f"property_inline | {element.translate(self.lang).capitalize()} | {game_icon(element.icon)}"
+            )
+        properties = sorted(
+            properties, key=lambda line: strip_accents(line.split("|")[1])
+        )
+        properties += ["property_inline | |"] * (columns - (len(elements) % (columns)))
+        for batch in itertools.batched(properties, columns):
+            for _property in batch:
+                out.append(_property)
+            out.append("")
+        return out
+
     @property
     def damage_die_legend(self) -> list[str]:
         out = ["section | Dés", "text|"]
@@ -448,52 +465,21 @@ class SpellLegend:
 
     @property
     def damage_type_legend(self) -> list[str]:
-        out = ["section | Dégâts", "text|"]
-        for damage_type_batch in itertools.batched(DamageType, 4):
-            batch = []
-            for i, damage_type in enumerate(damage_type_batch):
-                batch.append(
-                    f"property_inline | {damage_type.translate(self.lang).capitalize()} | {game_icon(damage_type.icon)}"
-                )
-            if i < 3:
-                while i < 3:
-                    batch.append("property_inline | |")
-                    i += 1
-            batch.append("")
-            out.extend(batch)
-        return out
+        return ["section | Dégâts"] + self.table(DamageType, columns=4)
 
     @property
     def spell_type_legend(self) -> list[str]:
-        out = ["section | Types de sorts", "text|"]
-        for spell_type_batch in itertools.batched(SpellType, 3):
-            batch = []
-            for spell_type in spell_type_batch:
-                batch.append(
-                    f"property_inline | {spell_type.translate(self.lang).capitalize()} | {game_icon(spell_type.icon)}"
-                )
-            batch.append("")
-            out.extend(batch)
-        return out
+        return ["section | Types de sorts"] + self.table(SpellType, columns=3)
 
     @property
     def spell_shape_legend(self) -> list[str]:
-        out = ["section | Formes de sorts", "text|"]
+        out = ["section | Formes de sorts"]
         shapes = [
             shape
             for shape in SpellShape
             if shape not in (SpellShape.radius, SpellShape.hemisphere)
         ]
-        for spell_shape_batch in itertools.batched(shapes, 4):
-            batch = []
-            for spell_shape in spell_shape_batch:
-                batch.append(
-                    f"property_inline | {spell_shape.translate(self.lang).capitalize()} | {game_icon(spell_shape.icon)}"
-                )
-
-            batch.append("")
-            out.extend(batch)
-        return out
+        return out + self.table(shapes, columns=4)
 
     @property
     def contents_text(self) -> list[str]:

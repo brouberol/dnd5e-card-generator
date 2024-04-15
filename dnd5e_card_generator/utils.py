@@ -1,4 +1,5 @@
 import tempfile
+import unicodedata
 from pathlib import Path
 
 import requests
@@ -16,6 +17,12 @@ def humanize_level(level: int) -> str:
 
 def game_icon(icon_name: str) -> str:
     return f'<icon name="{icon_name}">'
+
+
+def strip_accents(s: str) -> str:
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+    )
 
 
 def damage_type_text(lang):
