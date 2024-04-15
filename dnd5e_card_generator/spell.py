@@ -436,6 +436,22 @@ class SpellLegend:
     def __init__(self, lang: str):
         self.lang = lang
 
+    @property
+    def die_section_text(self) -> str:
+        return "Dés" if self.lang == "fr" else "Dice"
+
+    @property
+    def damage_type_section_text(self) -> str:
+        return "Dégâts" if self.lang == "fr" else "Damages"
+
+    @property
+    def spell_types_section_text(self) -> str:
+        return "Types de sort" if self.lang == "fr" else "Spell types"
+
+    @property
+    def spell_shapes_section_text(self) -> str:
+        return "Formes de sort" if self.lang == "fr" else "Spell shapes"
+
     def table(self, elements: list[TranslatedStrEnum], columns: int) -> list[str]:
         out, properties = ["text|"], []
         for element in elements:
@@ -454,7 +470,7 @@ class SpellLegend:
 
     @property
     def damage_die_legend(self) -> list[str]:
-        out = ["section | Dés", "text|"]
+        out = [f"section | {self.die_section_text}", "text|"]
         for damage_die_batch in itertools.batched(DamageDie._member_map_.items(), 6):
             batch = []
             for damage_die_name, damage_die in damage_die_batch:
@@ -465,15 +481,19 @@ class SpellLegend:
 
     @property
     def damage_type_legend(self) -> list[str]:
-        return ["section | Dégâts"] + self.table(DamageType, columns=4)
+        return [f"section | {self.damage_type_section_text}"] + self.table(
+            DamageType, columns=4
+        )
 
     @property
     def spell_type_legend(self) -> list[str]:
-        return ["section | Types de sorts"] + self.table(SpellType, columns=3)
+        return [f"section | {self.spell_types_section_text}"] + self.table(
+            SpellType, columns=3
+        )
 
     @property
     def spell_shape_legend(self) -> list[str]:
-        out = ["section | Formes de sorts"]
+        out = [f"section | {self.spell_shapes_section_text}"]
         shapes = [
             shape
             for shape in SpellShape
