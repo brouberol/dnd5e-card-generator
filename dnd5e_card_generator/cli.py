@@ -31,6 +31,13 @@ def parse_args():
         required=False,
     )
     parser.add_argument(
+        "--include-spell-legend",
+        help=("Include a card with the legend of spell pictograms"),
+        required=False,
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
         "--items",
         nargs="+",
         help=(
@@ -63,7 +70,7 @@ def main():
         spells += resolve_spell_filter(args.spell_filter)
         spells = list(set(spells))
 
-    cards = export_spells_to_cards(spells)
+    cards = export_spells_to_cards(spells, include_legend=args.include_spell_legend)
     cards += export_items_to_cards(args.items)
     with open(args.output, "w") as out:
         json.dump(cards, out, indent=2, ensure_ascii=False)

@@ -1,4 +1,5 @@
 import base64
+import itertools
 import json
 import re
 from dataclasses import dataclass
@@ -407,7 +408,7 @@ class Spell:
         ]
 
     @property
-    def contents_text(self) -> str:
+    def contents_text(self) -> list[str]:
         subtitle_text = f"subtitle | {self.subtitle}"
         level_text = f"level | {self.level}"
         spell_school_text = f"spell_school | {self.school}"
@@ -427,4 +428,91 @@ class Spell:
             icon=self.spell_type_icon,
             contents=self.contents_text,
         )
+        return card.to_dict()
+
+
+class SpellLegend:
+    def __init__(self, lang: str):
+        self.lang = lang
+
+    @property
+    def damage_die_legend(self) -> list[str]:
+        out = ["section | Dés", "text|"]
+        for damage_die_batch in itertools.batched(DamageDie._member_map_.items(), 6):
+            batch = []
+            for damage_die_name, damage_die in damage_die_batch:
+                batch.append(f"property_inline | {damage_die_name} | {str(damage_die)}")
+            batch.append("")
+            out.extend(batch)
+        return out
+
+    @property
+    def damage_type_legend(self) -> list[str]:
+        out = ["section | Dégâts", "text|"]
+        for damage_type_batch in itertools.batched(DamageType, 4):
+            batch = []
+            for i, damage_type in enumerate(damage_type_batch):
+                batch.append(
+                    f"property_inline | {damage_type.translate(self.lang).capitalize()} | {game_icon(damage_type.icon)}"
+                )
+            if i < 3:
+                while i < 3:
+                    batch.append("property_inline | |")
+                    i += 1
+            batch.append("")
+            out.extend(batch)
+        return out
+
+    @property
+    def spell_type_legend(self) -> list[str]:
+        out = ["section | Types de sorts", "text|"]
+        for spell_type_batch in itertools.batched(SpellType, 3):
+            batch = []
+            for spell_type in spell_type_batch:
+                batch.append(
+                    f"property_inline | {spell_type.translate(self.lang).capitalize()} | {game_icon(spell_type.icon)}"
+                )
+            batch.append("")
+            out.extend(batch)
+        return out
+
+    @property
+    def spell_shape_legend(self) -> list[str]:
+        out = ["section | Formes de sorts", "text|"]
+        shapes = [
+            shape
+            for shape in SpellShape
+            if shape not in (SpellShape.radius, SpellShape.hemisphere)
+        ]
+        for spell_shape_batch in itertools.batched(shapes, 4):
+            batch = []
+            for spell_shape in spell_shape_batch:
+                batch.append(
+                    f"property_inline | {spell_shape.translate(self.lang).capitalize()} | {game_icon(spell_shape.icon)}"
+                )
+
+            batch.append("")
+            out.extend(batch)
+        return out
+
+    @property
+    def contents_text(self) -> list[str]:
+        out = (
+            ["spell_school | illusion", "text|"]
+            + self.damage_type_legend
+            + self.damage_die_legend
+            + self.spell_type_legend
+            + self.spell_shape_legend
+            + ["text|"]
+        )
+        return out
+
+    def to_card(self) -> dict:
+        card = Card(
+            color="LightCoral",
+            title="Légende",
+            icon="scroll-unfurled",
+            contents=self.contents_text,
+        )
+
         return card.to_dict()

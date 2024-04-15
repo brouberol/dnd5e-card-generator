@@ -1,9 +1,10 @@
 import concurrent.futures
 
 from .scraping import scrape_item_details, scrape_spell_details
+from .spell import SpellLegend
 
 
-def export_spells_to_cards(spell_names: list[str]) -> list[dict]:
+def export_spells_to_cards(spell_names: list[str], include_legend: bool) -> list[dict]:
     if not spell_names:
         return []
 
@@ -16,6 +17,8 @@ def export_spells_to_cards(spell_names: list[str]) -> list[dict]:
             spells.append(future.result())
     spells = sorted(spells, key=lambda spell: (spell.level, spell.title))
     cards = [spell.to_card() for spell in spells]
+    if include_legend:
+        cards.append(SpellLegend(lang).to_card())
     return cards
 
 

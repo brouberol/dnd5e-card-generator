@@ -125,7 +125,6 @@ class DamageType(TranslatedStrEnum):
     radiant = "radiant"
     slashing = "slashing"
     thunder = "thunder"
-    healing = "healing"
 
     @classmethod
     def fr_translations(self) -> dict:
@@ -143,7 +142,6 @@ class DamageType(TranslatedStrEnum):
             "radiant": "radiant",
             "slashing": "tranchant",
             "thunder": "tonnerre",
-            "healing": "soin",
         }
 
     @property
@@ -218,13 +216,24 @@ class SpellShape(TranslatedStrEnum):
         return shape_to_icon.get(self.value)
 
 
-class SpellType(StrEnum):
+class SpellType(TranslatedStrEnum):
     aoe = "aoe"
     buff = "buff"
     debuff = "debuff"
     utility = "utility"
     healing = "healing"
     damage = "damage"
+
+    @classmethod
+    def fr_translations(self) -> dict:
+        return {
+            "aoe": "aire de dégâts",
+            "buff": "bonus",
+            "debuff": "malus",
+            "healing": "soins",
+            "utility": "utilitaire",
+            "damage": "offensif",
+        }
 
     @property
     def icon(self):
