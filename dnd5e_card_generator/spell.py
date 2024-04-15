@@ -505,8 +505,8 @@ class SpellLegend:
     def contents_text(self) -> list[str]:
         out = (
             ["spell_school | illusion", "text|"]
-            + self.damage_type_legend
             + self.damage_die_legend
+            + self.damage_type_legend
             + self.spell_type_legend
             + self.spell_shape_legend
             + ["text|"]
@@ -517,7 +517,7 @@ class SpellLegend:
         card = Card(
             color="LightCoral",
             title="Légende",
-            icon="scroll-unfurled",
+            icon=None,
             contents=self.contents_text,
         )
 
