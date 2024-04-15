@@ -452,7 +452,7 @@ class SpellLegend:
     def spell_shapes_section_text(self) -> str:
         return "Formes de sort" if self.lang == "fr" else "Spell shapes"
 
-    def table(self, elements: list[TranslatedStrEnum], columns: int) -> list[str]:
+    def to_table(self, elements: list[TranslatedStrEnum], columns: int) -> list[str]:
         out, properties = ["text|"], []
         for element in elements:
             properties.append(
@@ -481,13 +481,13 @@ class SpellLegend:
 
     @property
     def damage_type_legend(self) -> list[str]:
-        return [f"section | {self.damage_type_section_text}"] + self.table(
+        return [f"section | {self.damage_type_section_text}"] + self.to_table(
             DamageType, columns=4
         )
 
     @property
     def spell_type_legend(self) -> list[str]:
-        return [f"section | {self.spell_types_section_text}"] + self.table(
+        return [f"section | {self.spell_types_section_text}"] + self.to_table(
             SpellType, columns=3
         )
 
@@ -499,7 +499,7 @@ class SpellLegend:
             for shape in SpellShape
             if shape not in (SpellShape.radius, SpellShape.hemisphere)
         ]
-        return out + self.table(shapes, columns=4)
+        return out + self.to_table(shapes, columns=4)
 
     @property
     def contents_text(self) -> list[str]:
