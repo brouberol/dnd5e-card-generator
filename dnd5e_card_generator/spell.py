@@ -413,8 +413,9 @@ class Spell:
         subtitle_text = f"subtitle | {self.subtitle}"
         level_text = f"level | {self.level}"
         spell_school_text = f"spell_school | {self.school}"
+        title_text = f"title | {self.title}"
         return (
-            [subtitle_text, level_text, spell_school_text]
+            [title_text, subtitle_text, level_text, spell_school_text]
             + self.spell_properties_parts
             + self.spell_parts
             + self.upcasting_parts
@@ -435,6 +436,10 @@ class Spell:
 class SpellLegend:
     def __init__(self, lang: str):
         self.lang = lang
+
+    @property
+    def title_text(self):
+        return "Légende" if self.lang == "fr" else "Legend"
 
     @property
     def die_section_text(self) -> str:
@@ -504,7 +509,8 @@ class SpellLegend:
     @property
     def contents_text(self) -> list[str]:
         out = (
-            ["spell_school | illusion", "text|"]
+            [f"title | {self.title_text}"]
+            + ["spell_school | illusion", "text|"]
             + self.damage_die_legend
             + self.damage_type_legend
             + self.spell_type_legend
@@ -516,7 +522,7 @@ class SpellLegend:
     def to_card(self) -> dict:
         card = Card(
             color="LightCoral",
-            title="Légende",
+            title=self.title_text,
             icon=None,
             contents=self.contents_text,
         )
