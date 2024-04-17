@@ -4,7 +4,8 @@ from typing import Self
 
 class TranslatedStrEnum(StrEnum):
     @classmethod
-    def fr_translations(self) -> dict: ...
+    def fr_translations(self) -> dict:
+        raise NotImplementedError
 
     @classmethod
     def en_translations(cls) -> dict:
@@ -39,7 +40,7 @@ class TranslatedStrEnum(StrEnum):
             "en": cls.reversed_en_translations(),
         }
 
-    def translate(self, lang: str):
+    def translate(self, lang: str) -> str:  # type: ignore
         return self.translations()[lang][self.name]
 
     @classmethod

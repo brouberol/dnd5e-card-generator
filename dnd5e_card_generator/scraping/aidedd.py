@@ -1,10 +1,8 @@
 import re
 from dataclasses import dataclass
-from typing import Self
 from urllib.parse import parse_qs, urlparse
 
 import requests
-from bs4 import BeautifulSoup
 
 from dnd5e_card_generator.const import (
     AIDEDD_MAGIC_ITEMS_URL,
@@ -19,6 +17,7 @@ from dnd5e_card_generator.models import (
     Rarity,
     SpellShape,
 )
+from dnd5e_card_generator.scraping import StrictBeautifulSoup
 from dnd5e_card_generator.spell import Spell
 from dnd5e_card_generator.utils import fetch_data
 
@@ -52,7 +51,7 @@ class SpellFilter:
         }
 
     @classmethod
-    def from_str(cls, s: str) -> Self:
+    def from_str(cls, s: str) -> "SpellFilter":
         class_name, min_lvl, max_lvl = s.split(":")
         resolved_class_name = cls.class_name_synonyms().get(class_name, class_name)
         return SpellFilter(
@@ -86,7 +85,7 @@ class SpellFilter:
     def resolve(self) -> list[str]:
         out = []
         resp = self.request()
-        soup = BeautifulSoup(resp.text, features="html.parser")
+        soup = StrictBeautifulSoup(resp.text, features="html.parser")
         spell_cells = soup.find("table").find_all("td", class_="item")
         for spell_cell in spell_cells:
             link = spell_cell.find("a")
@@ -121,7 +120,7 @@ class SpellScraper:
         self.spell = spell
         self.lang = lang
         html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
-        self.soup = BeautifulSoup(html, features="html.parser")
+        self.soup = StrictBeautifulSoup(html, features="html.parser")
         self.div_content = self.soup.find("div", class_="content")
         if self.div_content is None:
             raise ValueError(f"{spell} not found!")
@@ -184,7 +183,7 @@ class SpellScraper:
     def scrape_casting_components(self) -> str:
         return self._scrape_property("c", list(self.components_by_lang.values()))
 
-    def scrape_text(self) -> str:
+    def scrape_text(self) -> list[str]:
         return [d.text for d in self.div_content.find_all("div", class_="classe")]
 
     def scrape_spell(self) -> Spell:
@@ -223,7 +222,8 @@ class SpellScraper:
         somatic = "S" in single_letter_casting_components
         material = "M" in single_letter_casting_components
         if material:
-            if components_text := re.search(r"\((.+)\)", casting_components).group(1):
+            if components_match := re.search(r"\((.+)\)", casting_components):
+                components_text = components_match.group(1)
                 paying_components = (
                     components_text.capitalize()
                     if self.paying_components_indicator_by_lang[self.lang]
@@ -289,7 +289,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     }
     html = fetch_data(AIDEDD_MAGIC_ITEMS_URL, item, lang)
     attunement_text = attunement_text_by_lang[lang]
-    soup = BeautifulSoup(html, features="html.parser")
+    soup = StrictBeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
     if div_content is None:
         raise ValueError(f"{item} not found!")
@@ -315,7 +315,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     rarity = Rarity.from_str(item_rarity, lang)
     item_description = list(div_content.find("div", class_="description").strings)
     recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
-    recharges = recharges_match.group(1) if recharges_match else ""
+    recharges = int(recharges_match.group(1) if recharges_match else 0)
     magic_item = MagicItem(
         title=div_content.find("h1").text.strip(),
         type=item_type,

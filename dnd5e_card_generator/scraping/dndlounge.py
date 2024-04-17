@@ -1,24 +1,24 @@
 import json
 
 import requests
-from bs4 import BeautifulSoup
 
 from dnd5e_card_generator.const import DATA_DIR
 from dnd5e_card_generator.models import SpellType
+from dnd5e_card_generator.scraping import StrictBeautifulSoup
 
 
 class DndLoungeScraper:
-    def parse_html(self, url: str) -> BeautifulSoup:
+    def parse_html(self, url: str) -> StrictBeautifulSoup:
         resp = requests.get(url)
         resp.raise_for_status()
-        return BeautifulSoup(resp.text, features="html.parser")
+        return StrictBeautifulSoup(resp.text, features="html.parser")
 
     def parse_spell_names(self, url: str) -> list[str]:
         soup = self.parse_html(url)
         tbl = soup.find("table")
         return [tr.find("td").text.replace("’", "'") for tr in tbl.find_all("tr")[1:]]
 
-    def scrape_spells_by_spells_type(self) -> dict[str, list[str]]:
+    def scrape_spells_by_spells_type(self) -> dict[str, str]:
         out = {}
         for spell_type in [
             SpellType.aoe,

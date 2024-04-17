@@ -39,12 +39,12 @@ class Rarity(TranslatedStrEnum):
     def color(self) -> str:
         # https://colordesigner.io/color-scheme-builder#5C4B51-8CBEB2-F2EBBF-F3B562-F06060
         colors_by_rarity = {
-            Rarity.common: "5C4B51",
-            Rarity.uncommon: "8CBEB2",
-            Rarity.rare: "BDD684",
-            Rarity.very_rare: "F3B562",
-            Rarity.legendary: "F06060",
-            Rarity.artifact: "9575CD",
+            "common": "5C4B51",
+            "uncommon": "8CBEB2",
+            "rare": "BDD684",
+            "very_rare": "F3B562",
+            "legendary": "F06060",
+            "artifact": "9575CD",
         }
         return colors_by_rarity[self.value]
 
@@ -75,14 +75,14 @@ class ItemType(TranslatedStrEnum):
     @property
     def icon(self) -> str:
         icon_by_type = {
-            ItemType.armor: "lamellar",
-            ItemType.weapon: "shard-sword",
-            ItemType.ring: "ring",
-            ItemType.wand: "lunar-wand",
-            ItemType.wondrous_item: "eclipse-flare",
-            ItemType.staff: "bo",
-            ItemType.rod: "flanged-mace",
-            ItemType.potion: "potion-ball",
+            "armor": "lamellar",
+            "weapon": "shard-sword",
+            "ring": "ring",
+            "wand": "lunar-wand",
+            "wondrous_item": "eclipse-flare",
+            "staff": "bo",
+            "rod": "flanged-mace",
+            "potion": "potion-ball",
         }
         return icon_by_type[self.value]
 
@@ -161,7 +161,7 @@ class DamageType(TranslatedStrEnum):
             "slashing": "axe-sword",
             "thunder": "crowned-explosion",
         }
-        return damage_to_icon.get(self.value)
+        return damage_to_icon[self.value]
 
     @classmethod
     def to_pattern(cls, lang: str) -> str:
@@ -185,7 +185,7 @@ class SpellShape(TranslatedStrEnum):
     wall = "wall"
 
     @classmethod
-    def fr_translations(self) -> dict:
+    def fr_translations(self) -> dict[str, str]:
         return {
             "circle": "cercle",
             "cone": "cône",
@@ -213,7 +213,7 @@ class SpellShape(TranslatedStrEnum):
             "square": "square",
             "wall": "brick-wall",
         }
-        return shape_to_icon.get(self.value)
+        return shape_to_icon[self.value]
 
 
 class SpellType(TranslatedStrEnum):
@@ -225,7 +225,7 @@ class SpellType(TranslatedStrEnum):
     damage = "damage"
 
     @classmethod
-    def fr_translations(self) -> dict:
+    def fr_translations(self) -> dict[str, str]:
         return {
             "aoe": "zone",
             "buff": "bonus",
@@ -236,7 +236,7 @@ class SpellType(TranslatedStrEnum):
         }
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         type_to_icon = {
             "aoe": "fire-ring",
             "buff": "armor-upgrade",
@@ -245,7 +245,7 @@ class SpellType(TranslatedStrEnum):
             "utility": "toolbox",
             "damage": "bloody-sword",
         }
-        return type_to_icon.get(self.value)
+        return type_to_icon[self.value]
 
 
 class DamageDie(StrEnum):
@@ -268,11 +268,11 @@ class DamageDie(StrEnum):
 class DamageFormula:
     num_die: int
     damage_die: DamageDie
-    damage_type: DamageType
+    damage_type: DamageType | None
 
     def render(self) -> str:
         dice = f" {self.num_die}{str(self.damage_die)}"
-        if self.damage_type:
+        if self.damage_type and self.damage_type.icon:
             return f"{dice}{game_icon(self.damage_type.icon)}"
         else:
             return dice
@@ -282,9 +282,9 @@ class DamageFormula:
 class Card:
     color: str
     title: str
-    icon: str
+    icon: str | None
     contents: list[str]
     count: int = field(default=1)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return asdict(self)

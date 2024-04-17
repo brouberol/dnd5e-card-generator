@@ -4,7 +4,7 @@ import json
 import re
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Optional
+from typing import Any, Optional
 
 from .const import DATA_DIR
 from .models import (
@@ -16,7 +16,6 @@ from .models import (
     SpellShape,
     SpellType,
 )
-from .translator import TranslatedStrEnum
 from .utils import game_icon, humanize_level, strip_accents
 
 
@@ -65,9 +64,10 @@ class Spell:
         return json.load(open(DATA_DIR / "spell_by_types.json", "r"))
 
     @cached_property
-    def spell_type(self):
-        if spell_type := self.spell_types.get(self.en_title):
-            return getattr(SpellType, spell_type)
+    def spell_type(self) -> SpellType | None:
+        if _spell_type := self.spell_types.get(self.en_title):
+            return getattr(SpellType, _spell_type)
+        return None
 
     @property
     def background_image_base64(self):
@@ -76,19 +76,7 @@ class Spell:
         )
 
     @property
-    def spell_casting_extra(self):
-        spell_extra = []
-        if ritual_text := self.ritual_text:
-            spell_extra.append(ritual_text)
-        if concentration_text := self.concentration_text:
-            spell_extra.append(concentration_text)
-        spell_extra_text = " ".join(spell_extra)
-        if spell_extra_text:
-            spell_extra_text = f"- {spell_extra_text}"
-        return spell_extra_text
-
-    @property
-    def spell_casting_components(self):
+    def spell_casting_components(self) -> str:
         components = []
         if self.verbal:
             components.append("V")
@@ -99,9 +87,10 @@ class Spell:
         return " ".join(components)
 
     @property
-    def spell_type_icon(self):
-        if self.spell_type:
-            return self.spell_type.icon
+    def spell_type_icon(self) -> str:
+        if spell_type := self.spell_type:
+            if spell_type.icon:
+                return spell_type.icon
         return "scroll-unfurled"
 
     @property
@@ -118,7 +107,7 @@ class Spell:
                 return f"{humanize_level(self.level)} level - {self.school_text}"
 
     @property
-    def school_text(self):
+    def school_text(self) -> str:
         return self.school.translate(self.lang).capitalize()
 
     @property
@@ -149,7 +138,7 @@ class Spell:
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
 
-    def damage_type_text(self, lang):
+    def damage_type_text(self, lang) -> str:
         if lang == "fr":
             return r"(de )?dégâts (de |d')?(?P<damage_type>\w+)"
         return r"\w+ damage"
@@ -222,7 +211,7 @@ class Spell:
         }
         return self._highlight(pattern_by_lang[self.lang], text)
 
-    def shorten_upcasting_text(self) -> tuple[int, str]:
+    def shorten_upcasting_text(self) -> str:
         upcasting_text = {
             "fr": [
                 r"(Lorsque|Si) vous lancez ce sort en utilisant un emplacement de sort de niveau \d ou supérieur,",
@@ -293,7 +282,7 @@ class Spell:
         else:
             return self.casting_range
 
-    def fix_text_with_subparts(self, text: list[str]) -> str:
+    def fix_text_with_subparts(self, text: list[str]) -> list[str]:
         text_copy = text.copy()
         for i, part in enumerate(text):
             if part.startswith(". "):
@@ -307,7 +296,7 @@ class Spell:
             text = text.replace(m.group(), self._strong(m.group()))
         return self._li(text)
 
-    def fix_text_with_bullet_points(self, text: list[str]) -> str:
+    def fix_text_with_bullet_points(self, text: list[str]) -> list[str]:
         out = []
         for part in text:
             if not part.startswith("• "):
@@ -331,7 +320,7 @@ class Spell:
         return [f"text | {text_part}" for text_part in text_parts]
 
     @property
-    def casting_shape_text(self):
+    def casting_shape_text(self) -> str:
         if not self.shape:
             return ""
         shape_name = self.shape.translate(self.lang)
@@ -372,7 +361,7 @@ class Spell:
                 "measure-tape", self.shorten_distance_text(self.casting_range_text)
             ),
         ]
-        if self.shape:
+        if self.shape and self.shape.icon:
             parts.append(
                 property_inline(
                     self.shape.icon, self.shorten_distance_text(self.casting_shape_text)
@@ -457,9 +446,11 @@ class SpellLegend:
     def spell_shapes_section_text(self) -> str:
         return "Formes de sort" if self.lang == "fr" else "Spell shapes"
 
-    def to_table(self, elements: list[TranslatedStrEnum], columns: int) -> list[str]:
+    def to_table(self, elements: Any, columns: int) -> list[str]:
         out, properties = ["text|"], []
         for element in elements:
+            if not element.icon:
+                continue
             properties.append(
                 f"property_inline | {element.translate(self.lang).capitalize()} | {game_icon(element.icon)}"
             )
