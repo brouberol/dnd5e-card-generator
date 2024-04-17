@@ -12,12 +12,12 @@ from dnd5e_card_generator.const import (
 from dnd5e_card_generator.magic_item import MagicItem
 from dnd5e_card_generator.models import (
     DamageType,
-    ItemType,
+    MagicItemKind,
+    MagicItemRarity,
     MagicSchool,
-    Rarity,
     SpellShape,
 )
-from dnd5e_card_generator.scraping import StrictBeautifulSoup
+from dnd5e_card_generator.scraping.helpers import StrictBeautifulSoup
 from dnd5e_card_generator.spell import Spell
 from dnd5e_card_generator.utils import fetch_data
 
@@ -298,11 +298,11 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     item_type_text, _, item_rarity = item_type_div_text.partition(",")
     item_rarity = item_rarity.strip()
     if re.match(r"(armor|armure)", item_type_text.lower()):
-        item_type = ItemType.armor
+        item_type = MagicItemKind.armor
     elif re.match(r"(arme|weapon)", item_type_text.lower()):
-        item_type = ItemType.weapon
+        item_type = MagicItemKind.weapon
     else:
-        item_type = ItemType.from_str(item_type_text.lower(), lang)
+        item_type = MagicItemKind.from_str(item_type_text.lower(), lang)
 
     if attunement_text in item_rarity:
         requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
@@ -312,7 +312,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
         requires_attunement = False
     img_elt = soup.find("img")
     image_url = img_elt.attrs["src"] if img_elt else ""
-    rarity = Rarity.from_str(item_rarity, lang)
+    rarity = MagicItemRarity.from_str(item_rarity, lang)
     item_description = list(div_content.find("div", class_="description").strings)
     recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
     recharges = int(recharges_match.group(1) if recharges_match else 0)

@@ -6,7 +6,9 @@ from .translator import TranslatedStrEnum
 from .utils import game_icon
 
 
-class Rarity(TranslatedStrEnum):
+class MagicItemRarity(TranslatedStrEnum):
+    """Describes the rarity of a magic item"""
+
     common = "common"
     uncommon = "uncommon"
     rare = "rare"
@@ -49,7 +51,9 @@ class Rarity(TranslatedStrEnum):
         return colors_by_rarity[self.value]
 
 
-class ItemType(TranslatedStrEnum):
+class MagicItemKind(TranslatedStrEnum):
+    """Describes the type of object of a magic item"""
+
     wondrous_item = "wondrous_item"
     ring = "ring"
     weapon = "weapon"
@@ -88,6 +92,8 @@ class ItemType(TranslatedStrEnum):
 
 
 class MagicSchool(TranslatedStrEnum):
+    """List and translate all magic schools"""
+
     abjuration = "abjuration"
     divination = "divination"
     enchantment = "enchantment"
@@ -112,6 +118,8 @@ class MagicSchool(TranslatedStrEnum):
 
 
 class DamageType(TranslatedStrEnum):
+    """Translate and assign an icon to all types of damage"""
+
     acid = "acid"
     bludgeoning = "bludgeoning"
     cold = "cold"
@@ -173,6 +181,8 @@ class DamageType(TranslatedStrEnum):
 
 
 class SpellShape(TranslatedStrEnum):
+    """Translate and assign an icon to all shapes of spells"""
+
     circle = "circle"
     cone = "cone"
     cube = "cube"
@@ -217,6 +227,14 @@ class SpellShape(TranslatedStrEnum):
 
 
 class SpellType(TranslatedStrEnum):
+    """Translate and assign an icon to all types of spells
+
+    A type of spell describes the kind of general effect it has, and could be
+    used in the decision process of choosing the right spell for the right
+    situation.
+
+    """
+
     aoe = "aoe"
     buff = "buff"
     debuff = "debuff"
@@ -249,6 +267,8 @@ class SpellType(TranslatedStrEnum):
 
 
 class DamageDie(StrEnum):
+    """Representation of the different damage die"""
+
     d4 = "a"
     d6 = "b"
     d8 = "c"
@@ -266,6 +286,12 @@ class DamageDie(StrEnum):
 
 @dataclass
 class DamageFormula:
+    """Representation of a damage formula.
+
+    Ex: 2d10 radiant damages
+
+    """
+
     num_die: int
     damage_die: DamageDie
     damage_type: DamageType | None
@@ -280,6 +306,8 @@ class DamageFormula:
 
 @dataclass
 class Card:
+    """Wrapper around the data contained in a physical item or spell card"""
+
     color: str
     title: str
     icon: str | None

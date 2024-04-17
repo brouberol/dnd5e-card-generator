@@ -1,16 +1,18 @@
 import re
 from dataclasses import dataclass
 
-from .models import ItemType, Rarity
+from .models import MagicItemKind, MagicItemRarity
 from .utils import damage_type_text, game_icon
 
 
 @dataclass
 class MagicItem:
+    """This class implements the logic of exporting a magic item data as a card"""
+
     title: str
-    type: ItemType
+    type: MagicItemKind
     color: str
-    rarity: Rarity
+    rarity: MagicItemRarity
     attunement: bool
     text: list[str]
     lang: str
@@ -27,7 +29,7 @@ class MagicItem:
 
     @property
     def type_text(self) -> str:
-        return ItemType.translate(self.type, self.lang).capitalize()
+        return MagicItemKind.translate(self.type, self.lang).capitalize()
 
     @property
     def rarity_text(self) -> str:

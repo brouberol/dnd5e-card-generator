@@ -4,7 +4,7 @@ import requests
 
 from dnd5e_card_generator.const import DATA_DIR
 from dnd5e_card_generator.models import SpellType
-from dnd5e_card_generator.scraping import StrictBeautifulSoup
+from dnd5e_card_generator.scraping.helpers import StrictBeautifulSoup
 
 
 class DndLoungeScraper:
