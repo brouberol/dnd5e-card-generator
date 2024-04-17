@@ -1,4 +1,3 @@
-import base64
 import itertools
 import json
 import re
@@ -68,12 +67,6 @@ class Spell:
         if _spell_type := self.spell_types.get(self.en_title):
             return getattr(SpellType, _spell_type)
         return None
-
-    @property
-    def background_image_base64(self):
-        return base64.b64encode(self.school.background_file_path.read_bytes()).decode(
-            "utf-8"
-        )
 
     @property
     def spell_casting_components(self) -> str:
