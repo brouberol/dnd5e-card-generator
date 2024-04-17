@@ -1,17 +1,17 @@
 import json
 
 import requests
+from bs4 import BeautifulSoup
 
 from dnd5e_card_generator.const import DATA_DIR
 from dnd5e_card_generator.models import SpellType
-from dnd5e_card_generator.scraping.helpers import StrictBeautifulSoup
 
 
 class DndLoungeScraper:
-    def parse_html(self, url: str) -> StrictBeautifulSoup:
+    def parse_html(self, url: str) -> BeautifulSoup:
         resp = requests.get(url)
         resp.raise_for_status()
-        return StrictBeautifulSoup(resp.text, features="html.parser")
+        return BeautifulSoup(resp.text, features="html.parser")
 
     def parse_spell_names(self, url: str) -> list[str]:
         soup = self.parse_html(url)

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from urllib.parse import parse_qs, urlparse
 
 import requests
+from bs4 import BeautifulSoup
 
 from dnd5e_card_generator.const import (
     AIDEDD_MAGIC_ITEMS_URL,
@@ -17,7 +18,6 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
 )
-from dnd5e_card_generator.scraping.helpers import StrictBeautifulSoup
 from dnd5e_card_generator.spell import Spell
 from dnd5e_card_generator.utils import fetch_data
 
@@ -85,7 +85,7 @@ class SpellFilter:
     def resolve(self) -> list[str]:
         out = []
         resp = self.request()
-        soup = StrictBeautifulSoup(resp.text, features="html.parser")
+        soup = BeautifulSoup(resp.text, features="html.parser")
         spell_cells = soup.find("table").find_all("td", class_="item")
         for spell_cell in spell_cells:
             link = spell_cell.find("a")
@@ -120,7 +120,7 @@ class SpellScraper:
         self.spell = spell
         self.lang = lang
         html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
-        self.soup = StrictBeautifulSoup(html, features="html.parser")
+        self.soup = BeautifulSoup(html, features="html.parser")
         self.div_content = self.soup.find("div", class_="content")
         if self.div_content is None:
             raise ValueError(f"{spell} not found!")
@@ -289,7 +289,7 @@ def scrape_item_details(item: str, lang: str) -> MagicItem:
     }
     html = fetch_data(AIDEDD_MAGIC_ITEMS_URL, item, lang)
     attunement_text = attunement_text_by_lang[lang]
-    soup = StrictBeautifulSoup(html, features="html.parser")
+    soup = BeautifulSoup(html, features="html.parser")
     div_content = soup.find("div", class_="content")
     if div_content is None:
         raise ValueError(f"{item} not found!")
