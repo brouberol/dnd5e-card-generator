@@ -16,6 +16,11 @@ beautifulsoup4 = "^4.12.3"
 dnd5e-card-generator = 'dnd5e_card_generator.cli:main'
 scrape-spell-types = 'dnd5e_card_generator.scraping.dndlounge:main'
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.9.0"
+types-requests = "^2.31.0.20240406"
+types-beautifulsoup4 = "^4.12.0.20240229"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
