@@ -2,8 +2,6 @@
 
 import argparse
 import json
-import shutil
-import sys
 from pathlib import Path
 
 from .cards import export_items_to_cards, export_spells_to_cards
@@ -58,12 +56,6 @@ def parse_args():
 
 
 def main():
-    if not shutil.which("magick"):
-        print(
-            "Imagemagick is required. Please install it from your package manager or https://imagemagick.org/script/download.php"
-        )
-        sys.exit(1)
-
     args = parse_args()
     spells = args.spells
     if args.spell_filter:
