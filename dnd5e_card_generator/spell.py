@@ -461,7 +461,7 @@ class SpellLegend:
         for batch in itertools.batched(properties, columns):
             for _property in batch:
                 out.append(_property)
-            out.append("")
+            out.append("fill")
         return out
 
     @property
@@ -471,7 +471,7 @@ class SpellLegend:
             batch = []
             for damage_die_name, damage_die in damage_die_batch:
                 batch.append(f"property_inline | {damage_die_name} | {str(damage_die)}")
-            batch.append("")
+            batch.append("fill")
             out.extend(batch)
         return out
 
