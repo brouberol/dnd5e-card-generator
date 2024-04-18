@@ -291,12 +291,18 @@ class Spell:
 
     def fix_text_with_bullet_points(self, text: list[str]) -> list[str]:
         out = []
+        in_ul = False
         for part in text:
             if not part.startswith("• "):
+                if in_ul:
+                    out[-1] += "</ul>"
                 out.append(part)
             elif not out:
-                out.append(self.format_bullet_point(part))
+                out.append("<ul>" + self.format_bullet_point(part))
             else:
+                if not in_ul:
+                    in_ul = True
+                    out[-1] += "<ul>"
                 out[-1] += self.format_bullet_point(part)
         return out
 
