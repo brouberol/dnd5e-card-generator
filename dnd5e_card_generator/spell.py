@@ -401,10 +401,11 @@ class Spell:
         subtitle_text = f"subtitle | {self.subtitle}"
         level_text = f"level | {self.level}"
         spell_school_text = f"spell_school | {self.school}"
-        title_text = f"title | {self.title}"
+        title_text = f"title | {self.title} | {game_icon(self.spell_type_icon)}"
         return (
             [title_text, subtitle_text, level_text, spell_school_text]
             + self.spell_properties_parts
+            + ["header_separator|"]
             + self.spell_parts
             + self.upcasting_parts
             + self.paying_components_parts
@@ -415,7 +416,7 @@ class Spell:
         card = Card(
             color=self.color,
             title=self.title,
-            icon=self.spell_type_icon,
+            icon=None,
             contents=self.contents_text,
         )
         return card.to_dict()
@@ -500,7 +501,7 @@ class SpellLegend:
     def contents_text(self) -> list[str]:
         out = (
             [f"title | {self.title_text}"]
-            + ["spell_school | illusion", "text|"]
+            + ["spell_school | illusion", "header_separator|"]
             + self.damage_die_legend
             + self.damage_type_legend
             + self.spell_type_legend
