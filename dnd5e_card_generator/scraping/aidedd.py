@@ -118,6 +118,7 @@ class SpellScraper:
     ritual_pattern = r"\((ritual|rituel)\)"
     reaction_pattern = r"\d r[ée]action"
     concentration_pattern = r"concentration, "
+    tags_to_unwrap_from_description = ["em", "a"]
 
     def __init__(self, spell: str, lang: str):
         self.spell = spell
@@ -127,6 +128,16 @@ class SpellScraper:
         self.div_content = self.soup.find("div", class_="content")
         if self.div_content is None:
             raise ValueError(f"{spell} not found!")
+
+    def sanitize_soup(self, soup: BeautifulSoup):
+        # Remove emphasis and links from the div, to avoid causing whitespace
+        # issues when extracting the text content
+        for tag in soup.find_all(self.tags_to_unwrap_from_description):
+            tag.unwrap()
+        # Hack, cf https://stackoverflow.com/questions/44679677/get-real-text-with-beautifulsoup-after-unwrap
+        string_soup = str(soup)
+        new_soup = BeautifulSoup(string_soup, features="html.parser")
+        return new_soup
 
     @cached_property
     def five_e_sheets_spell(self) -> dict:
@@ -148,7 +159,10 @@ class SpellScraper:
         )
 
     def scrape_spell_texts(self) -> tuple[list[str], str]:
-        text = list(self.div_content.find("div", class_="description").strings)
+        desc_div = self.sanitize_soup(
+            self.div_content.find("div", class_="description")
+        )
+        text = list(desc_div.strings)
         upcasting_indicator = self.upcasting_indicator_by_lang[self.lang]
         if upcasting_indicator not in text:
             return text, ""
