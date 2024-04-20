@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Self
+from typing import Optional, Self
 
 from .translator import TranslatedStrEnum
 from .utils import game_icon
@@ -135,6 +135,10 @@ class DamageType(TranslatedStrEnum):
     thunder = "thunder"
 
     @classmethod
+    def from_5esheet_tag(cls, tag: str) -> "DamageType":
+        return cls.reversed_en_translations()[tag]
+
+    @classmethod
     def fr_translations(self) -> dict:
         return {
             "acid": "acide",
@@ -193,6 +197,21 @@ class SpellShape(TranslatedStrEnum):
     sphere = "sphere"
     square = "square"
     wall = "wall"
+
+    @classmethod
+    def from_5esheet_tag(cls, tag: str) -> Optional["SpellShape"]:
+        mapping = {
+            "C": SpellShape.cube,
+            "H": SpellShape.hemisphere,
+            "L": SpellShape.line,
+            "N": SpellShape.cone,
+            "Q": SpellShape.square,
+            "R": SpellShape.circle,
+            "S": SpellShape.sphere,
+            "W": SpellShape.wall,
+            "Y": SpellShape.cylinder,
+        }
+        return mapping.get(tag)
 
     @classmethod
     def fr_translations(self) -> dict[str, str]:

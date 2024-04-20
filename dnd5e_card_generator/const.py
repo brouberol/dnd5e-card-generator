@@ -6,3 +6,4 @@ AIDEDD_SPELLS_URL = "https://www.aidedd.org/dnd/sorts.php"
 AIDEDD_SPELLS_FILTER_URL = "https://www.aidedd.org/dnd-filters/sorts.php"
 AIDEDD_MAGIC_ITEMS_URL = "https://www.aidedd.org/dnd/om.php"
 SPELLS_BY_TYPE = json.load(open(DATA_DIR / "spell_by_types.json"))
+FIVE_E_SHEETS_SPELLS = json.load(open(DATA_DIR / "spells.json"))

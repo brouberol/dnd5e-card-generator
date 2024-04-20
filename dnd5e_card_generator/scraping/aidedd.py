@@ -1,5 +1,7 @@
 import re
 from dataclasses import dataclass
+from functools import cached_property
+from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 import requests
@@ -9,6 +11,7 @@ from dnd5e_card_generator.const import (
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
     AIDEDD_SPELLS_URL,
+    FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.magic_item import MagicItem
 from dnd5e_card_generator.models import (
@@ -125,6 +128,10 @@ class SpellScraper:
         if self.div_content is None:
             raise ValueError(f"{spell} not found!")
 
+    @cached_property
+    def five_e_sheets_spell(self) -> dict:
+        return FIVE_E_SHEETS_SPELLS[self.scrape_en_title()]
+
     def _scrape_property(self, classname: str, remove: list[str]) -> str:
         prop = self.div_content.find("div", class_=classname).text
         for term in remove:
@@ -186,10 +193,18 @@ class SpellScraper:
     def scrape_text(self) -> list[str]:
         return [d.text for d in self.div_content.find_all("div", class_="classe")]
 
+    def scrape_spell_shape(self) -> Optional[SpellShape]:
+        area_tags = self.five_e_sheets_spell.get("area_tags", [])
+        area_tags = [tag for tag in area_tags if tag not in ["ST", "MT"]]
+        if area_tags:
+            assert len(area_tags) == 1
+            return SpellShape.from_5esheet_tag(area_tags[0])
+
     def scrape_spell(self) -> Spell:
         print(f"Scraping data for spell {self.spell}")
         spell_text, upcasting_text = self.scrape_spell_texts()
         school_text = self.scrape_school_text()
+
         if ritual_match := re.search(self.ritual_pattern, school_text):
             school_text = school_text.replace(ritual_match.group(0), "").strip()
             ritual = True
@@ -249,14 +264,6 @@ class SpellScraper:
         else:
             damage_type = None
 
-        spell_shape_pattern = SpellShape.to_pattern(self.lang)
-        for text in (search_text, casting_range):
-            if spell_shape_match := re.search(spell_shape_pattern, text):
-                spell_shape = SpellShape.from_str(spell_shape_match.group(), self.lang)
-                break
-        else:
-            spell_shape = None
-
         return Spell(
             lang=self.lang,
             level=self.scrape_level(),
@@ -276,7 +283,7 @@ class SpellScraper:
             ritual=ritual,
             concentration=concentration,
             damage_type=damage_type,
-            shape=spell_shape,
+            shape=self.scrape_spell_shape(),
             reaction_condition=reaction_condition,
         )
 
