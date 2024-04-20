@@ -261,12 +261,21 @@ class Spell:
             text = text.replace(term, replacement)
         return text
 
+    def radius_specified_for_circle_or_sphere_shape(self) -> bool:
+        return (
+            self.shape in (SpellShape.circle, SpellShape.sphere)
+            and SpellShape.radius.translate(self.lang) in self.casting_range
+        )
+
     @property
     def casting_range_text(self) -> str:
         if not self.shape:
             return self.casting_range
         shape_name = self.shape.translate(self.lang)
-        if shape_name in self.casting_range:
+        if (
+            shape_name in self.casting_range
+            or self.radius_specified_for_circle_or_sphere_shape()
+        ):
             return re.sub(r"\([^\)]+\)", "", self.casting_range).strip()
         else:
             return self.casting_range
@@ -320,6 +329,15 @@ class Spell:
             return ""
         shape_name = self.shape.translate(self.lang)
         casting_shape_dimension_pattern = r"(?P<dim>\d+([,\.]\d+)? m\w+)"
+
+        # Sometimes, when a spell shape is a circle or a sphere, the radius is specified
+        # but not the shape
+        if self.radius_specified_for_circle_or_sphere_shape():
+            if casting_shape_dimension_match := re.search(
+                casting_shape_dimension_pattern, self.casting_range
+            ):
+                return casting_shape_dimension_match.group("dim").strip().capitalize()
+
         for text in [self.casting_range] + self.spell_parts:
             if shape_name not in text:
                 continue
