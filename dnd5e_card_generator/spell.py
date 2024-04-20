@@ -1,11 +1,10 @@
 import itertools
-import json
 import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Optional
 
-from .const import DATA_DIR
+from .const import SPELLS_BY_TYPE
 from .models import (
     Card,
     DamageDie,
@@ -58,13 +57,9 @@ class Spell:
         }
         return "#" + spell_colors_by_level[self.level]
 
-    @property
-    def spell_types(self):
-        return json.load(open(DATA_DIR / "spell_by_types.json", "r"))
-
     @cached_property
     def spell_type(self) -> SpellType | None:
-        if _spell_type := self.spell_types.get(self.en_title):
+        if _spell_type := SPELLS_BY_TYPE.get(self.en_title):
             return getattr(SpellType, _spell_type)
         return None
 
