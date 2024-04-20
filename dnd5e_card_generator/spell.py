@@ -141,7 +141,7 @@ class Spell:
         return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
 
     def fix_translation_mistakes(self, text: str) -> str:
-        replacements = {"fr": {"de un dé": "d'un dé"}}
+        replacements = {"fr": {"de un dé": "d'un dé", " [E]": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
@@ -225,10 +225,12 @@ class Spell:
         replacements = {"fr": {"Jusqu'à": "", "(voir ci-dessous)": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
-        return self.shorten_time_text(text).capitalize()
+        return self.shorten_time_text(text).strip().capitalize()
 
     def shorten_distance_text(self, text: str) -> str:
-        replacements = {"fr": {"mètres": "m", "mètre": "m", "Personnelle": "Perso."}}
+        replacements = {
+            "fr": {"mètres": "m", "mètre": "m", "Personnelle": "Perso.", "kilom": "km"}
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
@@ -246,14 +248,18 @@ class Spell:
                 "heure": "h",
                 "minutes": "min",
                 "minute": "min",
+                "jours": "j",
+                "jour": "j",
                 "Instantanée": "Instant.",
-                "dissipation ou déclenchement": "∞",
+                "dissipation ou déclenchement": "Illimitée",
             },
             "en": {
                 "hours": "h",
                 "hour": "h",
                 "minutes": "min",
                 "minute": "min",
+                "days": "d",
+                "day": "d",
                 "Instantaneous": "Instant.",
             },
         }
@@ -368,7 +374,10 @@ class Spell:
 
         parts = [
             property_inline(
-                "player-time", self.shorten_casting_time_text(self.casting_time)
+                "player-time",
+                self.shorten_time_text(
+                    self.shorten_casting_time_text(self.casting_time)
+                ),
             ),
             property_inline(
                 "measure-tape", self.shorten_distance_text(self.casting_range_text)
