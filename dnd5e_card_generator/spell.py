@@ -247,6 +247,7 @@ class Spell:
                 "minutes": "min",
                 "minute": "min",
                 "Instantanée": "Instant.",
+                "dissipation ou déclenchement": "∞",
             },
             "en": {
                 "hours": "h",
