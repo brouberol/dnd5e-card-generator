@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Self
+from typing import Optional, Self
 
 
 class TranslatedStrEnum(StrEnum):
@@ -44,8 +44,8 @@ class TranslatedStrEnum(StrEnum):
         return self.translations()[lang][self.name]
 
     @classmethod
-    def from_str(cls, s: str, lang: str) -> Self:
-        return cls.reversed_translations()[lang][s]
+    def from_str(cls, s: str, lang: str) -> Optional[Self]:
+        return cls.reversed_translations()[lang].get(s)
 
     @classmethod
     def to_pattern(cls, lang: str) -> str:

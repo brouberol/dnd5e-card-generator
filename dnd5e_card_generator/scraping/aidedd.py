@@ -271,10 +271,7 @@ class SpellScraper:
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
-            try:
-                damage_type = DamageType.from_str(damage_type_str, self.lang)
-            except KeyError:
-                damage_type = None
+            damage_type = DamageType.from_str(damage_type_str, self.lang)
         else:
             damage_type = None
 

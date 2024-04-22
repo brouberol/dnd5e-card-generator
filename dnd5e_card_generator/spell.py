@@ -172,14 +172,16 @@ class Spell:
 
         for match in matches:
             parts = match.groupdict()
+            damage_type = None
+            if parts.get("damage_type"):
+                damage_type = DamageType.from_str(
+                    parts["damage_type"].rstrip("s"), self.lang
+                )
+
             damage_formula = DamageFormula(
                 num_die=int(parts.get("num_die") or 1),
                 damage_die=DamageDie.from_str(parts["die_type"]),
-                damage_type=DamageType.from_str(
-                    parts["damage_type"].rstrip("s"), self.lang
-                )
-                if parts.get("damage_type")
-                else None,
+                damage_type=damage_type,
             )
             text = text.replace(
                 match.group(),
