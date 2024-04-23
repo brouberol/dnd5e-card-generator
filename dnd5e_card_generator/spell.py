@@ -113,12 +113,6 @@ class Spell(BaseCardTextFormatter):
             prefix = "Vous cast this spell using your reaction"
         return "".join((prefix, self.reaction_condition))
 
-    @property
-    def spell_carac_text(self) -> str:
-        if self.lang == "fr":
-            return "le modificateur de votre caractéristique d'incantation"
-        return "your spellcasting ability modifier"
-
     def fix_translation_mistakes(self, text: str) -> str:
         replacements = {"fr": {"de un dé": "d'un dé", " [E]": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():

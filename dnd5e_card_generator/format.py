@@ -16,18 +16,20 @@ class BaseCardTextFormatter:
     def _highlight(self, pattern: str, text: str) -> str:
         return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
 
-    def _highlight(self, pattern: str, text: str) -> str:
-        return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
-
     def damage_type_text(self, lang) -> str:
         if lang == "fr":
             return r"(de )?dégâts (de |d')?(?P<damage_type>\w+)"
         return r"\w+ damage"
 
+    def spell_carac_text(self, lang: str) -> str:
+        if lang == "fr":
+            return "le modificateur de votre caractéristique d'incantation"
+        return "your spellcasting ability modifier"
+
     def highlight_damage_formula(self, text: str, lang: str) -> str:
         die_value_pattern = (
             r"(?P<prefix>(one |un )?)(?P<num_die>\d+)?(?P<die_type>d\d+)( (?P<dmg_extra>\+ "
-            + self.spell_carac_text
+            + self.spell_carac_text(lang)
             + r")| "
             + self.damage_type_text(lang)
             + r")?"
