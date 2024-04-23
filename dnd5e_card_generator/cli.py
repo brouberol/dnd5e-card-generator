@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .cards import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
+from .export import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
 from .scraping.aidedd import SpellFilter
 
 
