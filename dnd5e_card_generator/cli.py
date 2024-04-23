@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from .cards import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
-from .scraping import resolve_spell_filter
+from .scraping.aidedd import SpellFilter
 
 
 def parse_args():
@@ -69,7 +69,7 @@ def main():
     args = parse_args()
     spells = args.spells
     if args.spell_filter:
-        spells += resolve_spell_filter(args.spell_filter)
+        spells += SpellFilter.from_str(args.spell_filter).resolve()
         spells = list(set(spells))
 
     cards = []
