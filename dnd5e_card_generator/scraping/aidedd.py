@@ -211,8 +211,9 @@ class SpellScraper:
         area_tags = self.five_e_sheets_spell.get("area_tags", [])
         area_tags = [tag for tag in area_tags if tag not in ["ST", "MT"]]
         if area_tags:
-            assert len(area_tags) == 1
+            # If several shapes are found, we randomly pick the first one
             return SpellShape.from_5esheet_tag(area_tags[0])
+        return None
 
     def scrape_spell(self) -> Spell:
         print(f"Scraping data for spell {self.spell}")
