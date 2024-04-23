@@ -4,7 +4,7 @@ from .scraping.aidedd import FeatScraper, MagicItemScraper, SpellScraper
 from .spell import SpellLegend
 
 
-def scrape_elements(elements, ScraperCls, sorting_func):
+def export_elements_to_cards(elements, ScraperCls, sorting_func):
     if not elements:
         return []
 
@@ -27,7 +27,7 @@ def export_spells_to_cards(spell_names: list[str], include_legend: bool) -> list
     of the spell cards.
 
     """
-    cards = scrape_elements(
+    cards = export_elements_to_cards(
         elements=spell_names,
         ScraperCls=SpellScraper,
         sorting_func=lambda spell: (spell.level, spell.title),
@@ -39,7 +39,7 @@ def export_spells_to_cards(spell_names: list[str], include_legend: bool) -> list
 
 def export_items_to_cards(item_names: list[str]) -> list[dict]:
     """Scrape Aidedd for the provided items and export them as cards data."""
-    return scrape_elements(
+    return export_elements_to_cards(
         elements=item_names,
         ScraperCls=MagicItemScraper,
         sorting_func=lambda item: (int(item.rarity), item.title),
@@ -48,7 +48,7 @@ def export_items_to_cards(item_names: list[str]) -> list[dict]:
 
 def export_feats_to_cards(feat_names: list[str]) -> list[dict]:
     """Scrape Aidedd for the provided feats and export them as cards data."""
-    return scrape_elements(
+    return export_elements_to_cards(
         elements=feat_names,
         ScraperCls=FeatScraper,
         sorting_func=lambda item: item.title,
