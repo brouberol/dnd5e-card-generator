@@ -392,7 +392,7 @@ class SpellLegend:
     @property
     def damage_die_legend(self) -> list[str]:
         out = [f"section | {self.die_section_text}", "text|"]
-        for damage_die_batch in itertools.batched(DamageDie._member_map_.items(), 6):
+        for damage_die_batch in itertools.batched(DamageDie.values_with_icons(), 6):
             batch = []
             for damage_die_name, damage_die in damage_die_batch:
                 batch.append(f"property_inline | {damage_die_name} | {str(damage_die)}")

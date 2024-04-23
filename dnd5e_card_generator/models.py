@@ -303,6 +303,12 @@ class DamageDie(StrEnum):
             return "d100"
 
     @classmethod
+    def values_with_icons(cls) -> list[tuple[str, "DamageDie"]]:
+        return [
+            (name, value) for name, value in cls._member_map_.items() if value != "d100"
+        ]
+
+    @classmethod
     def from_str(self, s: str) -> Self:
         return getattr(DamageDie, s)
 
