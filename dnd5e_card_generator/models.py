@@ -294,9 +294,13 @@ class DamageDie(StrEnum):
     d10 = "d"
     d12 = "e"
     d20 = "f"
+    d100 = "d100"
 
     def __str__(self):
-        return f"<dice>{self.value}</dice>"
+        if self.value != DamageDie.d100:
+            return f"<dice>{self.value}</dice>"
+        else:
+            return "d100"
 
     @classmethod
     def from_str(self, s: str) -> Self:
