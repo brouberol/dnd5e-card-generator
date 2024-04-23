@@ -229,6 +229,7 @@ class Spell(BaseCardTextFormatter):
         text_parts = self.fix_text_with_bullet_points(text_parts)
         text_parts = [self.highlight_spell_text(part) for part in text_parts]
         text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
+        text_parts = [self.highlight_italic_words(part) for part in text_parts]
         return text_parts
 
     @property

@@ -7,6 +7,9 @@ class BaseCardTextFormatter:
     def _li(self, text: str) -> str:
         return f"<li>{text}</li>"
 
+    def _em(self, text: str) -> str:
+        return f"<em>{text}</em>"
+
     def _strong(self, text: str) -> str:
         return f"<b>{text}</b>"
 
@@ -63,6 +66,9 @@ class BaseCardTextFormatter:
         for pattern in saving_throw_patterns_by_lang[lang]:
             text = self._highlight(pattern, text)
         return text
+
+    def highlight_italic_words(self, text: str) -> str:
+        return re.sub(r"_([^_]+)_", lambda m: self._em(m.group(1)), text)
 
     def fix_text_with_subparts(self, text: list[str]) -> list[str]:
         text_copy = text.copy()

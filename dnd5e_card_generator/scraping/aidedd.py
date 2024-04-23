@@ -129,11 +129,16 @@ class BaseAideDDScraper:
 
     def sanitize_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
         """Remove formatting tags form soup to avoid whitespace issues when extracting the text content"""
-        for tag in soup.find_all(self.tags_to_unwrap_from_description):
-            if tag.name == "li":
-                # This will help us later on to re-render the li bullet in the card
-                tag.string = "• " + tag.string
-            else:
+        for tag_type in self.tags_to_unwrap_from_description:
+            for tag in soup.find_all(tag_type):
+                if tag.name == "li":
+                    if tag.string is None:
+                        tag.string = tag.text
+                    # This will help us later on to re-render the li bullet in the card
+                    tag.string = "• " + tag.string
+                    continue
+                elif tag.name == "em":
+                    tag.string = f"_{tag.string}_"
                 tag.unwrap()
 
         # Hack, cf https://stackoverflow.com/questions/44679677/get-real-text-with-beautifulsoup-after-unwrap

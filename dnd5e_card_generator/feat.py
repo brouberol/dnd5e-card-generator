@@ -14,6 +14,7 @@ class Feat(BaseCardTextFormatter):
     def render_feat_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)
         text_parts = [self.highlight_saving_throw(part, self.lang) for part in text]
+        text_parts = [self.highlight_italic_words(part) for part in text_parts]
         text_parts = self.fix_text_with_bullet_points(text_parts)
         return text_parts
 
