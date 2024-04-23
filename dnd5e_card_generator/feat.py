@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-from .export import BaseCardExporter
+from .format import BaseCardTextFormatter
 from .models import Card
 
 
 @dataclass
-class Feat(BaseCardExporter):
+class Feat(BaseCardTextFormatter):
     title: str
     prerequesite: str
     text: list[str]

@@ -5,13 +5,13 @@ from functools import cached_property
 from typing import Any, Optional
 
 from .const import SPELLS_BY_TYPE
-from .export import BaseCardExporter
+from .format import BaseCardTextFormatter
 from .models import Card, DamageDie, DamageType, MagicSchool, SpellShape, SpellType
 from .utils import game_icon, humanize_level, strip_accents
 
 
 @dataclass
-class Spell(BaseCardExporter):
+class Spell(BaseCardTextFormatter):
     title: str
     en_title: str
     lang: str
