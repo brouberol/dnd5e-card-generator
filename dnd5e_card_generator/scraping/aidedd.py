@@ -1,16 +1,18 @@
 import re
+import tempfile
 from dataclasses import dataclass
 from functools import cached_property
+from pathlib import Path
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import NavigableString, Tag
 
 from dnd5e_card_generator.const import (
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
-    AIDEDD_SPELLS_URL,
     FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.magic_item import MagicItem
@@ -22,7 +24,6 @@ from dnd5e_card_generator.models import (
     SpellShape,
 )
 from dnd5e_card_generator.spell import Spell
-from dnd5e_card_generator.utils import fetch_data
 
 
 @dataclass
@@ -97,7 +98,67 @@ class SpellFilter:
         return out
 
 
-class SpellScraper:
+class BaseAideDDScraper:
+    base_url: str = ""
+    tags_to_unwrap_from_description = ["a", "em", "ul", "li"]
+
+    def __init__(self, slug: str, lang: str):
+        self.slug = slug
+        self.lang = lang
+        self.soup, self.div_content = self.parse_page()
+
+    def fetch_data(self):
+        cached_file = Path(f"{tempfile.gettempdir()}/{self.lang}:{self.slug}.html")
+        if cached_file.exists():
+            return cached_file.read_text()
+        lang_param = "vf" if self.lang == "fr" else "vo"
+        resp = requests.get(self.base_url, params={lang_param: self.slug})
+        resp.raise_for_status()
+        cached_file.write_text(resp.text)
+        return resp.text
+
+    def parse_page(self) -> tuple[BeautifulSoup, Tag | NavigableString | None]:
+        html = self.fetch_data()
+        soup = BeautifulSoup(html, features="html.parser")
+        div_content = soup.find("div", class_="content")
+        if div_content is None:
+            raise ValueError(f"{self.slug} not found!")
+        return soup, div_content
+
+    def sanitize_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
+        """Remove formatting tags form soup to avoid whitespace issues when extracting the text content"""
+        for tag in soup.find_all(self.tags_to_unwrap_from_description):
+            if tag.name == "li":
+                # This will help us later on to re-render the li bullet in the card
+                tag.string = "• " + tag.string
+            else:
+                tag.unwrap()
+
+        # Hack, cf https://stackoverflow.com/questions/44679677/get-real-text-with-beautifulsoup-after-unwrap
+        string_soup = str(soup)
+        new_soup = BeautifulSoup(string_soup, features="html.parser")
+        return new_soup
+
+    def scrape_text_block(self, tag: Tag) -> list[str]:
+        desc_div = self.sanitize_soup(tag)
+        return list(desc_div.strings)
+
+    def scrape_title(self) -> str:
+        return self.div_content.find("h1").text.strip()
+
+    def scrape_en_title(self) -> str:
+        if self.lang == "en":
+            return self.scrape_title()
+        return self.div_content.find("div", class_="trad").find("a").text
+
+    def scrape_description(self) -> list[str]:
+        return self.scrape_text_block(
+            self.div_content.find("div", class_="description")
+        )
+
+
+class SpellScraper(BaseAideDDScraper):
+    base_url = AIDEDD_SPELLS_FILTER_URL
     upcasting_indicator_by_lang = {
         "fr": "Aux niveaux supérieurs",
         "en": "At Higher Levels",
@@ -120,25 +181,6 @@ class SpellScraper:
     concentration_pattern = r"concentration, "
     tags_to_unwrap_from_description = ["em", "a"]
 
-    def __init__(self, spell: str, lang: str):
-        self.spell = spell
-        self.lang = lang
-        html = fetch_data(AIDEDD_SPELLS_URL, spell, lang)
-        self.soup = BeautifulSoup(html, features="html.parser")
-        self.div_content = self.soup.find("div", class_="content")
-        if self.div_content is None:
-            raise ValueError(f"{spell} not found!")
-
-    def sanitize_soup(self, soup: BeautifulSoup):
-        # Remove emphasis and links from the div, to avoid causing whitespace
-        # issues when extracting the text content
-        for tag in soup.find_all(self.tags_to_unwrap_from_description):
-            tag.unwrap()
-        # Hack, cf https://stackoverflow.com/questions/44679677/get-real-text-with-beautifulsoup-after-unwrap
-        string_soup = str(soup)
-        new_soup = BeautifulSoup(string_soup, features="html.parser")
-        return new_soup
-
     @cached_property
     def five_e_sheets_spell(self) -> dict:
         return FIVE_E_SHEETS_SPELLS[self.scrape_en_title()]
@@ -159,11 +201,8 @@ class SpellScraper:
         )
 
     def scrape_spell_texts(self) -> tuple[list[str], str]:
-        desc_div = self.sanitize_soup(
-            self.div_content.find("div", class_="description")
-        )
-        text = list(desc_div.strings)
         upcasting_indicator = self.upcasting_indicator_by_lang[self.lang]
+        text = self.scrape_description()
         if upcasting_indicator not in text:
             return text, ""
 
@@ -183,14 +222,6 @@ class SpellScraper:
             .strip()
             .capitalize()
         )
-
-    def scrape_title(self) -> str:
-        return self.div_content.find("h1").text.strip()
-
-    def scrape_en_title(self) -> str:
-        if self.lang == "en":
-            return self.scrape_title()
-        return self.div_content.find("div", class_="trad").find("a").text
 
     def scrape_casting_range(self) -> str:
         return self._scrape_property("r", list(self.casting_range_by_lang.values()))
@@ -215,8 +246,8 @@ class SpellScraper:
             return SpellShape.from_5esheet_tag(area_tags[0])
         return None
 
-    def scrape_spell(self) -> Spell:
-        print(f"Scraping data for spell {self.spell}")
+    def scrape(self) -> Spell:
+        print(f"Scraping data for spell {self.slug}")
         spell_text, upcasting_text = self.scrape_spell_texts()
         school_text = self.scrape_school_text()
 
@@ -300,50 +331,53 @@ class SpellScraper:
         )
 
 
-def scrape_item_details(item: str, lang: str) -> MagicItem:
-    print(f"Scraping data for item {item}")
+class MagicItemScraper(BaseAideDDScraper):
+    base_url = AIDEDD_MAGIC_ITEMS_URL
+
     attunement_text_by_lang = {
         "fr": "nécessite un lien",
         "en": "requires attunement",
     }
-    html = fetch_data(AIDEDD_MAGIC_ITEMS_URL, item, lang)
-    attunement_text = attunement_text_by_lang[lang]
-    soup = BeautifulSoup(html, features="html.parser")
-    div_content = soup.find("div", class_="content")
-    if div_content is None:
-        raise ValueError(f"{item} not found!")
 
-    item_type_div_text = div_content.find("div", class_="type").text
-    item_type_text, _, item_rarity = item_type_div_text.partition(",")
-    item_rarity = item_rarity.strip()
-    if re.match(r"(armor|armure)", item_type_text.lower()):
-        item_type = MagicItemKind.armor
-    elif re.match(r"(arme|weapon)", item_type_text.lower()):
-        item_type = MagicItemKind.weapon
-    else:
-        item_type = MagicItemKind.from_str(item_type_text.lower(), lang)
+    def scrape(self) -> MagicItem:
+        print(f"Scraping data for item {self.slug}")
 
-    if attunement_text in item_rarity:
-        requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
-        item_rarity = re.sub(requires_attunement_pattern, "", item_rarity).strip()
-        requires_attunement = True
-    else:
-        requires_attunement = False
-    img_elt = soup.find("img")
-    image_url = img_elt.attrs["src"] if img_elt else ""
-    rarity = MagicItemRarity.from_str(item_rarity, lang)
-    item_description = list(div_content.find("div", class_="description").strings)
-    recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
-    recharges = int(recharges_match.group(1) if recharges_match else 0)
-    magic_item = MagicItem(
-        title=div_content.find("h1").text.strip(),
-        type=item_type,
-        attunement=requires_attunement,
-        text=item_description,
-        rarity=rarity,
-        color="#" + rarity.color,
-        lang=lang,
-        image_url=image_url,
-        recharges=recharges,
-    )
-    return magic_item
+        attunement_text = self.attunement_text_by_lang[self.lang]
+        item_type_div_text = self.div_content.find("div", class_="type").text
+        item_type_text, _, item_rarity = item_type_div_text.partition(",")
+        item_rarity = item_rarity.strip()
+        if re.match(r"(armor|armure)", item_type_text.lower()):
+            item_type = MagicItemKind.armor
+        elif re.match(r"(arme|weapon)", item_type_text.lower()):
+            item_type = MagicItemKind.weapon
+        else:
+            item_type = MagicItemKind.from_str(item_type_text.lower(), self.lang)
+
+        if attunement_text in item_rarity:
+            requires_attunement_pattern = (
+                r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
+            )
+            item_rarity = re.sub(requires_attunement_pattern, "", item_rarity).strip()
+            requires_attunement = True
+        else:
+            requires_attunement = False
+        img_elt = self.soup.find("img")
+        image_url = img_elt.attrs["src"] if img_elt else ""
+        rarity = MagicItemRarity.from_str(item_rarity, self.lang)
+        item_description = list(
+            self.div_content.find("div", class_="description").strings
+        )
+        recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
+        recharges = int(recharges_match.group(1) if recharges_match else 0)
+        magic_item = MagicItem(
+            title=self.scrape_title(),
+            type=item_type,
+            attunement=requires_attunement,
+            text=item_description,
+            rarity=rarity,
+            color="#" + rarity.color,
+            lang=self.lang,
+            image_url=image_url,
+            recharges=recharges,
+        )
+        return magic_item
