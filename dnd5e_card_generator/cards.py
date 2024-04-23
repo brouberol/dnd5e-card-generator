@@ -45,3 +45,11 @@ def export_items_to_cards(item_names: list[str]) -> list[dict]:
         sorting_func=lambda item: (int(item.rarity), item.title),
     )
 
+
+def export_feats_to_cards(feat_names: list[str]) -> list[dict]:
+    """Scrape Aidedd for the provided feats and export them as cards data."""
+    return scrape_elements(
+        elements=feat_names,
+        ScraperCls=FeatScraper,
+        sorting_func=lambda item: item.title,
+    )

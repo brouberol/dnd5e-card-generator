@@ -11,10 +11,12 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from dnd5e_card_generator.const import (
+    AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
     FIVE_E_SHEETS_SPELLS,
 )
+from dnd5e_card_generator.feat import Feat
 from dnd5e_card_generator.magic_item import MagicItem
 from dnd5e_card_generator.models import (
     DamageType,
@@ -381,3 +383,16 @@ class MagicItemScraper(BaseAideDDScraper):
             recharges=recharges,
         )
         return magic_item
+
+
+class FeatScraper(BaseAideDDScraper):
+    base_url = AIDEDD_FEATS_ITEMS_URL
+
+    def scrape(self) -> Feat:
+        print(f"Scraping data for feat {self.slug}")
+        return Feat(
+            title=self.scrape_title(),
+            text=self.scrape_description(),
+            prerequesite=self.div_content.find("div", class_="prerequis").text,
+            lang=self.lang,
+        )

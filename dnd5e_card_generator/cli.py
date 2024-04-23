@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .cards import export_items_to_cards, export_spells_to_cards
+from .cards import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
 from .scraping import resolve_spell_filter
 
 
@@ -46,6 +46,16 @@ def parse_args():
         default=[],
     )
     parser.add_argument(
+        "--feats",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<feat-slug> items. "
+            "Example: fr:mage-de-guerre fr:sentinelle"
+        ),
+        required=False,
+        default=[],
+    )
+    parser.add_argument(
         "-o",
         "--output",
         type=Path,
@@ -62,8 +72,16 @@ def main():
         spells += resolve_spell_filter(args.spell_filter)
         spells = list(set(spells))
 
-    cards = export_spells_to_cards(spells, include_legend=args.include_spell_legend)
-    cards += export_items_to_cards(args.items)
+    cards = []
+    if spells:
+        cards.extend(
+            export_spells_to_cards(spells, include_legend=args.include_spell_legend)
+        )
+    if args.items:
+        cards.extend(export_items_to_cards(args.items))
+    if args.feats:
+        cards.extend(export_feats_to_cards(args.feats))
+
     with open(args.output, "w") as out:
         json.dump(cards, out, indent=2, ensure_ascii=False)
 
