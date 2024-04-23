@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from .format import BaseCardTextFormatter
 from .models import Card
+from .utils import game_icon
 
 
 @dataclass
@@ -24,19 +25,28 @@ class Feat(BaseCardTextFormatter):
         return [f"text | {text_part}" for text_part in text_parts]
 
     @property
+    def prerequisite_text(self) -> list[str]:
+        if not self.prerequesite:
+            return []
+        return [f"text | {self._strong(self.prerequesite)}"]
+
+    @property
     def contents_text(self) -> list[str]:
-        return [
-            f"title | {self.title}",
-            "spell_school | illusion",
-            "header_separator",
-            f"text | {self._strong(self.prerequesite)}",
-        ] + self.feat_parts
+        return (
+            [
+                f"title | {self.title} | {game_icon("stars-stack")}",
+                "spell_school | illusion",
+                "header_separator",
+            ]
+            + self.prerequisite_text
+            + self.feat_parts
+        )
 
     def to_card(self) -> dict:
         card = Card(
             title=self.title,
-            color="HotPink",
-            icon="stars-stack",
+            color="#994094",
+            icon=None,
             contents=self.contents_text,
         )
         return card.to_dict()

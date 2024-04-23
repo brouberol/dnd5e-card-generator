@@ -58,7 +58,7 @@ class BaseCardTextFormatter:
     def highlight_saving_throw(self, text: str, lang: str) -> str:
         saving_throw_patterns_by_lang = {
             "fr": [
-                r"jet de sauvegarde de [A-Z]\w+",
+                r"jet(s)? de sauvegarde de [A-Z]\w+",
                 "la moitié de ces dégâts en cas de réussite",
             ],
             "en": [r"\w+ saving throw", "half as much damage on a successful one"],

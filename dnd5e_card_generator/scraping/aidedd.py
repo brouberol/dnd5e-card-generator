@@ -395,9 +395,10 @@ class FeatScraper(BaseAideDDScraper):
 
     def scrape(self) -> Feat:
         print(f"Scraping data for feat {self.slug}")
+        prerequisite_div = self.div_content.find("div", class_="prerequis")
         return Feat(
             title=self.scrape_title(),
             text=self.scrape_description(),
-            prerequesite=self.div_content.find("div", class_="prerequis").text,
+            prerequesite=prerequisite_div.text if prerequisite_div else None,
             lang=self.lang,
         )
