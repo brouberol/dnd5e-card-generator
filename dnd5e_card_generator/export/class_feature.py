@@ -13,6 +13,25 @@ class ClassFeature(BaseCardTextFormatter):
     class_variant: str | None = field(default=None)
 
     @property
+    def icon(self):
+        mapping = {
+            "artificier": "fire-tail",
+            "barbare": "sharp-axe",
+            "barde": "harp",
+            "clerc": "thor-hammer",
+            "druide": "sickle",
+            "ensorceleur": "dragon-breath",
+            "guerrier": "axe-sword",
+            "magicien": "robe",
+            "moine": "fist",
+            "occultiste": "warlock-eye",
+            "paladin": "knight-banner",
+            "rodeur": "high-shot",
+            "roublard": "knife-thrust",
+        }
+        return mapping[self.class_name]
+
+    @property
     def text_parts(self) -> str:
         text = self.fix_text_with_subparts(self.text)
         text = self.fix_text_with_bullet_points(text)
@@ -32,7 +51,7 @@ class ClassFeature(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon="stars-stack"),
+            self.format_title(title=self.title, icon=self.icon),
             self.format_subtitle(self.subtitle_text),
             self.format_header_separator(),
             self.format_spell_school("illusion"),
