@@ -161,9 +161,12 @@ class BaseAideDDScraper:
 
 class SpellScraper(BaseAideDDScraper):
     base_url = AIDEDD_SPELLS_URL
+    # We surround these indicators with underscores as the text appears in italics
+    # in the text, and this is our way to signal the card formatter to display this
+    # text in italics in the end.
     upcasting_indicator_by_lang = {
-        "fr": "Aux niveaux supérieurs",
-        "en": "At Higher Levels",
+        "fr": "_Aux niveaux supérieurs_",
+        "en": "_At Higher Levels_",
     }
     paying_components_indicator_by_lang = {
         "fr": "valant au moins",
