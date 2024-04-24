@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from dnd5e_card_generator.const import COLORS
+from dnd5e_card_generator.config import COLORS, ICONS
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import Card
 
@@ -33,7 +33,7 @@ class Feat(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon="stars-stack"),
+            self.format_title(title=self.title, icon=ICONS["feat"]),
             self.format_spell_school("illusion"),
             self.format_header_separator(),
             self.prerequisite_text,

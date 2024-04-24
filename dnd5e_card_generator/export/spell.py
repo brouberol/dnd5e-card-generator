@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Optional
 
-from dnd5e_card_generator.const import COLORS, SPELLS_BY_TYPE
+from dnd5e_card_generator.config import COLORS, ICONS
+from dnd5e_card_generator.const import SPELLS_BY_TYPE
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import (
     Card,
@@ -66,7 +67,7 @@ class Spell(BaseCardTextFormatter):
         if spell_type := self.spell_type:
             if spell_type.icon:
                 return spell_type.icon
-        return "scroll-unfurled"
+        return ICONS["spell_default"]
 
     @property
     def subtitle(self) -> str:
@@ -263,40 +264,64 @@ class Spell(BaseCardTextFormatter):
             self.format_text(upcasting_text),
         ]
 
+    def format_casting_time_property(self) -> str:
+        return self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["casting_time"]),
+            self.shorten_time_text(self.shorten_casting_time_text(self.casting_time)),
+        )
+
+    def format_casting_range_property(self) -> str:
+        return (
+            self.format_property_inline(
+                game_icon(ICONS["spell_properties"]["casting_range"]),
+                self.shorten_distance_text(self.casting_range_text),
+            ),
+        )
+
+    def format_casting_shape_property(self) -> str:
+        return self.format_property_inline(
+            game_icon(self.shape.icon),
+            self.shorten_distance_text(self.casting_shape_text),
+        )
+
+    def format_effect_duration_property(self) -> str:
+        return self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["effect_duration"]),
+            self.shorten_effect_duration_text(self.effect_duration),
+        )
+
+    def format_casting_components_property(self) -> str:
+        self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["casting_components"]),
+            self.spell_casting_components,
+        )
+
+    def format_concentration_property(self) -> str:
+        return self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["concentration"]), "C"
+        )
+
+    def format_ritual_property(self) -> str:
+        return self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["ritual"]), "R"
+        )
+
     @property
     def spell_properties_parts(self) -> list[str]:
         parts = [
-            self.format_property_inline(
-                game_icon("player-time"),
-                self.shorten_time_text(
-                    self.shorten_casting_time_text(self.casting_time)
-                ),
-            ),
-            self.format_property_inline(
-                game_icon("measure-tape"),
-                self.shorten_distance_text(self.casting_range_text),
-            ),
+            self.format_casting_time_property(),
+            self.format_casting_range_property(),
         ]
         if self.shape and self.shape.icon:
-            parts.append(
-                self.format_property_inline(
-                    game_icon(self.shape.icon),
-                    self.shorten_distance_text(self.casting_shape_text),
-                )
-            )
+            parts.append(self.format_casting_shape_property())
         parts += [
-            self.format_property_inline(
-                game_icon("sands-of-time"),
-                self.shorten_effect_duration_text(self.effect_duration),
-            ),
-            self.format_property_inline(
-                game_icon("drink-me"), self.spell_casting_components
-            ),
+            self.format_effect_duration_property(),
+            self.format_casting_components_property(),
         ]
         if self.concentration:
-            parts.append(self.format_property_inline(game_icon("meditation"), "C"))
+            parts.append(self.format_concentration_property())
         if self.ritual:
-            parts.append(self.format_property_inline(game_icon("pentacle"), "R"))
+            parts.append(self.format_ritual_property())
         return parts
 
     @property

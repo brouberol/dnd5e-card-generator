@@ -2,7 +2,7 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self
 
-from dnd5e_card_generator.const import COLORS
+from dnd5e_card_generator.config import COLORS, ICONS, TRANSLATIONS
 
 from .translator import TranslatedStrEnum
 from .utils import game_icon
@@ -81,14 +81,7 @@ class MagicItemRarity(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(self) -> dict:
-        return {
-            "common": "commun",
-            "uncommon": "peu commun",
-            "rare": "rare",
-            "very_rare": "très rare",
-            "legendary": "légendaire",
-            "artifact": "artéfact",
-        }
+        return TRANSLATIONS["magic_item_rarity"]
 
     @property
     def color(self) -> str:
@@ -98,7 +91,7 @@ class MagicItemRarity(TranslatedStrEnum):
 class MagicItemKind(TranslatedStrEnum):
     """Describes the type of object of a magic item"""
 
-    wondrous_item = "wondrous_item"
+    wondrous_item = "wondrous item"
     ring = "ring"
     weapon = "weapon"
     wand = "wand"
@@ -109,30 +102,11 @@ class MagicItemKind(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(cls):
-        return {
-            "armor": "armure",
-            "potion": "potion",
-            "ring": "anneau",
-            "rod": "sceptre",
-            "staff": "bâton",
-            "wand": "baguette",
-            "weapon": "arme",
-            "wondrous_item": "objet merveilleux",
-        }
+        return TRANSLATIONS["magic_item_kind"]
 
     @property
     def icon(self) -> str:
-        icon_by_type = {
-            "armor": "lamellar",
-            "weapon": "shard-sword",
-            "ring": "ring",
-            "wand": "lunar-wand",
-            "wondrous_item": "eclipse-flare",
-            "staff": "bo",
-            "rod": "flanged-mace",
-            "potion": "potion-ball",
-        }
-        return icon_by_type[self.value]
+        return ICONS["magic_item_kind"][self.name]
 
 
 class MagicSchool(TranslatedStrEnum):
@@ -149,16 +123,7 @@ class MagicSchool(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(cls):
-        return {
-            "abjuration": "abjuration",
-            "divination": "divination",
-            "enchantment": "enchantement",
-            "evocation": "évocation",
-            "illusion": "illusion",
-            "conjuration": "invocation",
-            "necromancy": "nécromancie",
-            "transmutation": "transmutation",
-        }
+        return TRANSLATIONS["magic_school"]
 
 
 class DamageType(TranslatedStrEnum):
@@ -184,40 +149,11 @@ class DamageType(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(self) -> dict:
-        return {
-            "acid": "acide",
-            "bludgeoning": "contondant",
-            "cold": "froid",
-            "fire": "feu",
-            "force": "force",
-            "lightning": "éclair",
-            "necrotic": "nécrotique",
-            "piercing": "perforant",
-            "poison": "poison",
-            "psychic": "psychique",
-            "radiant": "radiant",
-            "slashing": "tranchant",
-            "thunder": "tonnerre",
-        }
+        return TRANSLATIONS["damage_type"]
 
     @property
     def icon(self) -> str:
-        damage_to_icon = {
-            "acid": "acid",
-            "bludgeoning": "hammer-drop",
-            "cold": "ice-spear",
-            "fire": "celebration-fire",
-            "force": "mighty-force",
-            "lightning": "lightning-tree",
-            "necrotic": "burning-skull",
-            "piercing": "arrowhead",
-            "poison": "poison-bottle",
-            "psychic": "psychic-waves",
-            "radiant": "sun",
-            "slashing": "axe-sword",
-            "thunder": "crowned-explosion",
-        }
-        return damage_to_icon[self.value]
+        return ICONS["damage"][self.name]
 
     @classmethod
     def to_pattern(cls, lang: str) -> str:
@@ -259,34 +195,11 @@ class SpellShape(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(self) -> dict[str, str]:
-        return {
-            "circle": "cercle",
-            "cone": "cône",
-            "cube": "cube",
-            "cylinder": "cylindre",
-            "hemisphere": "hémisphère",
-            "line": "ligne",
-            "sphere": "sphère",
-            "square": "carré",
-            "wall": "mur",
-            "radius": "rayon",
-        }
+        return TRANSLATIONS["spell_shape"]
 
     @property
     def icon(self) -> str:
-        shape_to_icon = {
-            "circle": "circle",
-            "cone": "ringed-beam",
-            "cube": "cube",
-            "cylinder": "database",
-            "hemisphere": "onigori",
-            "line": "straight-pipe",
-            "radius": "circle",
-            "sphere": "glass-ball",
-            "square": "square",
-            "wall": "brick-wall",
-        }
-        return shape_to_icon[self.value]
+        return ICONS["spell_shape"][self.value]
 
 
 class SpellType(TranslatedStrEnum):
@@ -307,26 +220,11 @@ class SpellType(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(self) -> dict[str, str]:
-        return {
-            "aoe": "zone",
-            "buff": "bonus",
-            "debuff": "malus",
-            "healing": "soins",
-            "utility": "utilitaire",
-            "damage": "offensif",
-        }
+        return TRANSLATIONS["spell_type"]
 
     @property
     def icon(self) -> str:
-        type_to_icon = {
-            "aoe": "fire-ring",
-            "buff": "armor-upgrade",
-            "debuff": "armor-downgrade",
-            "healing": "health-potion",
-            "utility": "toolbox",
-            "damage": "bloody-sword",
-        }
-        return type_to_icon[self.value]
+        return ICONS["spell_type"][self.name]
 
 
 class DamageDie(StrEnum):
@@ -374,40 +272,11 @@ class CharacterClass(TranslatedStrEnum):
 
     @classmethod
     def fr_translations(self) -> dict[str, str]:
-        return {
-            "artificer": "artificier",
-            "barbarian": "barbare",
-            "bard": "barde",
-            "cleric": "clerc",
-            "druid": "druide",
-            "monk": "moine",
-            "paladin": "paladin",
-            "ranger": "rodeur",
-            "rogue": "roublard",
-            "sorcerer": "ensorceleur",
-            "warlock": "occultiste",
-            "warrior": "guerrier",
-            "wizard": "magicien",
-        }
+        return TRANSLATIONS["character_class"]
 
     @property
     def icon(self):
-        mapping = {
-            "artificer": "fire-tail",
-            "barbarian": "sharp-axe",
-            "bard": "harp",
-            "cleric": "thor-hammer",
-            "druid": "sickle",
-            "monk": "fist",
-            "paladin": "knight-banner",
-            "ranger": "high-shot",
-            "rogue": "knife-thrust",
-            "sorcerer": "dragon-breath",
-            "warlock": "warlock-eye",
-            "warrior": "axe-sword",
-            "wizard": "robe",
-        }
-        return mapping[self.value]
+        return ICONS["classes"][self.value]
 
 
 @dataclass

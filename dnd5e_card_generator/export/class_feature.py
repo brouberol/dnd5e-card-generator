@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from dnd5e_card_generator.const import COLORS
+from dnd5e_card_generator.config import COLORS
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import Card, CharacterClass
 
