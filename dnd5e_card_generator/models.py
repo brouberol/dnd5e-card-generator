@@ -99,7 +99,7 @@ class MagicItemRarity(TranslatedStrEnum):
             "legendary": "F06060",
             "artifact": "9575CD",
         }
-        return colors_by_rarity[self.value]
+        return colors_by_rarity[self.name]
 
 
 class MagicItemKind(TranslatedStrEnum):
