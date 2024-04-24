@@ -440,10 +440,10 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
                 found_tag = True
                 continue
             if t.name == "p" and found_tag:
-                accumulator.append(t)
+                accumulator.append(self.sanitize_soup(t))
             elif t.name in ["h2", "h3", "h4"] and found_tag:
                 break
-        return [tag.string for tag in accumulator]
+        return [tag.string or tag.text for tag in accumulator]
 
     def scrape_class_variant(self) -> str | None:
         tag = self.find_feature_section()
