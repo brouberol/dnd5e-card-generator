@@ -77,14 +77,11 @@ class MagicItem(BaseCardTextFormatter):
         )
 
     def to_card(self) -> dict:
-        card = {
-            "count": 1,
-            "color": self.color,
-            "title": self.title,
-            "icon": self.icon,
-            "icon_back": self.icon,
-            "contents": self.contents_text,
-        }
-        if self.image_url:
-            card["background_image"] = self.image_url
-        return card
+        card = Card(
+            color=self.color,
+            title=self.title,
+            icon=self.icon,
+            contents=self.contents_text,
+            background_image=self.image_url,
+        )
+        return card.to_dict()

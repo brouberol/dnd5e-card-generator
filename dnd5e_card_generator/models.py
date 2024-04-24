@@ -342,6 +342,7 @@ class Card:
     icon: str | None
     contents: list[str]
     count: int = field(default=1)
+    background_image: str | None = field(default=None)
 
     def to_dict(self) -> dict:
         return asdict(self)
