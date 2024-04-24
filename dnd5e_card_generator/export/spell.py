@@ -333,10 +333,10 @@ class Spell(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
+            self.format_title(title=self.title, icon=self.spell_type_icon),
             self.format_subtitle(self.subtitle),
             self.format_level(self.level),
             self.format_spell_school(self.school),
-            self.format_title(title=self.title, icon=self.spell_type_icon),
             self.spell_properties_parts,
             self.format_header_separator(),
             self.spell_parts,
