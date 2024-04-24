@@ -7,6 +7,8 @@ poetry run dnd5e-card-generator \
     --items fr:cape-d-invisibilite fr:anneau-de-regeneration \
     --feats fr:athlete fr:sentinelle \
     --class-features \
+        'artificier:Outil de circonstance' \
+        'artificier:Élixir expérimental' \
         'barbare:Sens du danger' \
         'barbare:Esprit totem' \
         'barde:Expertise' \

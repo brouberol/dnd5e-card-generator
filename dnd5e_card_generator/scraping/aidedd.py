@@ -16,6 +16,7 @@ from dnd5e_card_generator.const import (
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
     AIDEDD_SPELLS_URL,
+    AIDEDD_UNEARTHED_ARCANA_URL,
     FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.export.class_feature import ClassFeature
@@ -406,6 +407,7 @@ class FeatScraper(BaseAideDDScraper):
 
 class CharacterClassFeatureScraper(BaseAideDDScraper):
     class_variant_indicator = {
+        "artificier": "Spécialité",
         "barbare": "Voie",
         "barde": "Collège",
         "clerc": "Domaine",
@@ -427,6 +429,8 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
 
     @property
     def base_url(self) -> str:
+        if self.class_name == "artificier":
+            return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name)
         return AIDEDD_CLASS_RULES_URL.format(class_=self.class_name)
 
     def find_feature_section(self) -> Tag:
