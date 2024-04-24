@@ -16,8 +16,7 @@ def export_elements_to_cards(elements, ScraperCls, sorting_func):
     tasks, models = [], []
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         for element in elements:
-            lang, slug = element.split(":")
-            scraper = ScraperCls(slug=slug, lang=lang)
+            scraper = ScraperCls(**element.to_dict())
             tasks.append(executor.submit(scraper.scrape))
         for future in concurrent.futures.as_completed(tasks):
             models.append(future.result())

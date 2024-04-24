@@ -6,6 +6,45 @@ from .translator import TranslatedStrEnum
 from .utils import game_icon
 
 
+class BaseDataclass:
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class CliArg(BaseDataclass):
+    lang: str
+    slug: str
+
+    @classmethod
+    def from_str(cls, s: str) -> "CliArg":
+        lang, slug = s.split(":")
+        return cls(lang=lang, slug=slug)
+
+
+class CliSpell(CliArg): ...
+
+
+class CliMagicItem(CliArg): ...
+
+
+class CliFeat(CliArg): ...
+
+
+@dataclass
+class CliSpellFilter(BaseDataclass):
+    class_name: str
+    min_level: int
+    max_level: int
+
+    @classmethod
+    def from_str(cls, s: str) -> "CliSpellFilter":
+        class_name, min_level, max_level = s.split(":")
+        return cls(
+            class_name=class_name, min_level=int(min_level), max_level=int(max_level)
+        )
+
+
 class MagicItemRarity(TranslatedStrEnum):
     """Describes the rarity of a magic item"""
 
@@ -334,7 +373,7 @@ class DamageFormula:
 
 
 @dataclass
-class Card:
+class Card(BaseDataclass):
     """Wrapper around the data contained in a physical item or spell card"""
 
     color: str
@@ -343,6 +382,3 @@ class Card:
     contents: list[str]
     count: int = field(default=1)
     background_image: str | None = field(default=None)
-
-    def to_dict(self) -> dict:
-        return asdict(self)

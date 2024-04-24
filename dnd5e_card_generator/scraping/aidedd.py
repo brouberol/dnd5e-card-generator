@@ -14,6 +14,7 @@ from dnd5e_card_generator.const import (
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
+    AIDEDD_SPELLS_URL,
     FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.export.feat import Feat
@@ -31,11 +32,11 @@ from dnd5e_card_generator.models import (
 @dataclass
 class SpellFilter:
     class_name: str
-    min_lvl: int
-    max_lvl: int
+    min_level: int
+    max_level: int
 
-    @staticmethod
-    def class_name_synonyms():
+    @property
+    def class_name_synonyms(self):
         return {
             "artificer": "a",
             "artificier": "a",
@@ -56,14 +57,6 @@ class SpellFilter:
             "rodeur": "r",
         }
 
-    @classmethod
-    def from_str(cls, s: str) -> "SpellFilter":
-        class_name, min_lvl, max_lvl = s.split(":")
-        resolved_class_name = cls.class_name_synonyms().get(class_name, class_name)
-        return SpellFilter(
-            class_name=resolved_class_name, min_lvl=int(min_lvl), max_lvl=int(max_lvl)
-        )
-
     def request(self) -> requests.Response:
         resp = requests.post(
             AIDEDD_SPELLS_FILTER_URL,
@@ -73,9 +66,9 @@ class SpellFilter:
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             data={
-                "Filtre1[]": [self.class_name],
-                "nivMin": self.min_lvl,
-                "nivMax": self.max_lvl,
+                "Filtre1[]": [self.class_name_synonyms[self.class_name]],
+                "nivMin": self.min_level,
+                "nivMax": self.max_level,
                 "source[]": ["base", "xgte", "tcoe", "ftod"],
                 "opt_tcoe": "S",
                 "colE": "on",
@@ -165,7 +158,7 @@ class BaseAideDDScraper:
 
 
 class SpellScraper(BaseAideDDScraper):
-    base_url = AIDEDD_SPELLS_FILTER_URL
+    base_url = AIDEDD_SPELLS_URL
     upcasting_indicator_by_lang = {
         "fr": "Aux niveaux supérieurs",
         "en": "At Higher Levels",

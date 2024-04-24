@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .export import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
+from .models import CliFeat, CliMagicItem, CliSpell, CliSpellFilter
 from .scraping.aidedd import SpellFilter
 
 
@@ -19,6 +20,7 @@ def parse_args():
         ),
         required=False,
         default=[],
+        type=CliSpell.from_str,
     )
     parser.add_argument(
         "--spell-filter",
@@ -27,6 +29,7 @@ def parse_args():
             "Example: cleric:0:1"
         ),
         required=False,
+        type=CliSpellFilter.from_str,
     )
     parser.add_argument(
         "--include-spell-legend",
@@ -44,6 +47,7 @@ def parse_args():
         ),
         required=False,
         default=[],
+        type=CliMagicItem.from_str,
     )
     parser.add_argument(
         "--feats",
@@ -67,12 +71,13 @@ def parse_args():
 
 def main():
     args = parse_args()
-    spells = args.spells
+    cards, spells = [], []
     if args.spell_filter:
-        spells += SpellFilter.from_str(args.spell_filter).resolve()
-        spells = list(set(spells))
+        spells_str = SpellFilter(**args.spell_filter.to_dict()).resolve()
+        spells = list(set(spells_str))
+        spells = [CliSpell.from_str(spell_str) for spell_str in spells_str]
 
-    cards = []
+    spells = args.spells + spells
     if spells:
         cards.extend(
             export_spells_to_cards(spells, include_legend=args.include_spell_legend)
