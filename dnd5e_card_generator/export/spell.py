@@ -271,11 +271,9 @@ class Spell(BaseCardTextFormatter):
         )
 
     def format_casting_range_property(self) -> str:
-        return (
-            self.format_property_inline(
-                game_icon(ICONS["spell_properties"]["casting_range"]),
-                self.shorten_distance_text(self.casting_range_text),
-            ),
+        return self.format_property_inline(
+            game_icon(ICONS["spell_properties"]["casting_range"]),
+            self.shorten_distance_text(self.casting_range_text),
         )
 
     def format_casting_shape_property(self) -> str:
@@ -291,7 +289,7 @@ class Spell(BaseCardTextFormatter):
         )
 
     def format_casting_components_property(self) -> str:
-        self.format_property_inline(
+        return self.format_property_inline(
             game_icon(ICONS["spell_properties"]["casting_components"]),
             self.spell_casting_components,
         )
