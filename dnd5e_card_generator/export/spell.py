@@ -4,10 +4,17 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Optional
 
-from .const import SPELLS_BY_TYPE
-from .format import BaseCardTextFormatter
-from .models import Card, DamageDie, DamageType, MagicSchool, SpellShape, SpellType
-from .utils import game_icon, humanize_level, strip_accents
+from dnd5e_card_generator.const import SPELLS_BY_TYPE
+from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
+from dnd5e_card_generator.models import (
+    Card,
+    DamageDie,
+    DamageType,
+    MagicSchool,
+    SpellShape,
+    SpellType,
+)
+from dnd5e_card_generator.utils import game_icon, humanize_level, strip_accents
 
 
 @dataclass

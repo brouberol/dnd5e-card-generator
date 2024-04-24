@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass
 
-from .models import MagicItemKind, MagicItemRarity
-from .utils import damage_type_text, game_icon
+from dnd5e_card_generator.models import MagicItemKind, MagicItemRarity
+from dnd5e_card_generator.utils import damage_type_text, game_icon
 
 
 @dataclass
@@ -53,10 +53,16 @@ class MagicItem:
         return ["fill | ", f"boxes | {self.recharges} | 1.5"]  # 1.5 is in em
 
     @property
+    def title_text(self) -> list[str]:
+        return [
+            f"title | {self.title} | {game_icon(self.icon)}",
+        ]
+
+    @property
     def subtitle_text(self) -> list[str]:
         return [
             f"subtitle | {self.subtitle}",
-            "rule",
+            "header_separator",
         ]
 
     @property
@@ -67,7 +73,9 @@ class MagicItem:
 
     @property
     def contents_text(self) -> list[str]:
-        return self.subtitle_text + self.text + self.recharges_text
+        return (
+            self.title_text + self.subtitle_text + self.item_text + self.recharges_text
+        )
 
     def to_card(self) -> dict:
         card = {

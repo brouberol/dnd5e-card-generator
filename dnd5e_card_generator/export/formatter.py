@@ -1,6 +1,6 @@
 import re
 
-from .models import DamageDie, DamageFormula, DamageType
+from dnd5e_card_generator.models import DamageDie, DamageFormula, DamageType
 
 
 class BaseCardTextFormatter:

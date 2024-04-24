@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from .format import BaseCardTextFormatter
-from .models import Card
-from .utils import game_icon
+from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
+from dnd5e_card_generator.models import Card
+from dnd5e_card_generator.utils import game_icon
 
 
 @dataclass

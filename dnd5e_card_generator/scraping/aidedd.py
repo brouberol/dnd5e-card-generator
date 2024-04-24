@@ -16,8 +16,9 @@ from dnd5e_card_generator.const import (
     AIDEDD_SPELLS_FILTER_URL,
     FIVE_E_SHEETS_SPELLS,
 )
-from dnd5e_card_generator.feat import Feat
-from dnd5e_card_generator.magic_item import MagicItem
+from dnd5e_card_generator.export.feat import Feat
+from dnd5e_card_generator.export.magic_item import MagicItem
+from dnd5e_card_generator.export.spell import Spell
 from dnd5e_card_generator.models import (
     DamageType,
     MagicItemKind,
@@ -25,7 +26,6 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
 )
-from dnd5e_card_generator.spell import Spell
 
 
 @dataclass

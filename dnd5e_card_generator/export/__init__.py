@@ -1,6 +1,11 @@
 import concurrent.futures
 
-from .scraping.aidedd import FeatScraper, MagicItemScraper, SpellScraper
+from dnd5e_card_generator.scraping.aidedd import (
+    FeatScraper,
+    MagicItemScraper,
+    SpellScraper,
+)
+
 from .spell import SpellLegend
 
 
