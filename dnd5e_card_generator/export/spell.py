@@ -236,7 +236,7 @@ class Spell(BaseCardTextFormatter):
     @property
     def spell_parts(self) -> list[str]:
         text_parts = self.render_spell_parts_text(self.text)
-        return [f"text | {text_part}" for text_part in text_parts]
+        return [self.format_text(text_part) for text_part in text_parts]
 
     @property
     def casting_shape_text(self) -> str:
