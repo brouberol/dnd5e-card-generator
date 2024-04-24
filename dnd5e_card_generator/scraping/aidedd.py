@@ -400,6 +400,21 @@ class FeatScraper(BaseAideDDScraper):
 
 
 class CharacterClassFeatureScraper(BaseAideDDScraper):
+    class_variant_indicator = {
+        "barbare": "Voie",
+        "barde": "Collège",
+        "clerc": "Domaine",
+        "druide": "Cercle",
+        "ensorceleur": "Origine",
+        "guerrier": "Archétype",
+        "magicien": "Tradition",
+        "moine": "Tradition",
+        "occultiste": "Patron",
+        "paladin": "Serment",
+        "rodeur": "Archétype",
+        "roublard": "Archétype",
+    }
+
     def __init__(self, class_name: str, title: str, lang: str):
         self.class_name = class_name
         self.title = title
@@ -409,12 +424,16 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
     def base_url(self) -> str:
         return AIDEDD_CLASS_RULES_URL.format(class_=self.class_name)
 
-    def scrape_text(self) -> list[str]:
+    def find_feature_section(self) -> Tag:
         for tag in self.soup.find_all(["h3", "h4"]):
             if tag.text == self.title:
                 break
         else:
             raise ValueError(f"Class feature {self.title} not found")
+        return tag
+
+    def scrape_text(self) -> list[str]:
+        tag = self.find_feature_section()
         accumulator, found_tag = [], False
         for t in self.soup.find_all():
             if t == tag:
@@ -426,8 +445,31 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
                 break
         return [tag.string for tag in accumulator]
 
+    def scrape_class_variant(self) -> str | None:
+        tag = self.find_feature_section()
+        last_seen_h2, last_seen_h3 = None, None
+        for t in self.soup.find_all(["h2", "h3", tag.name]):
+            if t == tag:
+                if last_seen_h2.text.startswith(
+                    self.class_variant_indicator[self.class_name]
+                ):
+                    return last_seen_h3.text
+                else:
+                    return
+            elif t.name == "h2":
+                last_seen_h2 = t
+            elif t.name == "h3":
+                last_seen_h3 = t
+        return
+
     def scrape(self) -> ClassFeature:
+        print(f"Scraping data for class feature {self.title}")
         text = self.scrape_text()
+        class_variant = self.scrape_class_variant()
         return ClassFeature(
-            text=text, title=self.title, lang=self.lang, class_name=self.class_name
+            text=text,
+            title=self.title,
+            lang=self.lang,
+            class_name=self.class_name,
+            class_variant=class_variant,
         )
