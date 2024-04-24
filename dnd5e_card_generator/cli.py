@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from .export import (
@@ -81,7 +82,6 @@ def parse_args():
         "--output",
         type=Path,
         help="File to write scraped spell data to",
-        required=True,
     )
     return parser.parse_args()
 
@@ -106,8 +106,12 @@ def main():
     if args.class_features:
         cards.extend(export_class_features_to_cards(args.class_features))
 
-    with open(args.output, "w") as out:
-        json.dump(cards, out, indent=2, ensure_ascii=False)
+    cards_json = json.dumps(cards, indent=2, ensure_ascii=False)
+    if args.output:
+        with open(args.output, "w") as out:
+            out.write(cards_json)
+    else:
+        sys.stdout.write(cards_json)
 
 
 if __name__ == "__main__":
