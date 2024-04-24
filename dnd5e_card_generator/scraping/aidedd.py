@@ -142,6 +142,8 @@ class BaseAideDDScraper:
         return new_soup
 
     def scrape_text_block(self, tag: Tag) -> list[str]:
+        if tag.name == "table":
+            return [str(tag)]
         desc_div = self.sanitize_soup(tag)
         return list(desc_div.strings)
 
@@ -444,6 +446,8 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
                 continue
             if t.name == "p" and found_tag:
                 accumulator.append(self.sanitize_soup(t))
+            elif t.name == "table" and found_tag:
+                accumulator.append(t)
             elif t.name in ["h2", "h3", "h4"] and found_tag:
                 break
         out = []
