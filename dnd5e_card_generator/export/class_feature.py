@@ -14,7 +14,7 @@ class ClassFeature(BaseCardTextFormatter):
 
     @property
     def text_parts(self) -> str:
-        return [self.format_text(part) for part in self.text]
+        return [self.format_text(self.highlight_level(part)) for part in self.text]
 
     @property
     def subtitle_text(self) -> str:

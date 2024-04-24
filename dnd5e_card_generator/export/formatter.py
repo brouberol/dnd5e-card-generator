@@ -125,6 +125,10 @@ class BaseCardTextFormatter:
                 text_copy[i] = ""
         return [part for part in text_copy if part]
 
+    def highlight_level(self, text: str) -> str:
+        level_pattern_by_lang = {"fr": r"niveau \d+", "en": r"\d+(st|nd|rd|th) level"}
+        return self._highlight(level_pattern_by_lang[self.lang], text)
+
     def format_bullet_point(self, text: str) -> str:
         text = text.replace("• ", "")
         if m := re.match(r"((\w+)\s)+(?=:)", text):
