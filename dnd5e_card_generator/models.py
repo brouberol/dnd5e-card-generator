@@ -364,6 +364,59 @@ class DamageDie(StrEnum):
         return getattr(DamageDie, s)
 
 
+class CharacterClass(TranslatedStrEnum):
+    artificer = "artificer"
+    barbarian = "barbarian"
+    bard = "bard"
+    cleric = "cleric"
+    druid = "druid"
+    monk = "monk"
+    paladin = "paladin"
+    ranger = "ranger"
+    rogue = "rogue"
+    sorcerer = "sorcerer"
+    warlock = "warlock"
+    warrior = "warrior"
+    wizard = "wizard"
+
+    @classmethod
+    def fr_translations(self) -> dict[str, str]:
+        return {
+            "artificer": "artificier",
+            "barbarian": "barbare",
+            "bard": "barde",
+            "cleric": "clerc",
+            "druid": "druide",
+            "monk": "moine",
+            "paladin": "paladin",
+            "ranger": "rodeur",
+            "rogue": "roublard",
+            "sorcerer": "ensorceleur",
+            "warlock": "occultiste",
+            "warrior": "guerrier",
+            "wizard": "magicien",
+        }
+
+    @property
+    def icon(self):
+        mapping = {
+            "artificer": "fire-tail",
+            "barbarian": "sharp-axe",
+            "bard": "harp",
+            "cleric": "thor-hammer",
+            "druid": "sickle",
+            "monk": "fist",
+            "paladin": "knight-banner",
+            "ranger": "high-shot",
+            "rogue": "knife-thrust",
+            "sorcerer": "dragon-breath",
+            "warlock": "warlock-eye",
+            "warrior": "axe-sword",
+            "wizard": "robe",
+        }
+        return mapping[self.value]
+
+
 @dataclass
 class DamageFormula:
     """Representation of a damage formula.

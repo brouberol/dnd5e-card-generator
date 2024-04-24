@@ -24,6 +24,7 @@ from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
 from dnd5e_card_generator.export.spell import Spell
 from dnd5e_card_generator.models import (
+    CharacterClass,
     DamageType,
     MagicItemKind,
     MagicItemRarity,
@@ -407,31 +408,35 @@ class FeatScraper(BaseAideDDScraper):
 
 class CharacterClassFeatureScraper(BaseAideDDScraper):
     class_variant_indicator = {
-        "artificier": "Spécialité",
-        "barbare": "Voie",
-        "barde": "Collège",
-        "clerc": "Domaine",
-        "druide": "Cercle",
-        "ensorceleur": "Origine",
-        "guerrier": "Archétype",
-        "magicien": "Tradition",
-        "moine": "Tradition",
-        "occultiste": "Patron",
-        "paladin": "Serment",
-        "rodeur": "Archétype",
-        "roublard": "Archétype",
+        CharacterClass.artificer: "Spécialité",
+        CharacterClass.barbarian: "Voie",
+        CharacterClass.bard: "Collège",
+        CharacterClass.cleric: "Domaine",
+        CharacterClass.druid: "Cercle",
+        CharacterClass.monk: "Tradition",
+        CharacterClass.paladin: "Serment",
+        CharacterClass.ranger: "Archétype",
+        CharacterClass.rogue: "Archétype",
+        CharacterClass.sorcerer: "Origine",
+        CharacterClass.warlock: "Patron",
+        CharacterClass.warrior: "Archétype",
+        CharacterClass.wizard: "Tradition",
     }
 
     def __init__(self, class_name: str, title: str, lang: str):
-        self.class_name = class_name
+        self.class_name = CharacterClass.from_str(class_name, lang)
         self.title = title
         super().__init__(slug=title, lang=lang)
 
     @property
     def base_url(self) -> str:
-        if self.class_name == "artificier":
-            return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name)
-        return AIDEDD_CLASS_RULES_URL.format(class_=self.class_name)
+        if self.class_name == CharacterClass.artificer:
+            return AIDEDD_UNEARTHED_ARCANA_URL.format(
+                class_=self.class_name.translate(self.lang)
+            )
+        return AIDEDD_CLASS_RULES_URL.format(
+            class_=self.class_name.translate(self.lang)
+        )
 
     def find_feature_section(self) -> Tag:
         for tag in self.soup.find_all(["h3", "h4"]):

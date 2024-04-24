@@ -1,35 +1,16 @@
 from dataclasses import dataclass, field
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.models import Card
+from dnd5e_card_generator.models import Card, CharacterClass
 
 
 @dataclass
 class ClassFeature(BaseCardTextFormatter):
-    class_name: str
+    class_name: CharacterClass
     title: str
     text: list[str]
     lang: str
     class_variant: str | None = field(default=None)
-
-    @property
-    def icon(self):
-        mapping = {
-            "artificier": "fire-tail",
-            "barbare": "sharp-axe",
-            "barde": "harp",
-            "clerc": "thor-hammer",
-            "druide": "sickle",
-            "ensorceleur": "dragon-breath",
-            "guerrier": "axe-sword",
-            "magicien": "robe",
-            "moine": "fist",
-            "occultiste": "warlock-eye",
-            "paladin": "knight-banner",
-            "rodeur": "high-shot",
-            "roublard": "knife-thrust",
-        }
-        return mapping[self.class_name]
 
     @property
     def text_parts(self) -> str:
@@ -51,7 +32,7 @@ class ClassFeature(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon=self.icon),
+            self.format_title(title=self.title, icon=self.class_name.icon),
             self.format_subtitle(self.subtitle_text),
             self.format_header_separator(),
             self.format_spell_school("illusion"),
