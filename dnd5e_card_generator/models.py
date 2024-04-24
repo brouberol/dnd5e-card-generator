@@ -2,6 +2,8 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self
 
+from dnd5e_card_generator.const import COLORS
+
 from .translator import TranslatedStrEnum
 from .utils import game_icon
 
@@ -90,16 +92,7 @@ class MagicItemRarity(TranslatedStrEnum):
 
     @property
     def color(self) -> str:
-        # https://colordesigner.io/color-scheme-builder#5C4B51-8CBEB2-F2EBBF-F3B562-F06060
-        colors_by_rarity = {
-            "common": "5C4B51",
-            "uncommon": "8CBEB2",
-            "rare": "BDD684",
-            "very_rare": "F3B562",
-            "legendary": "F06060",
-            "artifact": "9575CD",
-        }
-        return colors_by_rarity[self.name]
+        return COLORS["magic_item"][self.name]
 
 
 class MagicItemKind(TranslatedStrEnum):

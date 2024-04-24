@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Optional
 
-from dnd5e_card_generator.const import SPELLS_BY_TYPE
+from dnd5e_card_generator.const import COLORS, SPELLS_BY_TYPE
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import (
     Card,
@@ -42,20 +42,7 @@ class Spell(BaseCardTextFormatter):
 
     @property
     def color(self) -> str:
-        # https://coolors.co/palette/f94144-f3722c-f8961e-f9844a-f9c74f-90be6d-43aa8b-4d908e-577590-277da1
-        spell_colors_by_level = {
-            0: "277DA1",
-            1: "577590",
-            2: "4D908E",
-            3: "43AA8B",
-            4: "90BE6D",
-            5: "F9C74F",
-            6: "F8961E",
-            7: "F9844A",
-            8: "F3722C",
-            9: "F94144",
-        }
-        return "#" + spell_colors_by_level[self.level]
+        return "#" + COLORS["spell"][self.level]
 
     @cached_property
     def spell_type(self) -> SpellType | None:
