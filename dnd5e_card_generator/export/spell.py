@@ -332,18 +332,17 @@ class Spell(BaseCardTextFormatter):
 
     @property
     def contents_text(self) -> list[str]:
-        subtitle_text = self.format_subtitle(self.subtitle)
-        level_text = self.format_level(self.level)
-        spell_school_text = self.format_spell_school(self.school)
-        title_text = self.format_title(title=self.title, icon=self.spell_type_icon)
-        return (
-            [title_text, subtitle_text, level_text, spell_school_text]
-            + self.spell_properties_parts
-            + [self.format_header_separator()]
-            + self.spell_parts
-            + self.upcasting_parts
-            + self.paying_components_parts
-            + self.reaction_condition_parts
+        return self.assemble_text_contents(
+            self.format_subtitle(self.subtitle),
+            self.format_level(self.level),
+            self.format_spell_school(self.school),
+            self.format_title(title=self.title, icon=self.spell_type_icon),
+            self.spell_properties_parts,
+            self.format_header_separator(),
+            self.spell_parts,
+            self.upcasting_parts,
+            self.paying_components_parts,
+            self.reaction_condition_parts,
         )
 
     def to_card(self) -> dict:
@@ -442,19 +441,16 @@ class SpellLegend(BaseCardTextFormatter):
 
     @property
     def contents_text(self) -> list[str]:
-        out = (
-            [
-                self.format_title(self.title_text),
-                self.format_spell_school("illusion"),
-                self.format_header_separator(),
-            ]
-            + self.damage_die_legend
-            + self.damage_type_legend
-            + self.spell_type_legend
-            + self.spell_shape_legend
-            + [self.format_fill()]
+        return self.assemble_text_contents(
+            self.format_title(self.title_text),
+            self.format_spell_school("illusion"),
+            self.format_header_separator(),
+            self.damage_die_legend,
+            self.damage_type_legend,
+            self.spell_type_legend,
+            self.spell_shape_legend,
+            self.format_fill(),
         )
-        return out
 
     def to_card(self) -> dict:
         card = Card(

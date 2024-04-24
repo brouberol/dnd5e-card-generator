@@ -70,10 +70,12 @@ class MagicItem(BaseCardTextFormatter):
 
     @property
     def contents_text(self) -> list[str]:
-        return (
-            [self.title_text, self.subtitle_text, self.format_header_separator()]
-            + self.item_text
-            + self.recharges_text
+        return self.assemble_text_contents(
+            self.title_text,
+            self.subtitle_text,
+            self.format_header_separator(),
+            self.item_text,
+            self.recharges_text,
         )
 
     def to_card(self) -> dict:

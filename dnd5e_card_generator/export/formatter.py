@@ -60,6 +60,17 @@ class BaseCardTextFormatter:
     def format_spell_school(self, school: str) -> str:
         return f"spell_school | {school}"
 
+    def assemble_text_contents(self, *parts: list | str) -> list[str]:
+        contents = []
+        for part in parts:
+            if not part:
+                continue
+            if isinstance(part, list):
+                contents.extend(part)
+            else:
+                contents.append(part)
+        return contents
+
     def highlight_damage_formula(self, text: str, lang: str) -> str:
         die_value_pattern = (
             r"(?P<prefix>(one |un )?)(?P<num_die>\d+)?(?P<die_type>d\d+)( (?P<dmg_extra>\+ "

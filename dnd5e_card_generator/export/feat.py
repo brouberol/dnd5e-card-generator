@@ -31,12 +31,13 @@ class Feat(BaseCardTextFormatter):
 
     @property
     def contents_text(self) -> list[str]:
-        return [
+        return self.assemble_text_contents(
             self.format_title(title=self.title, icon="stars-stack"),
             self.format_spell_school("illusion"),
             self.format_header_separator(),
             self.prerequisite_text,
-        ] + self.feat_parts
+            self.feat_parts,
+        )
 
     def to_card(self) -> dict:
         card = Card(
