@@ -411,7 +411,7 @@ class SpellLegend(BaseCardTextFormatter):
             for damage_die_name, damage_die in damage_die_batch:
                 batch.append(
                     self.format_property_inline(
-                        text=damage_die_name, icon=str(damage_die)
+                        text=damage_die_name, icon=damage_die.render()
                     )
                 )
             batch.append(self.format_fill())

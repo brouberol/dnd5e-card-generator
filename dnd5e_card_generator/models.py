@@ -296,7 +296,7 @@ class DamageDie(StrEnum):
     d20 = "f"
     d100 = "d100"
 
-    def __str__(self):
+    def render(self):
         if self.value != DamageDie.d100:
             return f"<dice>{self.value}</dice>"
         else:
@@ -326,7 +326,7 @@ class DamageFormula:
     damage_type: DamageType | None
 
     def render(self) -> str:
-        dice = f" {self.num_die}{str(self.damage_die)}"
+        dice = f" {self.num_die}{self.damage_die.render()}"
         if self.damage_type and self.damage_type.icon:
             return f"{dice}{game_icon(self.damage_type.icon)}"
         else:
