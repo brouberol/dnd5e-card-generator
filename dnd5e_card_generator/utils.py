@@ -25,3 +25,12 @@ def damage_type_text(lang):
     if lang == "fr":
         return r"(de )?dégâts (de |d')?\w+"
     return r"\w+ damage"
+
+
+def pascal_case_to_snake_case(pascal_string: str) -> str:
+    snake_string = ""
+    for i, char in enumerate(pascal_string):
+        if char.isupper() and i != 0:
+            snake_string += "_"
+        snake_string += char.lower()
+    return snake_string

@@ -1,11 +1,18 @@
 from enum import StrEnum
 from typing import Optional, Self
 
+from dnd5e_card_generator.config import COLORS, ICONS, TRANSLATIONS
+from dnd5e_card_generator.utils import pascal_case_to_snake_case
+
 
 class TranslatedStrEnum(StrEnum):
     @classmethod
-    def fr_translations(self) -> dict:
-        raise NotImplementedError
+    def config_key(cls):
+        return pascal_case_to_snake_case(cls.__name__)
+
+    @classmethod
+    def fr_translations(cls) -> dict:
+        return TRANSLATIONS[cls.config_key()]
 
     @classmethod
     def en_translations(cls) -> dict:
@@ -52,3 +59,11 @@ class TranslatedStrEnum(StrEnum):
         return (
             r"(?<=[\s\()])(" + r"|".join(cls.translations()[lang].values()) + r")(?=\s)"
         )
+
+    @property
+    def color(self) -> str:
+        return COLORS[self.config_key()][self.name]
+
+    @property
+    def icon(self) -> str:
+        return ICONS[self.config_key()][self.name]

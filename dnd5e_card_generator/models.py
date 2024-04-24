@@ -2,8 +2,6 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self
 
-from dnd5e_card_generator.config import COLORS, ICONS, TRANSLATIONS
-
 from .translator import TranslatedStrEnum
 from .utils import game_icon
 
@@ -79,14 +77,6 @@ class MagicItemRarity(TranslatedStrEnum):
             "artifact": 5,
         }[self.name]
 
-    @classmethod
-    def fr_translations(self) -> dict:
-        return TRANSLATIONS["magic_item_rarity"]
-
-    @property
-    def color(self) -> str:
-        return COLORS["magic_item"][self.name]
-
 
 class MagicItemKind(TranslatedStrEnum):
     """Describes the type of object of a magic item"""
@@ -100,14 +90,6 @@ class MagicItemKind(TranslatedStrEnum):
     potion = "potion"
     rod = "rod"
 
-    @classmethod
-    def fr_translations(cls):
-        return TRANSLATIONS["magic_item_kind"]
-
-    @property
-    def icon(self) -> str:
-        return ICONS["magic_item_kind"][self.name]
-
 
 class MagicSchool(TranslatedStrEnum):
     """List and translate all magic schools"""
@@ -120,10 +102,6 @@ class MagicSchool(TranslatedStrEnum):
     evocation = "evocation"
     necromancy = "necromancy"
     transmutation = "transmutation"
-
-    @classmethod
-    def fr_translations(cls):
-        return TRANSLATIONS["magic_school"]
 
 
 class DamageType(TranslatedStrEnum):
@@ -146,14 +124,6 @@ class DamageType(TranslatedStrEnum):
     @classmethod
     def from_5esheet_tag(cls, tag: str) -> "DamageType":
         return cls.reversed_en_translations()[tag]
-
-    @classmethod
-    def fr_translations(self) -> dict:
-        return TRANSLATIONS["damage_type"]
-
-    @property
-    def icon(self) -> str:
-        return ICONS["damage"][self.name]
 
     @classmethod
     def to_pattern(cls, lang: str) -> str:
@@ -193,14 +163,6 @@ class SpellShape(TranslatedStrEnum):
         }
         return mapping.get(tag)
 
-    @classmethod
-    def fr_translations(self) -> dict[str, str]:
-        return TRANSLATIONS["spell_shape"]
-
-    @property
-    def icon(self) -> str:
-        return ICONS["spell_shape"][self.value]
-
 
 class SpellType(TranslatedStrEnum):
     """Translate and assign an icon to all types of spells
@@ -217,14 +179,6 @@ class SpellType(TranslatedStrEnum):
     utility = "utility"
     healing = "healing"
     damage = "damage"
-
-    @classmethod
-    def fr_translations(self) -> dict[str, str]:
-        return TRANSLATIONS["spell_type"]
-
-    @property
-    def icon(self) -> str:
-        return ICONS["spell_type"][self.name]
 
 
 class DamageDie(StrEnum):
@@ -269,14 +223,6 @@ class CharacterClass(TranslatedStrEnum):
     warlock = "warlock"
     warrior = "warrior"
     wizard = "wizard"
-
-    @classmethod
-    def fr_translations(self) -> dict[str, str]:
-        return TRANSLATIONS["character_class"]
-
-    @property
-    def icon(self):
-        return ICONS["classes"][self.value]
 
 
 @dataclass
