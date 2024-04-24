@@ -1,6 +1,7 @@
 import concurrent.futures
 
 from dnd5e_card_generator.scraping.aidedd import (
+    CharacterClassFeatureScraper,
     FeatScraper,
     MagicItemScraper,
     SpellScraper,
@@ -56,4 +57,12 @@ def export_feats_to_cards(feat_names: list[str]) -> list[dict]:
         elements=feat_names,
         ScraperCls=FeatScraper,
         sorting_func=lambda item: item.title,
+    )
+
+
+def export_class_features_to_cards(class_features: list[str]) -> list[dict]:
+    return export_elements_to_cards(
+        elements=class_features,
+        ScraperCls=CharacterClassFeatureScraper,
+        sorting_func=lambda item: (item.class_name, item.title),
     )

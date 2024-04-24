@@ -32,6 +32,18 @@ class CliFeat(CliArg): ...
 
 
 @dataclass
+class CliClassFeature(BaseDataclass):
+    class_name: str
+    title: str
+    lang: str
+
+    @classmethod
+    def from_str(cls, s: str) -> "CliClassFeature":
+        class_name, _, title = s.partition(":")
+        return cls(title=title, class_name=class_name, lang="fr")
+
+
+@dataclass
 class CliSpellFilter(BaseDataclass):
     class_name: str
     min_level: int

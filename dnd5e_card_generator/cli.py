@@ -4,8 +4,13 @@ import argparse
 import json
 from pathlib import Path
 
-from .export import export_feats_to_cards, export_items_to_cards, export_spells_to_cards
-from .models import CliFeat, CliMagicItem, CliSpell, CliSpellFilter
+from .export import (
+    export_class_features_to_cards,
+    export_feats_to_cards,
+    export_items_to_cards,
+    export_spells_to_cards,
+)
+from .models import CliClassFeature, CliFeat, CliMagicItem, CliSpell, CliSpellFilter
 from .scraping.aidedd import SpellFilter
 
 
@@ -58,6 +63,18 @@ def parse_args():
         ),
         required=False,
         default=[],
+        type=CliFeat.from_str,
+    )
+    parser.add_argument(
+        "--class-features",
+        nargs="+",
+        help=(
+            "Space separated <class>:<feature title> items. "
+            "Example: 'clerc:Conduit divin : renvoi des morts-vivants'"
+        ),
+        required=False,
+        default=[],
+        type=CliClassFeature.from_str,
     )
     parser.add_argument(
         "-o",
@@ -86,6 +103,8 @@ def main():
         cards.extend(export_items_to_cards(args.items))
     if args.feats:
         cards.extend(export_feats_to_cards(args.feats))
+    if args.class_features:
+        cards.extend(export_class_features_to_cards(args.class_features))
 
     with open(args.output, "w") as out:
         json.dump(cards, out, indent=2, ensure_ascii=False)

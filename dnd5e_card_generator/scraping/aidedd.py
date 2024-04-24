@@ -11,12 +11,14 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from dnd5e_card_generator.const import (
+    AIDEDD_CLASS_RULES_URL,
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
     AIDEDD_SPELLS_URL,
     FIVE_E_SHEETS_SPELLS,
 )
+from dnd5e_card_generator.export.class_feature import ClassFeature
 from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
 from dnd5e_card_generator.export.spell import Spell
@@ -394,4 +396,38 @@ class FeatScraper(BaseAideDDScraper):
             text=self.scrape_description(),
             prerequesite=prerequisite_div.text if prerequisite_div else None,
             lang=self.lang,
+        )
+
+
+class CharacterClassFeatureScraper(BaseAideDDScraper):
+    def __init__(self, class_name: str, title: str, lang: str):
+        self.class_name = class_name
+        self.title = title
+        super().__init__(slug=title, lang=lang)
+
+    @property
+    def base_url(self) -> str:
+        return AIDEDD_CLASS_RULES_URL.format(class_=self.class_name)
+
+    def scrape_text(self) -> list[str]:
+        for tag in self.soup.find_all(["h3", "h4"]):
+            if tag.text == self.title:
+                break
+        else:
+            raise ValueError(f"Class feature {self.title} not found")
+        accumulator, found_tag = [], False
+        for t in self.soup.find_all():
+            if t == tag:
+                found_tag = True
+                continue
+            if t.name == "p" and found_tag:
+                accumulator.append(t)
+            elif t.name in ["h2", "h3", "h4"] and found_tag:
+                break
+        return [tag.string for tag in accumulator]
+
+    def scrape(self) -> ClassFeature:
+        text = self.scrape_text()
+        return ClassFeature(
+            text=text, title=self.title, lang=self.lang, class_name=self.class_name
         )
