@@ -1,6 +1,7 @@
 import re
 
 from dnd5e_card_generator.models import DamageDie, DamageFormula, DamageType
+from dnd5e_card_generator.utils import game_icon
 
 
 class BaseCardTextFormatter:
@@ -25,6 +26,39 @@ class BaseCardTextFormatter:
         if lang == "fr":
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
+
+    def format_header_separator(self) -> str:
+        return "header_separator |"
+
+    def format_fill(self) -> str:
+        return "fill |"
+
+    def format_title(self, title: str, icon: str | None = None) -> str:
+        parts = ["title", title]
+        if icon:
+            parts.append(game_icon(icon))
+        return " | ".join(parts)
+
+    def format_subtitle(self, subtitle: str) -> str:
+        return f"subtitle | {subtitle}"
+
+    def format_boxes(self, recharges: int) -> str:
+        return f"boxes | {recharges} | 1.5"  # 1.5 is in em
+
+    def format_text(self, text: str) -> str:
+        return f"text | {text}"
+
+    def format_section(self, section: str) -> str:
+        return f"section | {section}"
+
+    def format_property_inline(self, icon: str, text: str) -> str:
+        return f"property_inline | {icon} | {text}"
+
+    def format_level(self, level: int) -> str:
+        return f"level | {level}"
+
+    def format_spell_school(self, school: str) -> str:
+        return f"spell_school | {school}"
 
     def highlight_damage_formula(self, text: str, lang: str) -> str:
         die_value_pattern = (

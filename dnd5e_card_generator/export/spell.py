@@ -272,42 +272,44 @@ class Spell(BaseCardTextFormatter):
         upcasting_text = self.highlight_extra_targets(upcasting_text)
 
         return [
-            f"section | {self.upcasting_section_title}",
-            f"text | {upcasting_text}",
+            self.format_section(self.upcasting_section_title),
+            self.format_text(upcasting_text),
         ]
 
     @property
     def spell_properties_parts(self) -> list[str]:
-        def property_inline(icon: str, text: str) -> str:
-            return f"property_inline | {game_icon(icon)} | {text}"
-
         parts = [
-            property_inline(
-                "player-time",
+            self.format_property_inline(
+                game_icon("player-time"),
                 self.shorten_time_text(
                     self.shorten_casting_time_text(self.casting_time)
                 ),
             ),
-            property_inline(
-                "measure-tape", self.shorten_distance_text(self.casting_range_text)
+            self.format_property_inline(
+                game_icon("measure-tape"),
+                self.shorten_distance_text(self.casting_range_text),
             ),
         ]
         if self.shape and self.shape.icon:
             parts.append(
-                property_inline(
-                    self.shape.icon, self.shorten_distance_text(self.casting_shape_text)
+                self.format_property_inline(
+                    game_icon(self.shape.icon),
+                    self.shorten_distance_text(self.casting_shape_text),
                 )
             )
         parts += [
-            property_inline(
-                "sands-of-time", self.shorten_effect_duration_text(self.effect_duration)
+            self.format_property_inline(
+                game_icon("sands-of-time"),
+                self.shorten_effect_duration_text(self.effect_duration),
             ),
-            property_inline("drink-me", self.spell_casting_components),
+            self.format_property_inline(
+                game_icon("drink-me"), self.spell_casting_components
+            ),
         ]
         if self.concentration:
-            parts.append(f"property_inline | {game_icon('meditation')} | C")
+            parts.append(self.format_property_inline(game_icon("meditation"), "C"))
         if self.ritual:
-            parts.append(f"property_inline | {game_icon('pentacle')} | R")
+            parts.append(self.format_property_inline(game_icon("pentacle"), "R"))
         return parts
 
     @property
@@ -315,8 +317,8 @@ class Spell(BaseCardTextFormatter):
         if not self.paying_components:
             return []
         return [
-            f"section | {self.casting_components_text}",
-            f"text | {self.paying_components}",
+            self.format_section(self.casting_components_text),
+            self.format_text(self.paying_components),
         ]
 
     @property
@@ -324,20 +326,20 @@ class Spell(BaseCardTextFormatter):
         if not self.reaction_condition:
             return []
         return [
-            f"section | {self.reaction_section_title}",
-            f"text | {self.reaction_condition_text}",
+            self.format_section(self.reaction_section_title),
+            self.format_text(self.reaction_condition_text),
         ]
 
     @property
     def contents_text(self) -> list[str]:
-        subtitle_text = f"subtitle | {self.subtitle}"
-        level_text = f"level | {self.level}"
-        spell_school_text = f"spell_school | {self.school}"
-        title_text = f"title | {self.title} | {game_icon(self.spell_type_icon)}"
+        subtitle_text = self.format_subtitle(self.subtitle)
+        level_text = self.format_level(self.level)
+        spell_school_text = self.format_spell_school(self.school)
+        title_text = self.format_title(title=self.title, icon=self.spell_type_icon)
         return (
             [title_text, subtitle_text, level_text, spell_school_text]
             + self.spell_properties_parts
-            + ["header_separator|"]
+            + [self.format_header_separator()]
             + self.spell_parts
             + self.upcasting_parts
             + self.paying_components_parts
@@ -354,7 +356,7 @@ class Spell(BaseCardTextFormatter):
         return card.to_dict()
 
 
-class SpellLegend:
+class SpellLegend(BaseCardTextFormatter):
     def __init__(self, lang: str):
         self.lang = lang
 
@@ -379,49 +381,58 @@ class SpellLegend:
         return "Formes de sort" if self.lang == "fr" else "Spell shapes"
 
     def to_table(self, elements: Any, columns: int) -> list[str]:
-        out, properties = ["text|"], []
+        out, properties = [self.format_text("")], []
         for element in elements:
             if not element.icon:
                 continue
             properties.append(
-                f"property_inline | {element.translate(self.lang).capitalize()} | {game_icon(element.icon)}"
+                self.format_property_inline(
+                    text=element.translate(self.lang).capitalize(),
+                    icon=game_icon(element.icon),
+                )
             )
         properties = sorted(
             properties, key=lambda line: strip_accents(line.split("|")[1])
         )
-        properties += ["property_inline | |"] * (columns - (len(elements) % (columns)))
+        properties += [self.format_property_inline(text="", icon="")] * (
+            columns - (len(elements) % (columns))
+        )
         for batch in itertools.batched(properties, columns):
             for _property in batch:
                 out.append(_property)
-            out.append("fill")
+            out.append(self.format_fill())
         return out
 
     @property
     def damage_die_legend(self) -> list[str]:
-        out = [f"section | {self.die_section_text}", "text|"]
+        out = [self.format_section(self.die_section_text), self.format_text("")]
         for damage_die_batch in itertools.batched(DamageDie.values_with_icons(), 6):
             batch = []
             for damage_die_name, damage_die in damage_die_batch:
-                batch.append(f"property_inline | {damage_die_name} | {str(damage_die)}")
-            batch.append("fill")
+                batch.append(
+                    self.format_property_inline(
+                        text=damage_die_name, icon=str(damage_die)
+                    )
+                )
+            batch.append(self.format_fill())
             out.extend(batch)
         return out
 
     @property
     def damage_type_legend(self) -> list[str]:
-        return [f"section | {self.damage_type_section_text}"] + self.to_table(
+        return [self.format_section(self.damage_type_section_text)] + self.to_table(
             DamageType, columns=4
         )
 
     @property
     def spell_type_legend(self) -> list[str]:
-        return [f"section | {self.spell_types_section_text}"] + self.to_table(
+        return [self.format_section(self.spell_types_section_text)] + self.to_table(
             SpellType, columns=3
         )
 
     @property
     def spell_shape_legend(self) -> list[str]:
-        out = [f"section | {self.spell_shapes_section_text}"]
+        out = [self.format_section(self.spell_shapes_section_text)]
         shapes = [
             shape
             for shape in SpellShape
@@ -432,13 +443,16 @@ class SpellLegend:
     @property
     def contents_text(self) -> list[str]:
         out = (
-            [f"title | {self.title_text}"]
-            + ["spell_school | illusion", "header_separator|"]
+            [
+                self.format_title(self.title_text),
+                self.format_spell_school("illusion"),
+                self.format_header_separator(),
+            ]
             + self.damage_die_legend
             + self.damage_type_legend
             + self.spell_type_legend
             + self.spell_shape_legend
-            + ["text|"]
+            + [self.format_fill()]
         )
         return out
 

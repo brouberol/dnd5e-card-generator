@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import Card
-from dnd5e_card_generator.utils import game_icon
 
 
 @dataclass
@@ -22,25 +21,22 @@ class Feat(BaseCardTextFormatter):
     @property
     def feat_parts(self) -> list[str]:
         text_parts = self.render_feat_parts_text(self.text)
-        return [f"text | {text_part}" for text_part in text_parts]
+        return [self.format_text(text_part) for text_part in text_parts]
 
     @property
-    def prerequisite_text(self) -> list[str]:
+    def prerequisite_text(self) -> str:
         if not self.prerequesite:
-            return []
-        return [f"text | {self._strong(self.prerequesite)}"]
+            return ""
+        return self.format_text(self._strong(self.prerequesite))
 
     @property
     def contents_text(self) -> list[str]:
-        return (
-            [
-                f"title | {self.title} | {game_icon("stars-stack")}",
-                "spell_school | illusion",
-                "header_separator",
-            ]
-            + self.prerequisite_text
-            + self.feat_parts
-        )
+        return [
+            self.format_title(title=self.title, icon="stars-stack"),
+            self.format_spell_school("illusion"),
+            self.format_header_separator(),
+            self.prerequisite_text,
+        ] + self.feat_parts
 
     def to_card(self) -> dict:
         card = Card(

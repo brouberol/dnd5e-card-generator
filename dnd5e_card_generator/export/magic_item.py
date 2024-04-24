@@ -1,12 +1,13 @@
 import re
 from dataclasses import dataclass
 
-from dnd5e_card_generator.models import MagicItemKind, MagicItemRarity
+from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
+from dnd5e_card_generator.models import Card, MagicItemKind, MagicItemRarity
 from dnd5e_card_generator.utils import damage_type_text, game_icon
 
 
 @dataclass
-class MagicItem:
+class MagicItem(BaseCardTextFormatter):
     """This class implements the logic of exporting a magic item data as a card"""
 
     title: str
@@ -50,31 +51,29 @@ class MagicItem:
     def recharges_text(self) -> list[str]:
         if not self.recharges:
             return []
-        return ["fill | ", f"boxes | {self.recharges} | 1.5"]  # 1.5 is in em
+        return [self.format_fill(), self.format_boxes(self.recharges)]
 
     @property
-    def title_text(self) -> list[str]:
-        return [
-            f"title | {self.title} | {game_icon(self.icon)}",
-        ]
+    def title_text(self) -> str:
+        return self.format_title(self.title, self.icon)
 
     @property
-    def subtitle_text(self) -> list[str]:
-        return [
-            f"subtitle | {self.subtitle}",
-            "header_separator",
-        ]
+    def subtitle_text(self) -> str:
+        return self.format_subtitle(self.subtitle)
 
     @property
     def item_text(self) -> list[str]:
         return [
-            f"text | {self.highlight_die_value(text_part)}" for text_part in self.text
+            self.format_text(self.highlight_die_value(text_part))
+            for text_part in self.text
         ]
 
     @property
     def contents_text(self) -> list[str]:
         return (
-            self.title_text + self.subtitle_text + self.item_text + self.recharges_text
+            [self.title_text, self.subtitle_text, self.format_header_separator()]
+            + self.item_text
+            + self.recharges_text
         )
 
     def to_card(self) -> dict:
