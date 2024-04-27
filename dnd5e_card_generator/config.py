@@ -136,7 +136,7 @@ TRANSLATIONS = {
         "cold": "froid",
         "fire": "feu",
         "force": "force",
-        "lightning": "éclair",
+        "lightning": "foudre",
         "necrotic": "nécrotique",
         "piercing": "perforant",
         "poison": "poison",
