@@ -31,6 +31,7 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
 )
+from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
 
 @dataclass
@@ -392,18 +393,27 @@ class MagicItemScraper(BaseAideDDScraper):
         return magic_item
 
 
-class FeatScraper(BaseAideDDScraper):
-    base_url = AIDEDD_FEATS_ITEMS_URL
+class TitleDescriptionPrerequisiteScraper(BaseAideDDScraper):
+    base_url = None
+    model = None
 
-    def scrape(self) -> Feat:
-        print(f"Scraping data for feat {self.slug}")
+    def scrape(self):
+        human_readable_model_name = pascal_case_to_snake_case(
+            self.model.__name__
+        ).replace("_", " ")
+        print(f"Scraping data for {human_readable_model_name} {self.slug}")
         prerequisite_div = self.div_content.find("div", class_="prerequis")
-        return Feat(
+        return self.model(
             title=self.scrape_title(),
             text=self.scrape_description(),
             prerequesite=prerequisite_div.text if prerequisite_div else None,
             lang=self.lang,
         )
+
+
+class FeatScraper(TitleDescriptionPrerequisiteScraper):
+    base_url = AIDEDD_FEATS_ITEMS_URL
+    model = Feat
 
 
 class CharacterClassFeatureScraper(BaseAideDDScraper):

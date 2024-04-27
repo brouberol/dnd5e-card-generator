@@ -1,7 +1,9 @@
 import re
+from dataclasses import dataclass
 
+from dnd5e_card_generator.config import ICONS
 from dnd5e_card_generator.models import DamageDie, DamageFormula, DamageType
-from dnd5e_card_generator.utils import game_icon
+from dnd5e_card_generator.utils import game_icon, pascal_case_to_snake_case
 
 
 class BaseCardTextFormatter:
@@ -151,3 +153,42 @@ class BaseCardTextFormatter:
                     out[-1] += "<ul>"
                 out[-1] += self.format_bullet_point(part)
         return out
+
+
+@dataclass
+class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
+    title: str
+    prerequesite: str
+    text: list[str]
+    lang: str
+
+    def render_parts_text(self, text: list[str]) -> list[str]:
+        text_parts = self.fix_text_with_subparts(text)
+        text_parts = self.fix_text_with_bullet_points(text_parts)
+        text_parts = [self.highlight_saving_throw(part, self.lang) for part in text]
+        text_parts = [self.highlight_italic_words(part) for part in text_parts]
+        return text_parts
+
+    @property
+    def text_parts(self) -> list[str]:
+        text_parts = self.render_parts_text(self.text)
+        return [self.format_text(text_part) for text_part in text_parts]
+
+    @property
+    def prerequisite_text(self) -> str:
+        if not self.prerequesite:
+            return ""
+        return self.format_text(self._strong(self.prerequesite))
+
+    @property
+    def contents_text(self) -> list[str]:
+        return self.assemble_text_contents(
+            self.format_title(
+                title=self.title,
+                icon=ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
+            ),
+            self.format_spell_school("illusion"),
+            self.format_header_separator(),
+            self.prerequisite_text,
+            self.text_parts,
+        )
