@@ -387,7 +387,6 @@ class MagicItemScraper(BaseAideDDScraper):
             attunement=requires_attunement,
             text=item_description,
             rarity=rarity,
-            color="#" + rarity.color,
             lang=self.lang,
             image_url=image_url,
             recharges=recharges,

@@ -43,7 +43,7 @@ class Spell(BaseCardTextFormatter):
 
     @property
     def color(self) -> str:
-        return "#" + COLORS["spell"][self.level]
+        return COLORS["spell"][self.level]
 
     @cached_property
     def spell_type(self) -> SpellType | None:
@@ -354,15 +354,6 @@ class Spell(BaseCardTextFormatter):
             self.paying_components_parts,
             self.reaction_condition_parts,
         )
-
-    def to_card(self) -> dict:
-        card = Card(
-            color=self.color,
-            title=self.title,
-            icon=None,
-            contents=self.contents_text,
-        )
-        return card.to_dict()
 
 
 class SpellLegend(BaseCardTextFormatter):

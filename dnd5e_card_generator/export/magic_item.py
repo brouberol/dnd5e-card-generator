@@ -13,7 +13,6 @@ class MagicItem(BaseCardTextFormatter):
 
     title: str
     type: MagicItemKind
-    color: str
     rarity: MagicItemRarity
     attunement: bool
     text: list[str]
@@ -28,6 +27,10 @@ class MagicItem(BaseCardTextFormatter):
     @property
     def icon(self):
         return self.type.icon
+
+    @property
+    def color(self):
+        return self.rarity.color
 
     @property
     def attunement_text(self) -> str:
@@ -82,7 +85,7 @@ class MagicItem(BaseCardTextFormatter):
     def to_card(self) -> dict:
         card = Card(
             color=self.color,
-            title=self.title,
+            title=self.format_title_for_card_list(),
             icon=self.icon,
             contents=self.contents_text,
             background_image=self.image_url,

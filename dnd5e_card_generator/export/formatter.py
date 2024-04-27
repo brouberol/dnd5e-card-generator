@@ -1,9 +1,13 @@
 import re
 from dataclasses import dataclass
 
-from dnd5e_card_generator.config import ICONS
-from dnd5e_card_generator.models import DamageDie, DamageFormula, DamageType
-from dnd5e_card_generator.utils import game_icon, pascal_case_to_snake_case
+from dnd5e_card_generator.config import COLORS, ICONS
+from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
+from dnd5e_card_generator.utils import (
+    game_icon,
+    human_readable_class_name,
+    pascal_case_to_snake_case,
+)
 
 
 class BaseCardTextFormatter:
@@ -18,6 +22,9 @@ class BaseCardTextFormatter:
 
     def _highlight(self, pattern: str, text: str) -> str:
         return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
+
+    def format_title_for_card_list(self):
+        return f"{human_readable_class_name(self.__class__.__name__)} - {self.title}"
 
     def damage_type_text(self, lang) -> str:
         if lang == "fr":
@@ -153,6 +160,19 @@ class BaseCardTextFormatter:
                     out[-1] += "<ul>"
                 out[-1] += self.format_bullet_point(part)
         return out
+
+    @property
+    def color(self) -> str:
+        return COLORS[pascal_case_to_snake_case(self.__class__.__name__)]
+
+    def to_card(self) -> dict:
+        card = Card(
+            color=self.color,
+            title=self.format_title_for_card_list(),
+            icon=None,
+            contents=self.contents_text,
+        )
+        return card.to_dict()
 
 
 @dataclass

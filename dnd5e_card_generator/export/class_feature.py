@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 
-from dnd5e_card_generator.config import COLORS
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.models import Card, CharacterClass
+from dnd5e_card_generator.models import CharacterClass
 
 
 @dataclass
@@ -40,12 +39,3 @@ class ClassFeature(BaseCardTextFormatter):
             self.format_header_separator(),
             self.text_parts,
         )
-
-    def to_card(self) -> dict:
-        card = Card(
-            title=self.title,
-            color=COLORS["class_feature"],
-            icon=None,
-            contents=self.contents_text,
-        )
-        return card.to_dict()
