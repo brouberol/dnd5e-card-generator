@@ -1,7 +1,15 @@
 import concurrent.futures
 
+from dnd5e_card_generator.models import (
+    CliClassFeature,
+    CliEldrichtInvocation,
+    CliFeat,
+    CliMagicItem,
+    CliSpell,
+)
 from dnd5e_card_generator.scraping.aidedd import (
     CharacterClassFeatureScraper,
+    EldrichInvocationScraper,
     FeatScraper,
     MagicItemScraper,
     SpellScraper,
@@ -25,7 +33,9 @@ def export_elements_to_cards(elements, ScraperCls, sorting_func):
     return [model.to_card() for model in models]
 
 
-def export_spells_to_cards(spell_names: list[str], include_legend: bool) -> list[dict]:
+def export_spells_to_cards(
+    spell_names: list[CliSpell], include_legend: bool
+) -> list[dict]:
     """Scrape Aidedd for the provided spells and export them as cards data.
 
     If include_legend=True, then a legend card will be generated and added at the end
@@ -42,7 +52,7 @@ def export_spells_to_cards(spell_names: list[str], include_legend: bool) -> list
     return cards
 
 
-def export_items_to_cards(item_names: list[str]) -> list[dict]:
+def export_items_to_cards(item_names: list[CliMagicItem]) -> list[dict]:
     """Scrape Aidedd for the provided items and export them as cards data."""
     return export_elements_to_cards(
         elements=item_names,
@@ -51,7 +61,7 @@ def export_items_to_cards(item_names: list[str]) -> list[dict]:
     )
 
 
-def export_feats_to_cards(feat_names: list[str]) -> list[dict]:
+def export_feats_to_cards(feat_names: list[CliFeat]) -> list[dict]:
     """Scrape Aidedd for the provided feats and export them as cards data."""
     return export_elements_to_cards(
         elements=feat_names,
@@ -60,7 +70,7 @@ def export_feats_to_cards(feat_names: list[str]) -> list[dict]:
     )
 
 
-def export_class_features_to_cards(class_features: list[str]) -> list[dict]:
+def export_class_features_to_cards(class_features: list[CliClassFeature]) -> list[dict]:
     return export_elements_to_cards(
         elements=class_features,
         ScraperCls=CharacterClassFeatureScraper,
