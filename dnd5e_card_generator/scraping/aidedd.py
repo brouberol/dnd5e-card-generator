@@ -12,6 +12,7 @@ from bs4.element import NavigableString, Tag
 
 from dnd5e_card_generator.const import (
     AIDEDD_CLASS_RULES_URL,
+    AIDEDD_ELDRICHT_INVOCATIONS_URL,
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
@@ -20,6 +21,7 @@ from dnd5e_card_generator.const import (
     FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.export.class_feature import ClassFeature
+from dnd5e_card_generator.export.eldricht_invocation import EldrichtInvocation
 from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
 from dnd5e_card_generator.export.spell import Spell
@@ -414,6 +416,11 @@ class TitleDescriptionPrerequisiteScraper(BaseAideDDScraper):
 class FeatScraper(TitleDescriptionPrerequisiteScraper):
     base_url = AIDEDD_FEATS_ITEMS_URL
     model = Feat
+
+
+class EldrichInvocationScraper(TitleDescriptionPrerequisiteScraper):
+    base_url = AIDEDD_ELDRICHT_INVOCATIONS_URL
+    model = EldrichtInvocation
 
 
 class CharacterClassFeatureScraper(BaseAideDDScraper):

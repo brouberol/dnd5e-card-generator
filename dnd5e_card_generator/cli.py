@@ -7,11 +7,19 @@ from pathlib import Path
 
 from .export import (
     export_class_features_to_cards,
+    export_eldricht_invocations_to_cards,
     export_feats_to_cards,
     export_items_to_cards,
     export_spells_to_cards,
 )
-from .models import CliClassFeature, CliFeat, CliMagicItem, CliSpell, CliSpellFilter
+from .models import (
+    CliClassFeature,
+    CliEldrichtInvocation,
+    CliFeat,
+    CliMagicItem,
+    CliSpell,
+    CliSpellFilter,
+)
 from .scraping.aidedd import SpellFilter
 
 
@@ -67,6 +75,17 @@ def parse_args():
         type=CliFeat.from_str,
     )
     parser.add_argument(
+        "--eldricht-invocations",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<invocation-slug> items. "
+            "Example: fr:arme-de-pacte-amelioree"
+        ),
+        required=False,
+        default=[],
+        type=CliEldrichtInvocation.from_str,
+    )
+    parser.add_argument(
         "--class-features",
         nargs="+",
         help=(
@@ -103,6 +122,8 @@ def main():
         cards.extend(export_items_to_cards(args.items))
     if args.feats:
         cards.extend(export_feats_to_cards(args.feats))
+    if args.eldricht_invocations:
+        cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))
     if args.class_features:
         cards.extend(export_class_features_to_cards(args.class_features))
 

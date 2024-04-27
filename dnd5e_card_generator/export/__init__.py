@@ -76,3 +76,13 @@ def export_class_features_to_cards(class_features: list[CliClassFeature]) -> lis
         ScraperCls=CharacterClassFeatureScraper,
         sorting_func=lambda item: (item.class_name, item.title),
     )
+
+
+def export_eldricht_invocations_to_cards(
+    eldricht_invocations: list[CliEldrichtInvocation],
+) -> list[dict]:
+    return export_elements_to_cards(
+        elements=eldricht_invocations,
+        ScraperCls=EldrichInvocationScraper,
+        sorting_func=lambda item: item.title,
+    )

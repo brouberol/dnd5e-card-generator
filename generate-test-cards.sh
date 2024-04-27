@@ -33,4 +33,5 @@ poetry run dnd5e-card-generator \
         'rodeur:Attaques multiples' \
         'roublard:Esprit fuyant' \
         'roublard:Embuscade magique' \
+    --eldricht-invocations fr:arme-de-pacte-amelioree fr:malefice-accablant \
     --output ./test-cards.json

@@ -33,6 +33,9 @@ class CliMagicItem(CliArg): ...
 class CliFeat(CliArg): ...
 
 
+class CliEldrichtInvocation(CliArg): ...
+
+
 @dataclass
 class CliClassFeature(BaseDataclass):
     class_name: str
