@@ -1,6 +1,6 @@
 COLORS = {
     "class_feature": "DarkCyan",
-    "feat": "#994094",
+    "feat": "Gold",
     "eldricht_invocation": "#994094",
     # https://colordesigner.io/color-scheme-builder#5C4B51-8CBEB2-F2EBBF-F3B562-F06060
     "magic_item_rarity": {
