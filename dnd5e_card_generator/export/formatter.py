@@ -24,7 +24,7 @@ class BaseCardTextFormatter:
         return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
 
     def format_title_for_card_list(self):
-        return f"{human_readable_class_name(self.__class__.__name__)} - {self.title}"
+        return f"{human_readable_class_name(self.__class__.__name__).capitalize()} - {self.title}"
 
     def damage_type_text(self, lang) -> str:
         # 2d8 dégâts de foudre ou de tonnerre
