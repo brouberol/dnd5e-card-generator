@@ -17,7 +17,15 @@ class ClassFeature(BaseCardTextFormatter):
         text = self.fix_text_with_subparts(self.text)
         text = self.fix_text_with_bullet_points(text)
         text = [
-            self.format_text(self.highlight_italic_words(self.highlight_level(part)))
+            self.format_text(
+                self.highlight_damage_formula(
+                    self.highlight_saving_throw(
+                        self.highlight_italic_words(self.highlight_level(part)),
+                        self.lang,
+                    ),
+                    self.lang,
+                )
+            )
             for part in text
         ]
         return text
