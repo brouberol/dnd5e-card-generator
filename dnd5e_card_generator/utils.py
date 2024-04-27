@@ -34,3 +34,7 @@ def pascal_case_to_snake_case(pascal_string: str) -> str:
             snake_string += "_"
         snake_string += char.lower()
     return snake_string
+
+
+def human_readable_class_name(cls_name: str) -> str:
+    return pascal_case_to_snake_case(cls_name).replace("_", " ")

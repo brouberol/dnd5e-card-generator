@@ -33,7 +33,7 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
 )
-from dnd5e_card_generator.utils import pascal_case_to_snake_case
+from dnd5e_card_generator.utils import human_readable_class_name
 
 
 @dataclass
@@ -400,10 +400,9 @@ class TitleDescriptionPrerequisiteScraper(BaseAideDDScraper):
     model = None
 
     def scrape(self):
-        human_readable_model_name = pascal_case_to_snake_case(
-            self.model.__name__
-        ).replace("_", " ")
-        print(f"Scraping data for {human_readable_model_name} {self.slug}")
+        print(
+            f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}"
+        )
         prerequisite_div = self.div_content.find("div", class_="prerequis")
         return self.model(
             title=self.scrape_title(),
