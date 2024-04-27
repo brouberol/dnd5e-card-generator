@@ -304,14 +304,16 @@ class DamageFormula:
 
     num_die: int
     damage_die: DamageDie
-    damage_type: DamageType | None
+    damage_type_1: DamageType | None
+    damage_type_2: DamageType | None
 
     def render(self) -> str:
-        dice = f" {self.num_die}{self.damage_die.render()}"
-        if self.damage_type and self.damage_type.icon:
-            return f"{dice}{game_icon(self.damage_type.icon)}"
-        else:
-            return dice
+        parts = [str(self.num_die), self.damage_die.render()]
+        if self.damage_type_1 and self.damage_type_1.icon:
+            parts.append(game_icon(self.damage_type_1.icon))
+        if self.damage_type_2 and self.damage_type_2.icon:
+            parts.extend(["/", game_icon(self.damage_type_2.icon)])
+        return " " + "".join(parts)
 
 
 @dataclass
