@@ -1,5 +1,6 @@
 import concurrent.futures
 
+from dnd5e_card_generator.export.monster import Monster
 from dnd5e_card_generator.models import (
     CliClassFeature,
     CliEldrichtInvocation,
@@ -12,6 +13,7 @@ from dnd5e_card_generator.scraping.aidedd import (
     EldrichInvocationScraper,
     FeatScraper,
     MagicItemScraper,
+    MonsterScraper,
     SpellScraper,
 )
 
@@ -84,5 +86,15 @@ def export_eldricht_invocations_to_cards(
     return export_elements_to_cards(
         elements=eldricht_invocations,
         ScraperCls=EldrichInvocationScraper,
+        sorting_func=lambda item: item.title,
+    )
+
+
+def export_monsters_to_cards(
+    monsters: list[Monster],
+) -> list[dict]:
+    return export_elements_to_cards(
+        elements=monsters,
+        ScraperCls=MonsterScraper,
         sorting_func=lambda item: item.title,
     )

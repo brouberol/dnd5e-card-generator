@@ -10,6 +10,7 @@ from .export import (
     export_eldricht_invocations_to_cards,
     export_feats_to_cards,
     export_items_to_cards,
+    export_monsters_to_cards,
     export_spells_to_cards,
 )
 from .models import (
@@ -17,6 +18,7 @@ from .models import (
     CliEldrichtInvocation,
     CliFeat,
     CliMagicItem,
+    CliMonster,
     CliSpell,
     CliSpellFilter,
 )
@@ -97,6 +99,17 @@ def parse_args():
         type=CliClassFeature.from_str,
     )
     parser.add_argument(
+        "--monsters",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<monster slug> items. "
+            "Example: 'fr:ankheg fr:babouin"
+        ),
+        required=False,
+        default=[],
+        type=CliMonster.from_str,
+    )
+    parser.add_argument(
         "-o",
         "--output",
         type=Path,
@@ -126,6 +139,8 @@ def main():
         cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))
     if args.class_features:
         cards.extend(export_class_features_to_cards(args.class_features))
+    if args.monsters:
+        cards.extend(export_monsters_to_cards(args.monsters))
 
     cards_json = json.dumps(cards, indent=2, ensure_ascii=False)
     if args.output:

@@ -101,6 +101,7 @@ ICONS = {
         "ritual": "pentacle",
     },
 }
+# Warn: make sure every translation is lowercased
 TRANSLATIONS = {
     "magic_item_kind": {
         "armor": "armure",
@@ -179,5 +180,29 @@ TRANSLATIONS = {
         "warlock": "occultiste",
         "warrior": "guerrier",
         "wizard": "magicien",
+    },
+    "creature_size": {
+        "tiny": "tp",
+        "small": "p",
+        "medium": "m",
+        "large": "g",
+        "huge": "tg",
+        "gargantuan": "gig",
+    },
+    "creature_type": {
+        "aberration": "aberration",
+        "beast": "bête",
+        "celestial": "céleste",
+        "construct": "artificiel",
+        "dragon": "dragon",
+        "elemental": "élémentaire",
+        "fey": "fée",
+        "fiend": "fiélon",
+        "giant": "géant",
+        "humanoid": "humanoïde",
+        "monstrosity": "monstruosité",
+        "ooze": "vase",
+        "plant": "plante",
+        "undead": "mort-vivant",
     },
 }

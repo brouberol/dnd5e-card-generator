@@ -1,3 +1,5 @@
+import math
+import re
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self
@@ -34,6 +36,9 @@ class CliFeat(CliArg): ...
 
 
 class CliEldrichtInvocation(CliArg): ...
+
+
+class CliMonster(CliArg): ...
 
 
 @dataclass
@@ -109,13 +114,21 @@ class BaseModel(StrEnum):
 
     @classmethod
     def from_str(cls, s: str, lang: str) -> Optional[Self]:
-        return cls.reversed_translations()[lang].get(s)
+        return cls.reversed_translations()[lang].get(s.lower())
 
     @classmethod
-    def to_pattern(cls, lang: str) -> str:
-        return (
-            r"(?<=[\s\()])(" + r"|".join(cls.translations()[lang].values()) + r")(?=\s)"
+    def pattern_options(cls, lang: str) -> str:
+        # We make a pattern with the largest elements first, to avoid partial matches
+        vals = sorted(
+            cls.translations()[lang].values(),
+            key=lambda item: len(item),
+            reverse=True,
         )
+        return r"(" + r"|".join(vals) + r")"
+
+    @classmethod
+    def as_pattern(cls, lang: str) -> str:
+        return r"(?<=[\s\()])" + cls.pattern_options(lang) + r"(?=\s)"
 
     @property
     def color(self) -> str:
@@ -195,7 +208,7 @@ class DamageType(BaseModel):
         return cls.reversed_en_translations()[tag]
 
     @classmethod
-    def to_pattern(cls, lang: str) -> str:
+    def as_pattern(cls, lang: str) -> str:
         return (
             r"dégâts (de (type )?|d')?("
             + r"|".join(cls.translations()[lang].values())
@@ -326,3 +339,83 @@ class Card(BaseDataclass):
     contents: list[str]
     count: int = field(default=1)
     background_image: str | None = field(default=None)
+
+
+class CreatureSize(BaseModel):
+    tiny = "tiny"
+    small = "small"
+    medium = "medium"
+    large = "large"
+    huge = "huge"
+    gargantuan = "gargantuan"
+
+    @classmethod
+    def as_pattern(cls, lang: str) -> str:
+        if lang == "fr":
+            return r"(?<=de taille )" + cls.pattern_options(lang)
+        return cls.pattern_options(lang)
+
+
+@dataclass
+class Attribute:
+    value: int
+
+    @property
+    def modifier(self) -> int:
+        return math.floor((self.value - 10) / 2)
+
+
+@dataclass
+class CreatureAttributes:
+    charisma: Attribute
+    constitution: Attribute
+    dexterity: Attribute
+    intelligence: Attribute
+    strength: Attribute
+    wisdom: Attribute
+
+
+@dataclass
+class CreatureSpeed:
+    speed: int
+    unit: str
+    type: str = field(default="base")
+
+    @classmethod
+    def from_str(cls, s: str) -> Self:
+        match = re.match(r"((?P<type>\w+) )?(?P<speed>\d+) (?P<unit>\w+)", s)
+        data = match.groupdict()
+        if data["type"] is None:
+            data["type"] = "base"
+        return CreatureSpeed(**data)
+
+
+class CreatureType(BaseModel):
+    aberration = "aberration"
+    beast = "beast"
+    celestial = "celestial"
+    construct = "construct"
+    dragon = "dragon"
+    elemental = "elemental"
+    fey = "fey"
+    fiend = "fiend"
+    giant = "giant"
+    humanoid = "humanoid"
+    monstrosity = "monstrosity"
+    ooze = "ooze"
+    plant = "plant"
+    undead = "undead"
+
+
+@dataclass
+class HitPointsFormula:
+    die: DamageDie
+    num_die: int
+    bonus: int
+
+    @classmethod
+    def from_str(cls, s: str) -> Self:
+        match = re.match(r"(?P<num_die>\d+)(?P<die>d\d+)\s?\+\s?(?P<bonus>\d+)", s)
+        data = match.groupdict()
+        data["die"] = DamageDie.from_str(data["die"])
+        return HitPointsFormula(**data)
