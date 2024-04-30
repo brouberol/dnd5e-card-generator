@@ -1,10 +1,9 @@
-import re
 from dataclasses import dataclass
 
 from dnd5e_card_generator.config import ICONS
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import Card, MagicItemKind, MagicItemRarity
-from dnd5e_card_generator.utils import damage_type_text, game_icon
+from dnd5e_card_generator.utils import game_icon
 
 
 @dataclass
@@ -19,10 +18,6 @@ class MagicItem(BaseCardTextFormatter):
     lang: str
     image_url: str
     recharges: int
-
-    def highlight_die_value(self, text) -> str:
-        die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
-        return re.sub(die_value_pattern, lambda match: f"<b>{match.group(0)}</b>", text)
 
     @property
     def icon(self):

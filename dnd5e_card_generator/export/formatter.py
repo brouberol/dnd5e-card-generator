@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from dnd5e_card_generator.config import COLORS, ICONS
 from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
 from dnd5e_card_generator.utils import (
+    damage_type_text,
     game_icon,
     human_readable_class_name,
     pascal_case_to_snake_case,
@@ -80,6 +81,12 @@ class BaseCardTextFormatter:
             else:
                 contents.append(part)
         return contents
+
+    def highlight_die_value(self, text) -> str:
+        die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
+        return re.sub(
+            die_value_pattern, lambda match: self._strong(match.group(0), text)
+        )
 
     def highlight_damage_formula(self, text: str, lang: str) -> str:
         die_value_pattern = (
