@@ -85,7 +85,7 @@ class BaseCardTextFormatter:
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
         return re.sub(
-            die_value_pattern, lambda match: self._strong(match.group(0), text)
+            die_value_pattern, lambda match: self._strong(match.group(0)), text
         )
 
     def highlight_damage_formula(self, text: str, lang: str) -> str:
