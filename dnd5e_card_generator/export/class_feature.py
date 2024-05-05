@@ -32,7 +32,7 @@ class ClassFeature(BaseCardTextFormatter):
 
     @property
     def subtitle_text(self) -> str:
-        parts = [self.class_name.capitalize()]
+        parts = [self.class_name.translate(self.lang).capitalize()]
         if self.class_variant:
             parts.extend(["-", self.class_variant])
         return " ".join(parts)
