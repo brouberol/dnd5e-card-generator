@@ -44,6 +44,5 @@ class ClassFeature(BaseCardTextFormatter):
             self.format_subtitle(self.subtitle_text),
             self.format_header_separator(),
             self.format_spell_school("illusion"),
-            self.format_header_separator(),
             self.text_parts,
         )
