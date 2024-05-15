@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+from .color import generate_palette
+from .config import COLORS
 from .export import (
     export_class_features_to_cards,
     export_eldricht_invocations_to_cards,
@@ -35,6 +37,16 @@ def parse_args():
         required=False,
         default=[],
         type=CliSpell.from_str,
+    )
+    parser.add_argument(
+        "--spell-colors",
+        nargs="+",
+        help=(
+            "Space separated hexadecimal colors associated with spells. If provided, a gradient "
+            "palette will be generated from these colors, and associated with each spell level"
+        ),
+        required=False,
+        type=str,
     )
     parser.add_argument(
         "--spell-filter",
@@ -119,6 +131,13 @@ def parse_args():
 def main():
     args = parse_args()
     cards, spells = [], []
+
+    if args.spell_colors:
+        COLORS["spell"] = {
+            lvl: color
+            for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
+        }
+
     if args.spell_filter:
         spells_str = SpellFilter(**args.spell_filter.to_dict()).resolve()
         spells = list(set(spells_str))

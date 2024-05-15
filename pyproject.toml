@@ -11,6 +11,7 @@ include = ["images/*.png"]
 python = "^3.9"
 requests = "^2.31.0"
 beautifulsoup4 = "^4.12.3"
+colorways = "^0.9.3"
 
 [tool.poetry.scripts]
 dnd5e-card-generator = 'dnd5e_card_generator.cli:main'
