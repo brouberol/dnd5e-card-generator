@@ -123,7 +123,7 @@ def parse_args():
         "-o",
         "--output",
         type=Path,
-        help="File to write scraped spell data to",
+        help="File to write the card data to",
     )
     return parser.parse_args()
 
