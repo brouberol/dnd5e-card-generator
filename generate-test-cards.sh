@@ -34,4 +34,5 @@ poetry run dnd5e-card-generator \
         'roublard:Esprit fuyant' \
         'roublard:Embuscade magique' \
     --eldricht-invocations fr:arme-de-pacte-amelioree fr:malefice-accablant \
+    --spell-colors '#646fe1' '#e16492' \
     --output ./test-cards.json
