@@ -130,7 +130,9 @@ class BaseAideDDScraper:
     def parse_page(self) -> tuple[BeautifulSoup, Tag | NavigableString | None]:
         html = self.fetch_data()
         soup = BeautifulSoup(html, features="html.parser")
-        div_content = soup.find("div", class_="content")
+        div_content = soup.find("div", class_="col1") or soup.find(
+            "div", class_="content"
+        )
         if div_content is None:
             raise ValueError(f"{self.slug} not found!")
         return soup, div_content
