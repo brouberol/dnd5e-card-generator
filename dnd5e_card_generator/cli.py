@@ -5,9 +5,8 @@ import json
 import sys
 from pathlib import Path
 
-from . import config
 from .color import generate_palette
-from .config import COLORS
+from .config import Config
 from .export import (
     export_class_features_to_cards,
     export_eldricht_invocations_to_cards,
@@ -140,10 +139,10 @@ def main():
     cards, spells = [], []
 
     if args.bypass_cache:
-        config.BYPASS_CACHE = True
+        Config.BYPASS_CACHE = True
 
     if args.spell_colors:
-        COLORS["spell"] = {
+        Config.COLORS["spell"] = {
             lvl: color
             for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
         }

@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self
 
-from dnd5e_card_generator.config import COLORS, ICONS, TRANSLATIONS
+from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
 from .utils import game_icon
@@ -74,7 +74,7 @@ class BaseModel(StrEnum):
 
     @classmethod
     def fr_translations(cls) -> dict:
-        return TRANSLATIONS[cls.config_key()]
+        return Config.TRANSLATIONS[cls.config_key()]
 
     @classmethod
     def en_translations(cls) -> dict:
@@ -132,11 +132,11 @@ class BaseModel(StrEnum):
 
     @property
     def color(self) -> str:
-        return COLORS[self.config_key()][self.name]
+        return Config.COLORS[self.config_key()][self.name]
 
     @property
     def icon(self) -> str:
-        return ICONS[self.config_key()][self.name]
+        return Config.ICONS[self.config_key()][self.name]
 
 
 class MagicItemRarity(BaseModel):

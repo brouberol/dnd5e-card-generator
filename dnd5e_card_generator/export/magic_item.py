@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from dnd5e_card_generator.config import ICONS
+from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import Card, MagicItemKind, MagicItemRarity
 from dnd5e_card_generator.utils import game_icon
@@ -29,7 +29,7 @@ class MagicItem(BaseCardTextFormatter):
 
     @property
     def attunement_text(self) -> str:
-        return game_icon(ICONS["magic_item"]["attunement"])
+        return game_icon(Config.ICONS["magic_item"]["attunement"])
 
     @property
     def type_text(self) -> str:

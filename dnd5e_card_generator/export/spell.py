@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Optional
 
-from dnd5e_card_generator.config import COLORS, ICONS
+from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.const import SPELLS_BY_TYPE
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.models import (
@@ -43,7 +43,7 @@ class Spell(BaseCardTextFormatter):
 
     @property
     def color(self) -> str:
-        return COLORS["spell"][self.level]
+        return Config.COLORS["spell"][self.level]
 
     @cached_property
     def spell_type(self) -> SpellType | None:
@@ -67,7 +67,7 @@ class Spell(BaseCardTextFormatter):
         if spell_type := self.spell_type:
             if spell_type.icon:
                 return spell_type.icon
-        return ICONS["spell_default"]
+        return Config.ICONS["spell_default"]
 
     @property
     def subtitle(self) -> str:
@@ -266,13 +266,13 @@ class Spell(BaseCardTextFormatter):
 
     def format_casting_time_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["casting_time"]),
+            game_icon(Config.ICONS["spell_properties"]["casting_time"]),
             self.shorten_time_text(self.shorten_casting_time_text(self.casting_time)),
         )
 
     def format_casting_range_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["casting_range"]),
+            game_icon(Config.ICONS["spell_properties"]["casting_range"]),
             self.shorten_distance_text(self.casting_range_text),
         )
 
@@ -284,24 +284,24 @@ class Spell(BaseCardTextFormatter):
 
     def format_effect_duration_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["effect_duration"]),
+            game_icon(Config.ICONS["spell_properties"]["effect_duration"]),
             self.shorten_effect_duration_text(self.effect_duration),
         )
 
     def format_casting_components_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["casting_components"]),
+            game_icon(Config.ICONS["spell_properties"]["casting_components"]),
             self.spell_casting_components,
         )
 
     def format_concentration_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["concentration"]), "C"
+            game_icon(Config.ICONS["spell_properties"]["concentration"]), "C"
         )
 
     def format_ritual_property(self) -> str:
         return self.format_property_inline(
-            game_icon(ICONS["spell_properties"]["ritual"]), "R"
+            game_icon(Config.ICONS["spell_properties"]["ritual"]), "R"
         )
 
     @property

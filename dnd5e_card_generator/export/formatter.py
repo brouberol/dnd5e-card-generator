@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from dnd5e_card_generator.config import COLORS, ICONS
+from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
 from dnd5e_card_generator.utils import (
     damage_type_text,
@@ -176,7 +176,7 @@ class BaseCardTextFormatter:
 
     @property
     def color(self) -> str:
-        return COLORS[pascal_case_to_snake_case(self.__class__.__name__)]
+        return Config.COLORS[pascal_case_to_snake_case(self.__class__.__name__)]
 
     def to_card(self) -> dict:
         card = Card(
@@ -218,7 +218,7 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
         return self.assemble_text_contents(
             self.format_title(
                 title=self.title,
-                icon=ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
+                icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
             ),
             self.format_spell_school("illusion"),
             self.format_header_separator(),
