@@ -118,8 +118,10 @@ class BaseAideDDScraper:
         self.soup, self.div_content = self.parse_page()
 
     def fetch_data(self):
+        from dnd5e_card_generator import config
+
         cached_file = Path(f"{tempfile.gettempdir()}/{self.lang}:{self.slug}.html")
-        if cached_file.exists():
+        if cached_file.exists() and not config.BYPASS_CACHE:
             return cached_file.read_text()
         lang_param = "vf" if self.lang == "fr" else "vo"
         resp = requests.get(self.base_url, params={lang_param: self.slug})

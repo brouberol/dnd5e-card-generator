@@ -1,3 +1,4 @@
+BYPASS_CACHE = False
 COLORS = {
     "class_feature": "PaleVioletRed",
     "feat": "Gold",

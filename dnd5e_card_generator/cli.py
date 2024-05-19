@@ -5,6 +5,7 @@ import json
 import sys
 from pathlib import Path
 
+from . import config
 from .color import generate_palette
 from .config import COLORS
 from .export import (
@@ -108,6 +109,12 @@ def parse_args():
         default=[],
         type=CliClassFeature.from_str,
     )
+    parser.add_argument(
+        "--bypass-cache",
+        action="store_true",
+        help="Bypass local cache to force the scrapers to issue HTTP requests (default: False)",
+        default=False,
+    )
     # parser.add_argument(
     #     "--monsters",
     #     nargs="+",
@@ -131,6 +138,9 @@ def parse_args():
 def main():
     args = parse_args()
     cards, spells = [], []
+
+    if args.bypass_cache:
+        config.BYPASS_CACHE = True
 
     if args.spell_colors:
         COLORS["spell"] = {
