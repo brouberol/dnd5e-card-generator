@@ -73,14 +73,14 @@ class Spell(BaseCardTextFormatter):
     def subtitle(self) -> str:
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school_text}"
+                return f"Tour de magie | {self.school_text}"
             else:
-                return f"Niveau {self.level} - {self.school_text}"
+                return f"Niveau {self.level} | {self.school_text}"
         else:
             if self.level == 0:
-                return f"Cantrip - {self.school_text}"
+                return f"Cantrip | {self.school_text}"
             else:
-                return f"{humanize_level(self.level)} level - {self.school_text}"
+                return f"{humanize_level(self.level)} level | {self.school_text}"
 
     @property
     def school_text(self) -> str:
@@ -216,7 +216,7 @@ class Spell(BaseCardTextFormatter):
     def render_spell_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)
         text_parts = self.fix_text_with_bullet_points(text_parts)
-        text_parts = [self.highlight_spell_text(part) for part in text_parts]
+        # text_parts = [self.highlight_spell_text(part) for part in text_parts]
         text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
         text_parts = [self.highlight_italic_words(part) for part in text_parts]
         return text_parts
@@ -256,8 +256,8 @@ class Spell(BaseCardTextFormatter):
             return []
         upcasting_text = self.shorten_upcasting_text()
         upcasting_text = self.fix_translation_mistakes(upcasting_text)
-        upcasting_text = self.highlight_spell_text(upcasting_text)
-        upcasting_text = self.highlight_extra_targets(upcasting_text)
+        # upcasting_text = self.highlight_spell_text(upcasting_text)
+        # upcasting_text = self.highlight_extra_targets(upcasting_text)
 
         return [
             self.format_section(self.upcasting_section_title),
@@ -343,16 +343,18 @@ class Spell(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon=self.spell_type_icon),
+            self.format_title(title=self.title),
             self.format_subtitle(self.subtitle),
             self.format_level(self.level),
             self.format_spell_school(self.school),
-            self.spell_properties_parts,
             self.format_header_separator(),
+            self.spell_properties_parts,
             self.spell_parts,
             self.upcasting_parts,
             self.paying_components_parts,
             self.reaction_condition_parts,
+            self.format_fill(),
+            'text | Clerc'
         )
 
 
