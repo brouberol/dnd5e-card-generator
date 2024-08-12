@@ -216,7 +216,7 @@ class Spell(BaseCardTextFormatter):
     def render_spell_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)
         text_parts = self.fix_text_with_bullet_points(text_parts)
-        # text_parts = [self.highlight_spell_text(part) for part in text_parts]
+        text_parts = [self.highlight_spell_text(part) for part in text_parts]
         text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
         text_parts = [self.highlight_italic_words(part) for part in text_parts]
         return text_parts
@@ -256,8 +256,8 @@ class Spell(BaseCardTextFormatter):
             return []
         upcasting_text = self.shorten_upcasting_text()
         upcasting_text = self.fix_translation_mistakes(upcasting_text)
-        # upcasting_text = self.highlight_spell_text(upcasting_text)
-        # upcasting_text = self.highlight_extra_targets(upcasting_text)
+        upcasting_text = self.highlight_spell_text(upcasting_text)
+        upcasting_text = self.highlight_extra_targets(upcasting_text)
 
         return [
             self.format_section(self.upcasting_section_title),
@@ -353,8 +353,6 @@ class Spell(BaseCardTextFormatter):
             self.upcasting_parts,
             self.paying_components_parts,
             self.reaction_condition_parts,
-            self.format_fill(),
-            'text | Clerc'
         )
 
 
