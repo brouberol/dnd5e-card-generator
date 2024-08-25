@@ -73,14 +73,14 @@ class Spell(BaseCardTextFormatter):
     def subtitle(self) -> str:
         if self.lang == "fr":
             if self.level == 0:
-                return f"Tour de magie - {self.school_text}"
+                return f"Tour de magie | {self.school_text}"
             else:
-                return f"Niveau {self.level} - {self.school_text}"
+                return f"Niveau {self.level} | {self.school_text}"
         else:
             if self.level == 0:
-                return f"Cantrip - {self.school_text}"
+                return f"Cantrip | {self.school_text}"
             else:
-                return f"{humanize_level(self.level)} level - {self.school_text}"
+                return f"{humanize_level(self.level)} level | {self.school_text}"
 
     @property
     def school_text(self) -> str:
@@ -343,12 +343,12 @@ class Spell(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon=self.spell_type_icon),
+            self.format_title(title=self.title),
             self.format_subtitle(self.subtitle),
             self.format_level(self.level),
             self.format_spell_school(self.school),
-            self.spell_properties_parts,
             self.format_header_separator(),
+            self.spell_properties_parts,
             self.spell_parts,
             self.upcasting_parts,
             self.paying_components_parts,

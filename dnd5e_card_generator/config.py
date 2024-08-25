@@ -95,11 +95,11 @@ class Config:
         },
         "spell_default": "scroll-unfurled",
         "spell_properties": {
-            "casting_time": "player-time",
-            "casting_range": "measure-tape",
+            "casting_time": "ink-swirl",
+            "casting_range": "hand",
             "effect_duration": "sands-of-time",
             "casting_components": "drink-me",
-            "concentration": "meditation",
+            "concentration": "eye-target",
             "ritual": "pentacle",
         },
     }
