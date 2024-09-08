@@ -1,7 +1,7 @@
 class Config:
     BYPASS_CACHE = False
     COLORS = {
-        "class_feature": "PaleVioletRed",
+        "class_feature": "indianred",
         "feat": "Gold",
         "eldricht_invocation": "#994094",
         # https://colordesigner.io/color-scheme-builder#5C4B51-8CBEB2-F2EBBF-F3B562-F06060
