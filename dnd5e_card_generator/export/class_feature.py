@@ -13,7 +13,7 @@ class ClassFeature(BaseCardTextFormatter):
     class_variant: str | None = field(default=None)
 
     @property
-    def text_parts(self) -> str:
+    def text_parts(self) -> list[str]:
         text = self.fix_text_with_subparts(self.text)
         text = self.fix_text_with_bullet_points(text)
         text = [

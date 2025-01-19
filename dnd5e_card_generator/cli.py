@@ -13,6 +13,7 @@ from .export import (
     export_feats_to_cards,
     export_items_to_cards,
     export_spells_to_cards,
+    export_ancestry_features_to_cards,
 )
 from .models import (
     CliClassFeature,
@@ -21,6 +22,7 @@ from .models import (
     CliMagicItem,
     CliSpell,
     CliSpellFilter,
+    CliAncestryFeature,
 )
 from .scraping.aidedd import SpellFilter
 
@@ -109,6 +111,17 @@ def parse_args():
         type=CliClassFeature.from_str,
     )
     parser.add_argument(
+        "--ancestry-features",
+        nargs="+",
+        help=(
+            "Space separated <lang>:<ancestry>:[sub_ancestry]. "
+            "Examples: 'fr:nain', 'fr:elfe:Elfe Noir"
+        ),
+        required=False,
+        default=[],
+        type=CliAncestryFeature.from_str,
+    )
+    parser.add_argument(
         "--bypass-cache",
         action="store_true",
         help="Bypass local cache to force the scrapers to issue HTTP requests (default: False)",
@@ -165,6 +178,8 @@ def main():
         cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))
     if args.class_features:
         cards.extend(export_class_features_to_cards(args.class_features))
+    if args.ancestry_features:
+        cards.extend(export_ancestry_features_to_cards(args.ancestry_features))
     # if args.monsters:
     #     cards.extend(export_monsters_to_cards(args.monsters))
 

@@ -54,6 +54,22 @@ class CliClassFeature(BaseDataclass):
 
 
 @dataclass
+class CliAncestryFeature(BaseDataclass):
+    ancestry: str
+    sub_ancestry: str
+    lang: str
+
+    @classmethod
+    def from_str(cls, s: str) -> "CliAncestryFeature":
+        if s.count(":") == 1:
+            lang, ancestry = s.split(":")
+            sub_ancestry = ""
+        else:
+            lang, ancestry, sub_ancestry = s.split(":")
+        return cls(ancestry=ancestry, sub_ancestry=sub_ancestry, lang="fr")
+
+
+@dataclass
 class CliSpellFilter(BaseDataclass):
     class_name: str
     min_level: int
@@ -305,6 +321,18 @@ class CharacterClass(BaseModel):
     warlock = "warlock"
     warrior = "warrior"
     wizard = "wizard"
+
+
+class CharacterAncestry(BaseModel):
+    dragonborn = "dragonborn"
+    dwarf = "dwarf"
+    elf = "elf"
+    gnome = "gnome"
+    half_elf = "half-elf"
+    half_orc = "half_orc"
+    halfling = "halfling"
+    human = "human"
+    tieflin = "tieflin"
 
 
 @dataclass

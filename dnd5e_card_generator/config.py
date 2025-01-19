@@ -26,10 +26,12 @@ class Config:
             8: "#F3722C",
             9: "#F94144",
         },
+        "ancestry_feature": "#458f36de",
     }
 
     # All of these icons come from https://game-icons.net/
     ICONS = {
+        "ancestry_feature": "elf-helmet",
         "character_class": {
             "artificer": "fire-tail",
             "barbarian": "sharp-axe",
@@ -182,6 +184,17 @@ class Config:
             "warlock": "occultiste",
             "warrior": "guerrier",
             "wizard": "magicien",
+        },
+        "character_ancestry": {
+            "dragonborn": "drakéide",
+            "dwarf": "nain",
+            "elf": "elfe",
+            "gnome": "gnome",
+            "half_elf": "demi-elfe",
+            "half_orc": "demi-orque",
+            "halfling": "halfelin",
+            "human": "humain",
+            "tieflin": "tieflin",
         },
         "creature_size": {
             "tiny": "tp",

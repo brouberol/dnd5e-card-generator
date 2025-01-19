@@ -13,6 +13,7 @@ from bs4.element import NavigableString, Tag
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.const import (
     AIDEDD_CLASS_RULES_URL,
+    AIDEDD_RACE_RULES_URL,
     AIDEDD_ELDRICHT_INVOCATIONS_URL,
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
@@ -23,6 +24,7 @@ from dnd5e_card_generator.const import (
     FIVE_E_SHEETS_SPELLS,
 )
 from dnd5e_card_generator.export.class_feature import ClassFeature
+from dnd5e_card_generator.export.ancestry_feature import AncestryFeature
 from dnd5e_card_generator.export.eldricht_invocation import EldrichtInvocation
 from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
@@ -31,6 +33,7 @@ from dnd5e_card_generator.export.spell import Spell
 from dnd5e_card_generator.models import (
     Attribute,
     CharacterClass,
+    CharacterAncestry,
     CreatureAttributes,
     CreatureSize,
     CreatureSpeed,
@@ -111,7 +114,7 @@ class SpellFilter:
 
 class BaseAideDDScraper:
     base_url: str = ""
-    tags_to_unwrap_from_description = ["a", "em", "ul", "li"]
+    tags_to_unwrap_from_description = ["a", "em", "ul", "li", "strong"]
 
     def __init__(self, slug: str, lang: str):
         self.slug = slug
@@ -150,6 +153,8 @@ class BaseAideDDScraper:
                     continue
                 elif tag.name == "em":
                     tag.string = f"_{tag.string}_"
+                elif tag.name == "strong":
+                    tag.string = f"*{tag.string}*"
                 tag.unwrap()
 
         # Hack, cf https://stackoverflow.com/questions/44679677/get-real-text-with-beautifulsoup-after-unwrap
@@ -709,4 +714,65 @@ class MonsterScraper(BaseAideDDScraper):
             description=self.scrape_description(),
             languages=self.scrape_languages(),
             image_url=self.scrape_image_url(),
+        )
+
+
+class AncestryFeatureScraper(BaseAideDDScraper):
+    model = AncestryFeature
+    title_indicator = "Traits"
+
+    def __init__(self, ancestry: str, sub_ancestry: str, lang: str):
+        self.ancestry = CharacterAncestry.from_str(ancestry, lang)
+        self.sub_ancestry = sub_ancestry
+        super().__init__(slug=ancestry, lang=lang)
+
+    @property
+    def base_url(self) -> str:
+        return AIDEDD_RACE_RULES_URL.format(ancestry=self.ancestry.translate(self.lang))
+
+    def find_feature_section(self) -> Tag:
+        if self.sub_ancestry:
+            for tag in self.soup.find_all(["h4"]):
+                if tag.text.endswith(self.sub_ancestry):
+                    break
+            else:
+                raise ValueError(f"Ancestry feature {self.sub_ancestry} not found")
+        else:
+            for tag in self.soup.find_all(["h3", "h4"]):
+                if tag.text.endswith(self.title_indicator):
+                    break
+            else:
+                raise ValueError(f"Ancestry feature {self.ancestry} not found")
+        return tag
+
+    def scrape_text(self) -> list[str]:
+        tag = self.find_feature_section()
+        accumulator, found_tag = [], False
+        for t in self.soup.find_all():
+            if t == tag:
+                found_tag = True
+                continue
+            if (
+                t.name == "p"
+                and found_tag
+                and "encadre" not in t.attrs.get("class", {})
+                and not t.text.startswith("Sous-race.")
+            ):
+                accumulator.append(self.sanitize_soup(t))
+            elif t.name == "table" and found_tag:
+                accumulator.append(t)
+            elif t.name in ["h2", "h3", "h4"] and found_tag:
+                break
+        out = []
+        for tag in accumulator:
+            out.extend(self.scrape_text_block(tag))
+
+        return out
+
+    def scrape(self) -> AncestryFeature:
+        print(f"Scraping data for ancestry feature {self.slug}")
+        return AncestryFeature(
+            title=self.ancestry.translate(self.lang).capitalize(),
+            sub_ancestry=self.sub_ancestry,
+            text=self.scrape_text(),
         )
