@@ -220,7 +220,7 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
                 title=self.title,
                 icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
             ),
-            self.format_spell_school("illusion"),
+            self.format_spell_school(self.__class__.__name__.lower()),
             self.format_header_separator(),
             self.prerequisite_text,
             self.text_parts,
