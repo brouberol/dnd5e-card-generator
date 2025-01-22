@@ -34,5 +34,6 @@ poetry run dnd5e-card-generator \
         'roublard:Esprit fuyant' \
         'roublard:Embuscade magique' \
     --eldricht-invocations fr:arme-de-pacte-amelioree fr:malefice-accablant \
+    --ancestry-features fr:nain 'fr:nain:Nain des collines' \
     --spell-colors '#646fe1' '#e16492' \
     --output ./test-cards.json
