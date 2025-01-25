@@ -2,6 +2,7 @@ class Config:
     BYPASS_CACHE = False
     COLORS = {
         "class_feature": "indianred",
+        "background": "#ff9aac",
         "feat": "#37352b",
         "feat_title": "#d6a44a",
         "eldricht_invocation": "#994094",
@@ -33,6 +34,7 @@ class Config:
     # All of these icons come from https://game-icons.net/
     ICONS = {
         "ancestry_feature": "elf-helmet",
+        "background": "fluffy-trefoil",
         "character_class": {
             "artificer": "fire-tail",
             "barbarian": "sharp-axe",

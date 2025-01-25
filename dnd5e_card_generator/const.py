@@ -7,6 +7,10 @@ AIDEDD_CLASS_RULES_URL = {
     "fr": "https://www.aidedd.org/regles/classes/{class_}",
     "en": "https://www.aidedd.org/en/rules/classes/{class_}/",
 }
+AIDEDD_BACKGROUND_URL = {
+    "fr": "https://www.aidedd.org/regles/historiques/{background}/",
+    "en": "https://www.aidedd.org/en/rules/background/{background}/",
+}
 AIDEDD_RACE_RULES_URL = {
     "fr": "https://www.aidedd.org/regles/races/{ancestry}",
     "en": "https://www.aidedd.org/en/rules/races/{ancestry}",

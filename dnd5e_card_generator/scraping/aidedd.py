@@ -22,6 +22,7 @@ from dnd5e_card_generator.const import (
     AIDEDD_SPELLS_URL,
     AIDEDD_UNEARTHED_ARCANA_URL,
     FIVE_E_SHEETS_SPELLS,
+    AIDEDD_BACKGROUND_URL,
 )
 from dnd5e_card_generator.export.class_feature import ClassFeature
 from dnd5e_card_generator.export.ancestry_feature import AncestryFeature
@@ -30,6 +31,7 @@ from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
 from dnd5e_card_generator.export.monster import Monster
 from dnd5e_card_generator.export.spell import Spell
+from dnd5e_card_generator.export.background import Background
 from dnd5e_card_generator.models import (
     Attribute,
     CharacterClass,
@@ -171,15 +173,16 @@ class BaseAideDDScraper:
     def scrape_title(self) -> str:
         return self.div_content.find("h1").text.strip()
 
+    def scrape_soup_title(self) -> str:
+        return self.soup.find("h1").text.strip()
+
     def scrape_en_title(self) -> str:
         if self.lang == "en":
             return self.scrape_title()
         return self.div_content.find("div", class_="trad").find("a").text
 
     def scrape_description(self) -> list[str]:
-        return self.scrape_text_block(
-            self.div_content.find("div", class_="description")
-        )
+        return self.scrape_text_block(self.div_content.find("div", class_="description"))
 
 
 class SpellScraper(BaseAideDDScraper):
@@ -768,7 +771,43 @@ class AncestryFeatureScraper(BaseAideDDScraper):
     def scrape(self) -> AncestryFeature:
         print(f"Scraping data for ancestry feature {self.slug}")
         return AncestryFeature(
-            title=self.ancestry.translate(self.lang).capitalize(),
+            title=self.scrape_soup_title(),
             sub_ancestry=self.sub_ancestry,
             text=self.scrape_text(),
+        )
+
+
+class BackgroundScraper(BaseAideDDScraper):
+    model = Background
+    marker = {"fr": "Capacité", "en": "Feature"}
+
+    @property
+    def base_url(self) -> str:
+        return AIDEDD_BACKGROUND_URL[self.lang].format(background=self.slug)
+
+    def scrape_subtitle(self) -> str:
+        marker = self.marker[self.lang]
+        for h4 in self.div_content.find_all("h4"):
+            if h4.text.startswith(marker):
+                return h4.text.replace(marker, "").lstrip(" ").lstrip(":").lstrip(" ")
+        return ""
+
+    def scrape_text(self) -> list[str]:
+        accumulator = []
+        for h4 in self.div_content.find_all("h4"):
+            if h4.text.startswith(self.marker[self.lang]):
+                for element in h4.find_next_siblings():
+                    if element.name == "h4":
+                        return accumulator
+                    else:
+                        accumulator.extend(self.scrape_text_block(element))
+        return []
+
+    def scrape(self) -> Background:
+        print(f"Scraping data for background {self.slug}")
+        return Background(
+            title=self.scrape_soup_title(),
+            text=self.scrape_text(),
+            lang=self.lang,
+            subtitle=self.scrape_subtitle(),
         )

@@ -8,6 +8,7 @@ from dnd5e_card_generator.models import (
     CliMagicItem,
     CliSpell,
     CliAncestryFeature,
+    CliBackground,
 )
 from dnd5e_card_generator.scraping.aidedd import (
     CharacterClassFeatureScraper,
@@ -17,6 +18,7 @@ from dnd5e_card_generator.scraping.aidedd import (
     MonsterScraper,
     SpellScraper,
     AncestryFeatureScraper,
+    BackgroundScraper,
 )
 
 from .spell import SpellLegend
@@ -106,5 +108,13 @@ def export_ancestry_features_to_cards(ancestry_features: list[CliAncestryFeature
     return export_elements_to_cards(
         elements=ancestry_features,
         ScraperCls=AncestryFeatureScraper,
+        sorting_func=lambda item: item.title,
+    )
+
+
+def export_backgrounds_to_cards(backgrounds: list[CliBackground]) -> list[dict]:
+    return export_elements_to_cards(
+        elements=backgrounds,
+        ScraperCls=BackgroundScraper,
         sorting_func=lambda item: item.title,
     )

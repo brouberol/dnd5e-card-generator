@@ -14,6 +14,7 @@ from .export import (
     export_items_to_cards,
     export_spells_to_cards,
     export_ancestry_features_to_cards,
+    export_backgrounds_to_cards,
 )
 from .models import (
     CliClassFeature,
@@ -23,6 +24,7 @@ from .models import (
     CliSpell,
     CliSpellFilter,
     CliAncestryFeature,
+    CliBackground,
 )
 from .scraping.aidedd import SpellFilter
 
@@ -122,6 +124,14 @@ def parse_args():
         type=CliAncestryFeature.from_str,
     )
     parser.add_argument(
+        "--backgrounds",
+        nargs="+",
+        help="Space separated <lang>:<background>. Examples: fr:voyageur",
+        required=False,
+        default=[],
+        type=CliBackground.from_str,
+    )
+    parser.add_argument(
         "--bypass-cache",
         action="store_true",
         help="Bypass local cache to force the scrapers to issue HTTP requests (default: False)",
@@ -180,6 +190,9 @@ def main():
         cards.extend(export_class_features_to_cards(args.class_features))
     if args.ancestry_features:
         cards.extend(export_ancestry_features_to_cards(args.ancestry_features))
+    if args.backgrounds:
+        cards.extend(export_backgrounds_to_cards(args.backgrounds))
+
     # if args.monsters:
     #     cards.extend(export_monsters_to_cards(args.monsters))
 

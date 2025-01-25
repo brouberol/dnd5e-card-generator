@@ -41,6 +41,9 @@ class CliEldrichtInvocation(CliArg): ...
 class CliMonster(CliArg): ...
 
 
+class CliBackground(CliArg): ...
+
+
 @dataclass
 class CliClassFeature(BaseDataclass):
     class_name: str
