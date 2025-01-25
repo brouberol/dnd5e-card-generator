@@ -168,9 +168,6 @@ class BaseAideDDScraper:
         return list(desc_div.strings)
 
     def scrape_title(self) -> str:
-        return self.div_content.find("h1").text.strip()
-
-    def scrape_soup_title(self) -> str:
         return self.soup.find("h1").text.strip()
 
     def scrape_en_title(self) -> str:
@@ -182,7 +179,28 @@ class BaseAideDDScraper:
         return self.scrape_text_block(self.div_content.find("div", class_="description"))
 
 
-class SpellScraper(BaseAideDDScraper):
+class BaseItemPageScraper(BaseAideDDScraper):
+
+    def scrape_title(self) -> str:
+        return self.div_content.find("h1").text.strip()
+
+
+class TitleDescriptionPrerequisiteScraper(BaseItemPageScraper):
+    base_url = None
+    model = None
+
+    def scrape(self):
+        print(f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}")
+        prerequisite_div = self.div_content.find("div", class_="prerequis")
+        return self.model(
+            title=self.scrape_title(),
+            text=self.scrape_description(),
+            prerequesite=prerequisite_div.text if prerequisite_div else None,
+            lang=self.lang,
+        )
+
+
+class SpellScraper(BaseItemPageScraper):
     base_url = AIDEDD_SPELLS_URL
     # We surround these indicators with underscores as the text appears in italics
     # in the text, and this is our way to signal the card formatter to display this
@@ -347,7 +365,7 @@ class SpellScraper(BaseAideDDScraper):
         )
 
 
-class MagicItemScraper(BaseAideDDScraper):
+class MagicItemScraper(BaseItemPageScraper):
     base_url = AIDEDD_MAGIC_ITEMS_URL
 
     attunement_text_by_lang = {
@@ -392,21 +410,6 @@ class MagicItemScraper(BaseAideDDScraper):
             recharges=recharges,
         )
         return magic_item
-
-
-class TitleDescriptionPrerequisiteScraper(BaseAideDDScraper):
-    base_url = None
-    model = None
-
-    def scrape(self):
-        print(f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}")
-        prerequisite_div = self.div_content.find("div", class_="prerequis")
-        return self.model(
-            title=self.scrape_title(),
-            text=self.scrape_description(),
-            prerequesite=prerequisite_div.text if prerequisite_div else None,
-            lang=self.lang,
-        )
 
 
 class FeatScraper(TitleDescriptionPrerequisiteScraper):
@@ -746,7 +749,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
     def scrape(self) -> AncestryFeature:
         print(f"Scraping data for ancestry feature {self.slug}")
         return AncestryFeature(
-            title=self.scrape_soup_title(),
+            title=self.scrape_title(),
             sub_ancestry=self.sub_ancestry,
             text=self.scrape_text(),
         )
@@ -781,7 +784,7 @@ class BackgroundScraper(BaseAideDDScraper):
     def scrape(self) -> Background:
         print(f"Scraping data for background {self.slug}")
         return Background(
-            title=self.scrape_soup_title(),
+            title=self.scrape_title(),
             text=self.scrape_text(),
             lang=self.lang,
             subtitle=self.scrape_subtitle(),
