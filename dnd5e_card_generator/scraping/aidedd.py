@@ -35,7 +35,6 @@ from dnd5e_card_generator.export.background import Background
 from dnd5e_card_generator.models import (
     Attribute,
     CharacterClass,
-    CharacterAncestry,
     CreatureAttributes,
     CreatureSize,
     CreatureSpeed,
