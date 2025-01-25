@@ -7,33 +7,34 @@ poetry run dnd5e-card-generator \
     --items fr:cape-d-invisibilite fr:anneau-de-regeneration \
     --feats fr:athlete fr:sentinelle \
     --class-features \
-        'artificier:Outil de circonstance' \
-        'artificier:Élixir expérimental' \
-        'barbare:Sens du danger' \
-        'barbare:Esprit totem' \
-        'barde:Expertise' \
-        'barde:Mots cinglants' \
-        'clerc:Conduit divin' \
-        'clerc:Frappe divine' \
-        'druide:Jeunesse éternelle' \
-        'druide:Formes du cercle' \
-        'ensorceleur:Flexibilité des sorts' \
-        'ensorceleur:Ancêtre draconique' \
-        'guerrier:Archétype martial' \
-        'guerrier:Implacable' \
-        'magicien:Maîtrise des sorts' \
-        'magicien:Regard hypnotique' \
-        'moine:Déplacement aérien' \
-        'moine:Tranquillité' \
-        'occultiste:Pacte de la chaîne' \
-        'occultiste:Défenses captivantes' \
-        'paladin:Protection' \
-        'paladin:Préceptes de dévotion' \
-        'rodeur:Vigilance primitive' \
-        'rodeur:Attaques multiples' \
-        'roublard:Esprit fuyant' \
-        'roublard:Embuscade magique' \
+        'fr:artificier:Outil de circonstance' \
+        'fr:artificier:Élixir expérimental' \
+        'fr:barbare:Sens du danger' \
+        'fr:barbare:Esprit totem' \
+        'fr:barde:Expertise' \
+        'fr:barde:Mots cinglants' \
+        'fr:clerc:Conduit divin' \
+        'fr:clerc:Frappe divine' \
+        'fr:druide:Jeunesse éternelle' \
+        'fr:druide:Formes du cercle' \
+        'fr:ensorceleur:Flexibilité des sorts' \
+        'fr:ensorceleur:Ancêtre draconique' \
+        'fr:guerrier:Archétype martial' \
+        'fr:guerrier:Implacable' \
+        'fr:magicien:Maîtrise des sorts' \
+        'fr:magicien:Regard hypnotique' \
+        'fr:moine:Déplacement aérien' \
+        'fr:moine:Tranquillité' \
+        'fr:occultiste:Pacte de la chaîne' \
+        'fr:occultiste:Défenses captivantes' \
+        'fr:paladin:Protection' \
+        'fr:paladin:Préceptes de dévotion' \
+        'fr:rodeur:Vigilance primitive' \
+        'fr:rodeur:Attaques multiples' \
+        'fr:roublard:Esprit fuyant' \
+        'fr:roublard:Embuscade magique' \
     --eldricht-invocations fr:arme-de-pacte-amelioree fr:malefice-accablant \
     --ancestry-features fr:nain 'fr:nain:Nain des collines' \
     --spell-colors '#646fe1' '#e16492' \
+    --backgrounds fr:voyageur en:acolyte \
     --output ./test-cards.json
