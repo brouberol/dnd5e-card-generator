@@ -81,9 +81,7 @@ class CliSpellFilter(BaseDataclass):
     @classmethod
     def from_str(cls, s: str) -> "CliSpellFilter":
         class_name, min_level, max_level = s.split(":")
-        return cls(
-            class_name=class_name, min_level=int(min_level), max_level=int(max_level)
-        )
+        return cls(class_name=class_name, min_level=int(min_level), max_level=int(max_level))
 
 
 class BaseModel(StrEnum):
@@ -228,11 +226,7 @@ class DamageType(BaseModel):
 
     @classmethod
     def as_pattern(cls, lang: str) -> str:
-        return (
-            r"dégâts (de (type )?|d')?("
-            + r"|".join(cls.translations()[lang].values())
-            + r")s?"
-        )
+        return r"dégâts (de (type )?|d')?(" + r"|".join(cls.translations()[lang].values()) + r")s?"
 
 
 class SpellShape(BaseModel):
@@ -301,9 +295,7 @@ class DamageDie(StrEnum):
 
     @classmethod
     def values_with_icons(cls) -> list[tuple[str, "DamageDie"]]:
-        return [
-            (name, value) for name, value in cls._member_map_.items() if value != "d100"
-        ]
+        return [(name, value) for name, value in cls._member_map_.items() if value != "d100"]
 
     @classmethod
     def from_str(self, s: str) -> Self:

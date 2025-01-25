@@ -34,10 +34,7 @@ def parse_args():
     parser.add_argument(
         "--spells",
         nargs="+",
-        help=(
-            "Space separated <lang>:<spell-slug> items. "
-            "Example: fr:lumiere en:toll-the-dead"
-        ),
+        help=("Space separated <lang>:<spell-slug> items. " "Example: fr:lumiere en:toll-the-dead"),
         required=False,
         default=[],
         type=CliSpell.from_str,
@@ -83,8 +80,7 @@ def parse_args():
         "--feats",
         nargs="+",
         help=(
-            "Space separated <lang>:<feat-slug> items. "
-            "Example: fr:mage-de-guerre fr:sentinelle"
+            "Space separated <lang>:<feat-slug> items. " "Example: fr:mage-de-guerre fr:sentinelle"
         ),
         required=False,
         default=[],
@@ -94,8 +90,7 @@ def parse_args():
         "--eldricht-invocations",
         nargs="+",
         help=(
-            "Space separated <lang>:<invocation-slug> items. "
-            "Example: fr:arme-de-pacte-amelioree"
+            "Space separated <lang>:<invocation-slug> items. " "Example: fr:arme-de-pacte-amelioree"
         ),
         required=False,
         default=[],
@@ -166,8 +161,7 @@ def main():
 
     if args.spell_colors:
         Config.COLORS["spell"] = {
-            lvl: color
-            for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
+            lvl: color for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
         }
 
     if args.spell_filter:
@@ -177,9 +171,7 @@ def main():
 
     spells = args.spells + spells
     if spells:
-        cards.extend(
-            export_spells_to_cards(spells, include_legend=args.include_spell_legend)
-        )
+        cards.extend(export_spells_to_cards(spells, include_legend=args.include_spell_legend))
     if args.items:
         cards.extend(export_items_to_cards(args.items))
     if args.feats:

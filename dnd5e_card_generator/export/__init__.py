@@ -39,9 +39,7 @@ def export_elements_to_cards(elements, ScraperCls, sorting_func):
     return [model.to_card() for model in models]
 
 
-def export_spells_to_cards(
-    spell_names: list[CliSpell], include_legend: bool
-) -> list[dict]:
+def export_spells_to_cards(spell_names: list[CliSpell], include_legend: bool) -> list[dict]:
     """Scrape Aidedd for the provided spells and export them as cards data.
 
     If include_legend=True, then a legend card will be generated and added at the end

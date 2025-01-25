@@ -30,7 +30,9 @@ class BaseCardTextFormatter:
     def damage_type_text(self, lang) -> str:
         # 2d8 dégâts de foudre ou de tonnerre
         if lang == "fr":
-            return r"(de )?dégâts (de |d')?(?P<damage_type_1>\w+)( ou (de |d')(?P<damage_type_2>\w+))?"
+            return (
+                r"(de )?dégâts (de |d')?(?P<damage_type_1>\w+)( ou (de |d')(?P<damage_type_2>\w+))?"
+            )
         return r"(?P<damage_type_1>\w+) (or (?P<damage_type_2>\w+) )?damage"
 
     def spell_carac_text(self, lang: str) -> str:
@@ -87,9 +89,7 @@ class BaseCardTextFormatter:
 
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
-        return re.sub(
-            die_value_pattern, lambda match: self._strong(match.group(0)), text
-        )
+        return re.sub(die_value_pattern, lambda match: self._strong(match.group(0)), text)
 
     def highlight_damage_formula(self, text: str, lang: str) -> str:
         die_value_pattern = (
@@ -107,13 +107,9 @@ class BaseCardTextFormatter:
             parts = match.groupdict()
             damage_type_1, damage_type_2 = None, None
             if parts.get("damage_type_1"):
-                damage_type_1 = DamageType.from_str(
-                    parts["damage_type_1"].rstrip("s"), lang
-                )
+                damage_type_1 = DamageType.from_str(parts["damage_type_1"].rstrip("s"), lang)
             if parts.get("damage_type_2"):
-                damage_type_2 = DamageType.from_str(
-                    parts["damage_type_2"].rstrip("s"), lang
-                )
+                damage_type_2 = DamageType.from_str(parts["damage_type_2"].rstrip("s"), lang)
 
             damage_formula = DamageFormula(
                 num_die=int(parts.get("num_die") or 1),

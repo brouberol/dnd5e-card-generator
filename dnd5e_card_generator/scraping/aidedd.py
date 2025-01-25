@@ -136,9 +136,7 @@ class BaseAideDDScraper:
     def parse_page(self) -> tuple[BeautifulSoup, Tag | NavigableString | None]:
         html = self.fetch_data()
         soup = BeautifulSoup(html, features="html.parser")
-        div_content = soup.find("div", class_="col1") or soup.find(
-            "div", class_="content"
-        )
+        div_content = soup.find("div", class_="col1") or soup.find("div", class_="content")
         if div_content is None:
             raise ValueError(f"{self.slug} not found!")
         return soup, div_content
@@ -239,19 +237,14 @@ class SpellScraper(BaseAideDDScraper):
 
         upcasting_text_element_index = text.index(upcasting_indicator)
         upcasting_text_parts = text[upcasting_text_element_index + 1 :]
-        upcasting_text_parts = [
-            re.sub(r"^\. ", "", part) for part in upcasting_text_parts
-        ]
+        upcasting_text_parts = [re.sub(r"^\. ", "", part) for part in upcasting_text_parts]
         upcasting_text = "\n".join(upcasting_text_parts)
         text = text[:upcasting_text_element_index]
         return text, upcasting_text
 
     def scrape_school_text(self) -> str:
         return (
-            self.div_content.find("div", class_="ecole")
-            .text.split(" - ")[1]
-            .strip()
-            .capitalize()
+            self.div_content.find("div", class_="ecole").text.split(" - ")[1].strip().capitalize()
         )
 
     def scrape_casting_range(self) -> str:
@@ -288,12 +281,8 @@ class SpellScraper(BaseAideDDScraper):
         else:
             ritual = False
         effect_duration = self.scrape_effect_duration()
-        if concentration_match := re.search(
-            self.concentration_pattern, effect_duration
-        ):
-            effect_duration = effect_duration.replace(
-                concentration_match.group(0), ""
-            ).strip()
+        if concentration_match := re.search(self.concentration_pattern, effect_duration):
+            effect_duration = effect_duration.replace(concentration_match.group(0), "").strip()
             concentration = True
         else:
             concentration = False
@@ -318,8 +307,7 @@ class SpellScraper(BaseAideDDScraper):
                 components_text = components_match.group(1)
                 paying_components = (
                     components_text.capitalize()
-                    if self.paying_components_indicator_by_lang[self.lang]
-                    in components_text
+                    if self.paying_components_indicator_by_lang[self.lang] in components_text
                     else ""
                 )
                 if paying_components and not paying_components.endswith("."):
@@ -328,9 +316,7 @@ class SpellScraper(BaseAideDDScraper):
             paying_components = ""
 
         search_text = "\n".join(spell_text)
-        if damage_type_match := re.search(
-            self.spell_damage_by_lang[self.lang], search_text
-        ):
+        if damage_type_match := re.search(self.spell_damage_by_lang[self.lang], search_text):
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
@@ -385,9 +371,7 @@ class MagicItemScraper(BaseAideDDScraper):
             item_type = MagicItemKind.from_str(item_type_text.lower(), self.lang)
 
         if attunement_text in item_rarity:
-            requires_attunement_pattern = (
-                r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
-            )
+            requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
             item_rarity = re.sub(requires_attunement_pattern, "", item_rarity).strip()
             requires_attunement = True
         else:
@@ -395,9 +379,7 @@ class MagicItemScraper(BaseAideDDScraper):
         img_elt = self.soup.find("img")
         image_url = img_elt.attrs["src"] if img_elt else ""
         rarity = MagicItemRarity.from_str(item_rarity, self.lang)
-        item_description = list(
-            self.div_content.find("div", class_="description").strings
-        )
+        item_description = list(self.div_content.find("div", class_="description").strings)
         recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
         recharges = int(recharges_match.group(1) if recharges_match else 0)
         magic_item = MagicItem(
@@ -418,9 +400,7 @@ class TitleDescriptionPrerequisiteScraper(BaseAideDDScraper):
     model = None
 
     def scrape(self):
-        print(
-            f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}"
-        )
+        print(f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}")
         prerequisite_div = self.div_content.find("div", class_="prerequis")
         return self.model(
             title=self.scrape_title(),
@@ -499,9 +479,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
         last_seen_h2, last_seen_h3 = None, None
         for t in self.soup.find_all(["h2", "h3", tag.name]):
             if t == tag:
-                if last_seen_h2.text.startswith(
-                    self.class_variant_indicator[self.class_name]
-                ):
+                if last_seen_h2.text.startswith(self.class_variant_indicator[self.class_name]):
                     return last_seen_h3.text
                 else:
                     return
@@ -574,9 +552,7 @@ class MonsterScraper(BaseAideDDScraper):
             if text == str_marker:
                 return next(text_iter).strip()
 
-    def _find_tag_after_tag_containing(
-        self, div: Tag, tag_name: str, content: str
-    ) -> Tag | None:
+    def _find_tag_after_tag_containing(self, div: Tag, tag_name: str, content: str) -> Tag | None:
         for tag in div.find_all(tag_name):
             if content in tag.text:
                 return tag
