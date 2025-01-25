@@ -462,12 +462,8 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
     @property
     def base_url(self) -> str:
         if self.class_name == CharacterClass.artificer:
-            return AIDEDD_UNEARTHED_ARCANA_URL.format(
-                class_=self.class_name.translate(self.lang)
-            )
-        return AIDEDD_CLASS_RULES_URL.format(
-            class_=self.class_name.translate(self.lang)
-        )
+            return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name.translate(self.lang))
+        return AIDEDD_CLASS_RULES_URL[self.lang].format(class_=self.class_name.translate(self.lang))
 
     def find_feature_section(self) -> Tag:
         for tag in self.soup.find_all(["h3", "h4"]):
@@ -722,13 +718,13 @@ class AncestryFeatureScraper(BaseAideDDScraper):
     title_indicator = "Traits"
 
     def __init__(self, ancestry: str, sub_ancestry: str, lang: str):
-        self.ancestry = CharacterAncestry.from_str(ancestry, lang)
+        self.ancestry = ancestry
         self.sub_ancestry = sub_ancestry
         super().__init__(slug=ancestry, lang=lang)
 
     @property
     def base_url(self) -> str:
-        return AIDEDD_RACE_RULES_URL.format(ancestry=self.ancestry.translate(self.lang))
+        return AIDEDD_RACE_RULES_URL[self.lang].format(ancestry=self.ancestry)
 
     def find_feature_section(self) -> Tag:
         if self.sub_ancestry:

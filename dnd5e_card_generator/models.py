@@ -49,8 +49,8 @@ class CliClassFeature(BaseDataclass):
 
     @classmethod
     def from_str(cls, s: str) -> "CliClassFeature":
-        class_name, _, title = s.partition(":")
-        return cls(title=title, class_name=class_name, lang="fr")
+        lang, class_name, title = s.split(":")
+        return cls(title=title, class_name=class_name, lang=lang)
 
 
 @dataclass
@@ -66,7 +66,7 @@ class CliAncestryFeature(BaseDataclass):
             sub_ancestry = ""
         else:
             lang, ancestry, sub_ancestry = s.split(":")
-        return cls(ancestry=ancestry, sub_ancestry=sub_ancestry, lang="fr")
+        return cls(ancestry=ancestry, sub_ancestry=sub_ancestry, lang=lang)
 
 
 @dataclass
