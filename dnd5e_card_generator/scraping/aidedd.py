@@ -3,7 +3,7 @@ import tempfile
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 from urllib.parse import parse_qs, urlparse
 
 import requests
@@ -116,6 +116,7 @@ class SpellFilter:
 class BaseAideDDScraper:
     base_url: str = ""
     tags_to_unwrap_from_description = ["a", "em", "ul", "li", "strong"]
+    model = None
 
     def __init__(self, slug: str, lang: str):
         self.slug = slug
@@ -132,15 +133,15 @@ class BaseAideDDScraper:
         cached_file.write_text(resp.text)
         return resp.text
 
-    def parse_page(self) -> tuple[BeautifulSoup, Tag | NavigableString | None]:
+    def parse_page(self) -> tuple[BeautifulSoup, Tag]:
         html = self.fetch_data()
         soup = BeautifulSoup(html, features="html.parser")
         div_content = soup.find("div", class_="col1") or soup.find("div", class_="content")
         if div_content is None:
             raise ValueError(f"{self.slug} not found!")
-        return soup, div_content
+        return soup, cast(Tag, div_content)
 
-    def sanitize_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
+    def sanitize_soup(self, soup: BeautifulSoup | Tag) -> BeautifulSoup:
         """Remove formatting tags form soup to avoid whitespace issues when extracting the text content"""
         for tag_type in self.tags_to_unwrap_from_description:
             for tag in soup.find_all(tag_type):
@@ -161,6 +162,22 @@ class BaseAideDDScraper:
         new_soup = BeautifulSoup(string_soup, features="html.parser")
         return new_soup
 
+    def _find_in_tag(self, tag: Tag | NavigableString | BeautifulSoup, *args, **kwargs) -> Tag:
+        match = tag.find(*args, **kwargs)
+        if not match:
+            raise ValueError(f"No match were found for {args}, {kwargs}")
+        elif isinstance(match, int):
+            raise TypeError("unexpected int return type")
+        elif isinstance(match, NavigableString):
+            raise TypeError("unexpected NavigableString return type")
+        return match
+
+    def find_in_content(self, *args, **kwargs):
+        return self._find_in_tag(self.div_content, *args, **kwargs)
+
+    def find_in_soup(self, *args, **kwargs):
+        return self._find_in_tag(self.soup, *args, **kwargs)
+
     def scrape_text_block(self, tag: Tag) -> list[str]:
         if tag.name == "table":
             return [str(tag)]
@@ -168,26 +185,25 @@ class BaseAideDDScraper:
         return list(desc_div.strings)
 
     def scrape_title(self) -> str:
-        return self.soup.find("h1").text.strip()
+        return self.find_in_soup("h1").text.strip()
 
     def scrape_en_title(self) -> str:
         if self.lang == "en":
             return self.scrape_title()
-        return self.div_content.find("div", class_="trad").find("a").text
+        return self.find_in_content("div", class_="trad").find("a").text
 
     def scrape_description(self) -> list[str]:
-        return self.scrape_text_block(self.div_content.find("div", class_="description"))
+        return self.scrape_text_block(self.find_in_content("div", class_="description"))
 
 
 class BaseItemPageScraper(BaseAideDDScraper):
 
     def scrape_title(self) -> str:
-        return self.div_content.find("h1").text.strip()
+        return self.find_in_content("h1").text.strip()
 
 
 class TitleDescriptionPrerequisiteScraper(BaseItemPageScraper):
-    base_url = None
-    model = None
+    base_url = ""
 
     def scrape(self):
         print(f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}")
@@ -232,14 +248,14 @@ class SpellScraper(BaseItemPageScraper):
         return FIVE_E_SHEETS_SPELLS[self.scrape_en_title()]
 
     def _scrape_property(self, classname: str, remove: list[str]) -> str:
-        prop = self.div_content.find("div", class_=classname).text
+        prop = self.find_in_content("div", class_=classname).text
         for term in remove:
             prop = prop.replace(term, "")
         return prop.strip()
 
     def scrape_level(self) -> int:
         return int(
-            self.div_content.find("div", class_="ecole")
+            self.find_in_content("div", class_="ecole")
             .text.split(" - ")[0]
             .replace("niveau", "")
             .replace("level", "")
@@ -260,9 +276,7 @@ class SpellScraper(BaseItemPageScraper):
         return text, upcasting_text
 
     def scrape_school_text(self) -> str:
-        return (
-            self.div_content.find("div", class_="ecole").text.split(" - ")[1].strip().capitalize()
-        )
+        return self.find_in_content("div", class_="ecole").text.split(" - ")[1].strip().capitalize()
 
     def scrape_casting_range(self) -> str:
         return self._scrape_property("r", list(self.casting_range_by_lang.values()))
@@ -377,7 +391,7 @@ class MagicItemScraper(BaseItemPageScraper):
         print(f"Scraping data for item {self.slug}")
 
         attunement_text = self.attunement_text_by_lang[self.lang]
-        item_type_div_text = self.div_content.find("div", class_="type").text
+        item_type_div_text = self.find_in_content("div", class_="type").text
         item_type_text, _, item_rarity = item_type_div_text.partition(",")
         item_rarity = item_rarity.strip()
         if re.match(r"(armor|armure)", item_type_text.lower()):
@@ -396,7 +410,7 @@ class MagicItemScraper(BaseItemPageScraper):
         img_elt = self.soup.find("img")
         image_url = img_elt.attrs["src"] if img_elt else ""
         rarity = MagicItemRarity.from_str(item_rarity, self.lang)
-        item_description = list(self.div_content.find("div", class_="description").strings)
+        item_description = list(self.find_in_content("div", class_="description").strings)
         recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
         recharges = int(recharges_match.group(1) if recharges_match else 0)
         magic_item = MagicItem(
@@ -526,11 +540,11 @@ class MonsterScraper(BaseAideDDScraper):
 
     @cached_property
     def creature_type_text(self) -> str:
-        return self.div_content.find("div", class_="type").text
+        return self.find_in_content("div", class_="type").text
 
     @cached_property
-    def creature_red_text_div(self) -> str:
-        return self.div_content.find("div", class_="red")
+    def creature_red_text_div(self) -> Tag:
+        return self.find_in_content("div", class_="red")
 
     def scrape_creature_size(self) -> CreatureSize:
         match = re.search(
@@ -662,13 +676,14 @@ class MonsterScraper(BaseAideDDScraper):
                 features.append(p.text)
             else:
                 return features
+        return []
 
     def scrape_actions(self) -> list[str]:
-        actions_div = self.div_content.find("div", class_="rub")
+        actions_div = self.find_in_content("div", class_="rub")
         return [p.text for p in actions_div.find_all_next("p")]
 
     def scrape_image_url(self) -> str | None:
-        if picture_div := self.div_content.find("div", class_="picture"):
+        if picture_div := self.find_in_content("div", class_="picture"):
             return picture_div.find("img").attrs["src"]
 
     def scrape(self) -> Monster:
