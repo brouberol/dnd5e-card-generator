@@ -45,7 +45,7 @@ class AncestryFeature(BaseCardTextFormatter):
                 title=self.title_text,
                 icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
             ),
-            self.format_spell_school("ancestry"),
+            self.format_card_type("ancestry"),
             self.format_header_separator(),
             self.text_parts,
         )

@@ -43,6 +43,6 @@ class ClassFeature(BaseCardTextFormatter):
             self.format_title(title=self.title, icon=self.class_name.icon),
             self.format_subtitle(self.subtitle_text),
             self.format_header_separator(),
-            self.format_spell_school(self.class_name.value),
+            self.format_card_type(self.class_name.value),
             self.text_parts,
         )

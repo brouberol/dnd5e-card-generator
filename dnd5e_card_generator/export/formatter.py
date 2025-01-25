@@ -71,6 +71,9 @@ class BaseCardTextFormatter:
     def format_spell_school(self, school: str) -> str:
         return f"spell_school | {school}"
 
+    def format_card_type(self, card_type: str) -> str:
+        return self.format_spell_school(card_type)
+
     def assemble_text_contents(self, *parts: list | str) -> list[str]:
         contents = []
         for part in parts:
@@ -220,7 +223,7 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
                 title=self.title,
                 icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
             ),
-            self.format_spell_school(self.__class__.__name__.lower()),
+            self.format_card_type(self.__class__.__name__.lower()),
             self.format_header_separator(),
             self.prerequisite_text,
             self.text_parts,
