@@ -354,6 +354,7 @@ class Spell(BaseCardTextFormatter):
 class SpellLegend(BaseCardTextFormatter):
     def __init__(self, lang: str):
         self.lang = lang
+        self.title = ""
 
     @property
     def title_text(self):

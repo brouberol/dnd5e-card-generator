@@ -121,9 +121,9 @@ class SpellFilter:
 
 
 class BaseAideDDScraper:
+    model = None
     base_url: str = ""
     tags_to_unwrap_from_description = ["a", "em", "ul", "li", "strong"]
-    model = None
 
     def __init__(self, slug: str, lang: str):
         self.slug = slug
@@ -210,12 +210,13 @@ class BaseItemPageScraper(BaseAideDDScraper):
 
 
 class TitleDescriptionPrerequisiteScraper(BaseItemPageScraper):
-    base_url = ""
 
     def scrape(self):
-        print(f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}")
+        print(
+            f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}"  # pyright: ignore
+        )
         prerequisite_div = self.div_content.find("div", class_="prerequis")
-        return self.model(
+        return self.model(  # pyright: ignore
             title=self.scrape_title(),
             text=self.scrape_description(),
             prerequesite=prerequisite_div.text if prerequisite_div else None,
@@ -798,7 +799,7 @@ class BackgroundScraper(BaseAideDDScraper):
     marker = {"fr": "Capacité", "en": "Feature"}
 
     @property
-    def base_url(self) -> str: # pyright: ignore
+    def base_url(self) -> str:  # pyright: ignore
         return AIDEDD_BACKGROUND_URL[self.lang].format(background=self.slug)
 
     def scrape_subtitle(self) -> str:

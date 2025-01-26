@@ -1,5 +1,5 @@
 class Config:
-    BYPASS_CACHE = False
+    BYPASS_CACHE: bool = False
     COLORS = {
         "class_feature": "indianred",
         "background": "#ff9aac",
