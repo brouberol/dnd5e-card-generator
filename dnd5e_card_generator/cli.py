@@ -44,7 +44,8 @@ def parse_args():
         nargs="+",
         help=(
             "Space separated hexadecimal colors associated with spells. If provided, a gradient "
-            "palette will be generated from these colors, and associated with each spell level"
+            "palette will be generated from these colors, and associated with each spell level. "
+            "Example: '#646fe1' '#e16492'"
         ),
         required=False,
         type=str,
