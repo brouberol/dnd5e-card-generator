@@ -10,6 +10,7 @@ from dnd5e_card_generator.utils import pascal_case_to_snake_case
 @dataclass
 class AncestryFeature(BaseCardTextFormatter):
     title: str
+    lang: str
     sub_ancestry: str
     text: list[str]
 

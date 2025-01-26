@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass
+from typing import Protocol
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
@@ -11,7 +12,12 @@ from dnd5e_card_generator.utils import (
 )
 
 
-class BaseCardTextFormatter:
+class FormatterProtocol(Protocol):
+    title: str
+    lang: str
+
+
+class BaseCardTextFormatter(FormatterProtocol):
     def _li(self, text: str) -> str:
         return f"<li>{text}</li>"
 
@@ -176,6 +182,10 @@ class BaseCardTextFormatter:
     @property
     def color(self) -> str:
         return Config.COLORS[pascal_case_to_snake_case(self.__class__.__name__)]
+
+    @property
+    def contents_text(self) -> list[str]:
+        return [""]
 
     def to_card(self) -> dict:
         card = Card(

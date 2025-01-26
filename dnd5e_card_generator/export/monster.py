@@ -6,17 +6,19 @@ from dnd5e_card_generator.models import (
     CreatureSize,
     CreatureSpeed,
     CreatureType,
+    HitPointsFormula,
 )
 
 
 @dataclass
 class Monster(BaseCardTextFormatter):
     title: str
+    lang: str
     type: CreatureType
     size: CreatureSize
     armor_class: str
     hit_points: int
-    hit_points_formula: str
+    hit_points_formula: HitPointsFormula
     speeds: list[CreatureSpeed]
     attributes: CreatureAttributes
     saving_throws: list[str]

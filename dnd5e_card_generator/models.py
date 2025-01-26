@@ -2,7 +2,7 @@ import math
 import re
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Optional, Self
+from typing import Optional, Self, cast
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.utils import pascal_case_to_snake_case
@@ -12,7 +12,7 @@ from .utils import game_icon
 
 class BaseDataclass:
     def to_dict(self) -> dict:
-        return asdict(self)
+        return asdict(self)  # pyright: ignore
 
 
 @dataclass
@@ -130,8 +130,8 @@ class BaseModel(StrEnum):
         return self.translations()[lang][self.name]
 
     @classmethod
-    def from_str(cls, s: str, lang: str) -> Optional[Self]:
-        return cls.reversed_translations()[lang].get(s.lower())
+    def from_str(cls, s: str, lang: str) -> Self:
+        return cls.reversed_translations()[lang][s.lower()]
 
     @classmethod
     def pattern_options(cls, lang: str) -> str:
@@ -295,10 +295,14 @@ class DamageDie(StrEnum):
 
     @classmethod
     def values_with_icons(cls) -> list[tuple[str, "DamageDie"]]:
-        return [(name, value) for name, value in cls._member_map_.items() if value != "d100"]
+        return [
+            (name, cast(DamageDie, value))
+            for name, value in cls._member_map_.items()
+            if value != "d100"
+        ]
 
     @classmethod
-    def from_str(self, s: str) -> Self:
+    def from_str(cls, s: str) -> Self:
         return getattr(DamageDie, s)
 
 
@@ -405,12 +409,15 @@ class CreatureSpeed:
     type: str = field(default="base")
 
     @classmethod
-    def from_str(cls, s: str) -> Self:
+    def from_str(cls, s: str) -> "CreatureSpeed":
         match = re.match(r"((?P<type>\w+) )?(?P<speed>\d+) (?P<unit>\w+)", s)
+        if not match:
+            raise ValueError(f"No creature speed found in '{s}'")
         data = match.groupdict()
         if data["type"] is None:
             data["type"] = "base"
-        return CreatureSpeed(**data)
+        speed = int(data["speed"])
+        return CreatureSpeed(speed=speed, unit=data["unit"], type=data["type"])
 
 
 class CreatureType(BaseModel):
@@ -437,8 +444,13 @@ class HitPointsFormula:
     bonus: int
 
     @classmethod
-    def from_str(cls, s: str) -> Self:
+    def from_str(cls, s: str) -> "HitPointsFormula":
         match = re.match(r"(?P<num_die>\d+)(?P<die>d\d+)\s?\+\s?(?P<bonus>\d+)", s)
+        if not match:
+            raise ValueError(f"No hit point formula found in '{s}'")
         data = match.groupdict()
-        data["die"] = DamageDie.from_str(data["die"])
-        return HitPointsFormula(**data)
+        return HitPointsFormula(
+            die=DamageDie.from_str(data["die"]),
+            num_die=int(data["num_die"]),
+            bonus=int(data["bonus"]),
+        )

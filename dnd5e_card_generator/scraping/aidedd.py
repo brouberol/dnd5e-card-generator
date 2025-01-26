@@ -49,6 +49,9 @@ from dnd5e_card_generator.models import (
 from dnd5e_card_generator.utils import human_readable_class_name
 
 
+class ScrapingError(Exception): ...
+
+
 @dataclass
 class SpellFilter:
     class_name: str
@@ -105,7 +108,11 @@ class SpellFilter:
         out = []
         resp = self.request()
         soup = BeautifulSoup(resp.text, features="html.parser")
-        spell_cells = soup.find("table").find_all("td", class_="item")
+        td = soup.find("table")
+        if not td:
+            raise ScrapingError("no td found in table")
+        td = cast(Tag, td)
+        spell_cells = td.find_all("td", class_="item") or []
         for spell_cell in spell_cells:
             link = spell_cell.find("a")
             query = parse_qs(urlparse(link.attrs["href"]).query)
@@ -138,7 +145,7 @@ class BaseAideDDScraper:
         soup = BeautifulSoup(html, features="html.parser")
         div_content = soup.find("div", class_="col1") or soup.find("div", class_="content")
         if div_content is None:
-            raise ValueError(f"{self.slug} not found!")
+            raise ScrapingError(f"{self.slug} not found!")
         return soup, cast(Tag, div_content)
 
     def sanitize_soup(self, soup: BeautifulSoup | Tag) -> BeautifulSoup:
@@ -165,12 +172,8 @@ class BaseAideDDScraper:
     def _find_in_tag(self, tag: Tag | NavigableString | BeautifulSoup, *args, **kwargs) -> Tag:
         match = tag.find(*args, **kwargs)
         if not match:
-            raise ValueError(f"No match were found for {args}, {kwargs}")
-        elif isinstance(match, int):
-            raise TypeError("unexpected int return type")
-        elif isinstance(match, NavigableString):
-            raise TypeError("unexpected NavigableString return type")
-        return match
+            raise ScrapingError(f"No match were found for {args}, {kwargs}")
+        return cast(Tag, match)
 
     def find_in_content(self, *args, **kwargs):
         return self._find_in_tag(self.div_content, *args, **kwargs)
@@ -190,7 +193,11 @@ class BaseAideDDScraper:
     def scrape_en_title(self) -> str:
         if self.lang == "en":
             return self.scrape_title()
-        return self.find_in_content("div", class_="trad").find("a").text
+        en_link = self.find_in_content("div", class_="trad").find("a")
+        if not en_link:
+            raise ScrapingError("No english link found")
+        en_link = cast(Tag, en_link)
+        return en_link.text
 
     def scrape_description(self) -> list[str]:
         return self.scrape_text_block(self.find_in_content("div", class_="description"))
@@ -333,6 +340,7 @@ class SpellScraper(BaseItemPageScraper):
         verbal = "V" in single_letter_casting_components
         somatic = "S" in single_letter_casting_components
         material = "M" in single_letter_casting_components
+        paying_components = ""
         if material:
             if components_match := re.search(r"\((.+)\)", casting_components):
                 components_text = components_match.group(1)
@@ -343,8 +351,6 @@ class SpellScraper(BaseItemPageScraper):
                 )
                 if paying_components and not paying_components.endswith("."):
                     paying_components = f"{paying_components}."
-        else:
-            paying_components = ""
 
         search_text = "\n".join(spell_text)
         if damage_type_match := re.search(self.spell_damage_by_lang[self.lang], search_text):
@@ -407,7 +413,7 @@ class MagicItemScraper(BaseItemPageScraper):
             requires_attunement = True
         else:
             requires_attunement = False
-        img_elt = self.soup.find("img")
+        img_elt = self.find_in_soup("img")
         image_url = img_elt.attrs["src"] if img_elt else ""
         rarity = MagicItemRarity.from_str(item_rarity, self.lang)
         item_description = list(self.find_in_content("div", class_="description").strings)
@@ -459,7 +465,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
         super().__init__(slug=title, lang=lang)
 
     @property
-    def base_url(self) -> str:
+    def base_url(self) -> str:  # pyright: ignore
         if self.class_name == CharacterClass.artificer:
             return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name.translate(self.lang))
         return AIDEDD_CLASS_RULES_URL[self.lang].format(class_=self.class_name.translate(self.lang))
@@ -469,7 +475,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
             if tag.text == self.title:
                 break
         else:
-            raise ValueError(f"Class feature {self.title} not found")
+            raise ScrapingError(f"Class feature {self.title} not found")
         return tag
 
     def scrape_text(self) -> list[str]:
@@ -492,9 +498,10 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
 
     def scrape_class_variant(self) -> str | None:
         tag = self.find_feature_section()
-        last_seen_h2, last_seen_h3 = None, None
-        for t in self.soup.find_all(["h2", "h3", tag.name]):
-            if t == tag:
+        last_seen_h2: Tag | None = None
+        last_seen_h3: Tag | None = None
+        for t in cast(list[Tag], self.soup.find_all(["h2", "h3", tag.name])):
+            if t == tag and last_seen_h2 is not None and last_seen_h3 is not None:
                 if last_seen_h2.text.startswith(self.class_variant_indicator[self.class_name]):
                     return last_seen_h3.text
                 else:
@@ -552,6 +559,8 @@ class MonsterScraper(BaseAideDDScraper):
             self.creature_type_text,
             flags=re.IGNORECASE,
         )
+        if not match:
+            raise ScrapingError(f"{CreatureSize} not found in text")
         return CreatureSize.from_str(match.group(), self.lang)
 
     def scrape_creature_type(self) -> CreatureType:
@@ -560,13 +569,16 @@ class MonsterScraper(BaseAideDDScraper):
             self.creature_type_text,
             flags=re.IGNORECASE,
         )
+        if not match:
+            raise ScrapingError(f"{CreatureType} not found in text")
         return CreatureType.from_str(match.group(), self.lang)
 
     def _scrape_element_after_str(self, div: Tag, str_marker: str) -> str:
         text_iter = div.strings
         for text in text_iter:
             if text == str_marker:
-                return next(text_iter).strip()
+                return next(text_iter).strip()  # pyright: ignore
+        return ""
 
     def _find_tag_after_tag_containing(self, div: Tag, tag_name: str, content: str) -> Tag | None:
         for tag in div.find_all(tag_name):
@@ -621,13 +633,13 @@ class MonsterScraper(BaseAideDDScraper):
             str_marker=self.senses_indicator_per_lang[self.lang],
         ).split(", ")
 
-    def scrape_languages(self) -> str | None:
+    def scrape_languages(self) -> str:
         languages_text = self._scrape_element_after_str(
             div=self.creature_red_text_div,
             str_marker=self.languages_indicator_per_lang[self.lang],
         )
         if languages_text == "—":
-            return None
+            return ""
         return languages_text.capitalize()
 
     def scrape_saving_throws(self) -> list[str]:
@@ -668,8 +680,14 @@ class MonsterScraper(BaseAideDDScraper):
             "strong",
             self.languages_indicator_per_lang[self.lang],
         )
+        if not language_div:
+            raise ScrapingError(
+                f"No div found after text '{self.languages_indicator_per_lang[self.lang]}'"
+            )
         # We get the next red line
         redline = language_div.find_next("svg")
+        if not redline:
+            raise
         features = []
         for p in redline.find_all_next("p"):
             if p.find_next("div", class_="rub"):  # The Actions title
@@ -682,13 +700,17 @@ class MonsterScraper(BaseAideDDScraper):
         actions_div = self.find_in_content("div", class_="rub")
         return [p.text for p in actions_div.find_all_next("p")]
 
-    def scrape_image_url(self) -> str | None:
+    def scrape_image_url(self) -> str:
         if picture_div := self.find_in_content("div", class_="picture"):
-            return picture_div.find("img").attrs["src"]
+            if picture_img := picture_div.find("img"):
+                picture_img = cast(Tag, picture_img)
+                return picture_img.attrs["src"]
+        return ""
 
     def scrape(self) -> Monster:
         return Monster(
             title=self.scrape_title(),
+            lang=self.lang,
             size=self.scrape_creature_size(),
             type=self.scrape_creature_type(),
             armor_class=self.scrape_armor_class(),
@@ -719,7 +741,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
         super().__init__(slug=ancestry, lang=lang)
 
     @property
-    def base_url(self) -> str:
+    def base_url(self) -> str:  # pyright: ignore
         return AIDEDD_RACE_RULES_URL[self.lang].format(ancestry=self.ancestry)
 
     def find_feature_section(self) -> Tag:
@@ -728,13 +750,13 @@ class AncestryFeatureScraper(BaseAideDDScraper):
                 if tag.text.endswith(self.sub_ancestry):
                     break
             else:
-                raise ValueError(f"Ancestry feature {self.sub_ancestry} not found")
+                raise ScrapingError(f"Ancestry feature {self.sub_ancestry} not found")
         else:
             for tag in self.soup.find_all(["h3", "h4"]):
                 if tag.text.endswith(self.title_indicator):
                     break
             else:
-                raise ValueError(f"Ancestry feature {self.ancestry} not found")
+                raise ScrapingError(f"Ancestry feature {self.ancestry} not found")
         return tag
 
     def scrape_text(self) -> list[str]:
@@ -765,6 +787,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
         print(f"Scraping data for ancestry feature {self.slug}")
         return AncestryFeature(
             title=self.scrape_title(),
+            lang=self.lang,
             sub_ancestry=self.sub_ancestry,
             text=self.scrape_text(),
         )
@@ -775,7 +798,7 @@ class BackgroundScraper(BaseAideDDScraper):
     marker = {"fr": "Capacité", "en": "Feature"}
 
     @property
-    def base_url(self) -> str:
+    def base_url(self) -> str: # pyright: ignore
         return AIDEDD_BACKGROUND_URL[self.lang].format(background=self.slug)
 
     def scrape_subtitle(self) -> str:
