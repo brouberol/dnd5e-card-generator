@@ -71,11 +71,11 @@ class MagicItem(BaseCardTextFormatter):
         return [self.map_string_transformations(part, formatters) for part in self.text]
 
     @property
-    def contents_text(self) -> list[str]:
-        return self.assemble_text_contents(
+    def contents_text(self) -> list[str | list[str]]:
+        return [
             self.title_text,
             self.subtitle_text,
             self.format_header_separator(),
             self.item_text,
             self.recharges_text,
-        )
+        ]

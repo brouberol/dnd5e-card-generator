@@ -89,7 +89,7 @@ class BaseCardTextFormatter(FormatterProtocol):
     def format_card_type(self, card_type: str) -> str:
         return self.format_spell_school(card_type)
 
-    def assemble_text_contents(self, *parts: list | str) -> list[str]:
+    def assemble_text_contents(self, parts: list[str | list[str]]) -> list[str]:
         contents = []
         for part in parts:
             if not part:
@@ -203,7 +203,7 @@ class BaseCardTextFormatter(FormatterProtocol):
         return Config.COLORS[pascal_case_to_snake_case(self.__class__.__name__)]
 
     @property
-    def contents_text(self) -> list[str]:
+    def contents_text(self) -> list[str | list[str]]:
         return [""]
 
     @property
@@ -226,7 +226,7 @@ class BaseCardTextFormatter(FormatterProtocol):
             color=self.color,
             title=self.format_title_for_card_list(),
             icon=self.icon,
-            contents=self.contents_text,
+            contents=self.assemble_text_contents(self.contents_text),
             background_image=self.image,
         )
         return card.to_dict()
@@ -261,11 +261,11 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
         return self.format_text(self._strong(self.prerequesite))
 
     @property
-    def contents_text(self) -> list[str]:
-        return self.assemble_text_contents(
+    def contents_text(self) -> list[str | list[str]]:
+        return [
             self.title_text,
             self.format_card_type(self.__class__.__name__.lower()),
             self.format_header_separator(),
             self.prerequisite_text,
             self.text_parts,
-        )
+        ]

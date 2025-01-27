@@ -344,8 +344,8 @@ class Spell(BaseCardTextFormatter):
         ]
 
     @property
-    def contents_text(self) -> list[str]:
-        return self.assemble_text_contents(
+    def contents_text(self) -> list[str | list[str]]:
+        return [
             self.title_text,
             self.format_subtitle(self.subtitle),
             self.format_level(self.level),
@@ -356,7 +356,7 @@ class Spell(BaseCardTextFormatter):
             self.upcasting_parts,
             self.paying_components_parts,
             self.reaction_condition_parts,
-        )
+        ]
 
 
 class SpellLegend(BaseCardTextFormatter):
@@ -439,8 +439,8 @@ class SpellLegend(BaseCardTextFormatter):
         return out + self.to_table(shapes, columns=4)
 
     @property
-    def contents_text(self) -> list[str]:
-        return self.assemble_text_contents(
+    def contents_text(self) -> list[str | list[str]]:
+        return [
             self.format_title(self.title_text),
             self.format_spell_school("illusion"),
             self.format_header_separator(),
@@ -449,14 +449,14 @@ class SpellLegend(BaseCardTextFormatter):
             self.spell_type_legend,
             self.spell_shape_legend,
             self.format_fill(),
-        )
+        ]
 
     def to_card(self) -> dict:
         card = Card(
             color="LightCoral",
             title=self.title_text,
             icon=None,
-            contents=self.contents_text,
+            contents=self.assemble_text_contents(self.contents_text),
         )
 
         return card.to_dict()
