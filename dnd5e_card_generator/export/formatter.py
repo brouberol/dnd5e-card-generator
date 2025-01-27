@@ -77,7 +77,7 @@ class BaseCardTextFormatter(FormatterProtocol):
         )
 
     def format_text(self, text: str) -> str:
-        return f"text | {text}"
+        return f"text | {text.rstrip()}"
 
     def format_section(self, section: str) -> str:
         return f"section | {section}"
