@@ -69,12 +69,7 @@ class BaseCardTextFormatter(FormatterProtocol):
         return f"subtitle | {subtitle}"
 
     def format_boxes(self, recharges: int) -> str:
-        return "\n".join(
-            [
-                f"boxes | {recharges} | 1.5",  # 1.5 is in em
-                "text |",  # only here for vertical margin
-            ]
-        )
+        return f"boxes | {recharges} | 1.5"  # 1.5 is in em
 
     def format_text(self, text: str) -> str:
         return f"text | {text.rstrip()}"

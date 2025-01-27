@@ -50,7 +50,11 @@ class MagicItem(BaseCardTextFormatter):
     def recharges_text(self) -> list[str]:
         if not self.recharges:
             return []
-        return [self.format_fill(), self.format_boxes(self.recharges)]
+        return [
+            self.format_fill(),
+            self.format_boxes(self.recharges),
+            self.format_text(""),  # for a vertical margin
+        ]
 
     @property
     def subtitle_text(self) -> str:
