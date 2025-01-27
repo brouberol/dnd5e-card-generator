@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.utils import human_readable_class_name
 
 
 @dataclass
@@ -10,11 +9,6 @@ class AncestryFeature(BaseCardTextFormatter):
     lang: str
     sub_ancestry: str
     text: list[str]
-
-    def format_title_for_card_list(self):
-        return (
-            f"{human_readable_class_name(self.__class__.__name__).capitalize()} - {self.title_text}"
-        )
 
     @property
     def title_text(self) -> str:
