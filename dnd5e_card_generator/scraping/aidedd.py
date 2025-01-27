@@ -566,7 +566,7 @@ class MonsterScraper(BaseAideDDScraper):
 
     def scrape_creature_type(self) -> CreatureType:
         match = re.search(
-            CreatureType.pattern_options(self.lang),
+            CreatureType.possible_values_as_pattern(self.lang),
             self.creature_type_text,
             flags=re.IGNORECASE,
         )

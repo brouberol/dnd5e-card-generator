@@ -21,6 +21,7 @@ class ClassFeature(BaseCardTextFormatter):
             self.highlight_saving_throw,
             self.highlight_italic_words,
             self.highlight_level,
+            self.highlight_action_name,
         ]
         return [self.map_string_transformations(part, formatters) for part in text]
 

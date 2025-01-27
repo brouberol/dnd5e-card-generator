@@ -134,18 +134,22 @@ class BaseModel(StrEnum):
         return cls.reversed_translations()[lang][s.lower()]
 
     @classmethod
-    def pattern_options(cls, lang: str) -> str:
+    def pattern_options(cls, lang: str) -> list[str]:
         # We make a pattern with the largest elements first, to avoid partial matches
-        vals = sorted(
+        return sorted(
             cls.translations()[lang].values(),
             key=lambda item: len(item),
             reverse=True,
         )
+
+    @classmethod
+    def possible_values_as_pattern(cls, lang: str) -> str:
+        vals = cls.pattern_options(lang)
         return r"(" + r"|".join(vals) + r")"
 
     @classmethod
     def as_pattern(cls, lang: str) -> str:
-        return r"(?<=[\s\()])" + cls.pattern_options(lang) + r"(?=\s)"
+        return r"(?<=[\s\()])" + cls.possible_values_as_pattern(lang) + r"(?=[\s\.])"
 
     @property
     def color(self) -> str:
@@ -379,8 +383,8 @@ class CreatureSize(BaseModel):
     @classmethod
     def as_pattern(cls, lang: str) -> str:
         if lang == "fr":
-            return r"(?<=de taille )" + cls.pattern_options(lang)
-        return cls.pattern_options(lang)
+            return r"(?<=de taille )" + cls.possible_values_as_pattern(lang)
+        return cls.possible_values_as_pattern(lang)
 
 
 @dataclass
@@ -454,3 +458,19 @@ class HitPointsFormula:
             num_die=int(data["num_die"]),
             bonus=int(data["bonus"]),
         )
+
+
+class Action(BaseModel):
+    attack = "attack"
+    dash = "dash"
+    disengage = "disengage"
+    dodge = "dodge"
+    help = "help"
+    hide = "hide"
+    ready = "ready"
+    search = "search"
+
+    @classmethod
+    def pattern_options(cls, lang: str) -> list[str]:
+        values = super().pattern_options(lang)
+        return [val.capitalize() for val in values]

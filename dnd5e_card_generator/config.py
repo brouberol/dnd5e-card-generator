@@ -223,4 +223,14 @@ class Config:
             "plant": "plante",
             "undead": "mort-vivant",
         },
+        "action": {
+            "attack": "attaquer",
+            "dash": "foncer",
+            "disengage": "désengager",
+            "dodge": "esquiver",
+            "help": "aider",
+            "hide": "cache",
+            "ready": "préparer",
+            "search": "chercher",
+        },
     }

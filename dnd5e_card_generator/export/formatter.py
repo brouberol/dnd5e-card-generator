@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Protocol, Callable
 
 from dnd5e_card_generator.config import Config
-from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
+from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType, Action
 from dnd5e_card_generator.utils import (
     damage_type_text,
     game_icon,
