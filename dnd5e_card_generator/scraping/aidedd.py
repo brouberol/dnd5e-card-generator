@@ -785,7 +785,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
         return out
 
     def scrape(self) -> AncestryFeature:
-        print(f"Scraping data for ancestry feature {self.slug}")
+        print(f"Scraping data for ancestry feature {self.sub_ancestry or self.ancestry}")
         return AncestryFeature(
             title=self.scrape_title(),
             lang=self.lang,
