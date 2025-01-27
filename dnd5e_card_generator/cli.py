@@ -53,8 +53,8 @@ def parse_args():
     parser.add_argument(
         "--spell-filter",
         help=(
-            "Filter resolved to a list of spells, of form <class>:<start-lvl>:<end-level>. "
-            "Example: cleric:0:1"
+            "Filter resolved to a list of spells, of form <lang>:<class>:<start-lvl>:<end-level>. "
+            "Example: fr:clerc:0:1"
         ),
         required=False,
         type=CliSpellFilter.from_str,
@@ -80,9 +80,7 @@ def parse_args():
     parser.add_argument(
         "--feats",
         nargs="+",
-        help=(
-            "Space separated <lang>:<feat-slug> items. " "Example: fr:mage-de-guerre fr:sentinelle"
-        ),
+        help="Space separated <lang>:<feat-slug> items. Example: fr:mage-de-guerre fr:sentinelle",
         required=False,
         default=[],
         type=CliFeat.from_str,
@@ -91,7 +89,7 @@ def parse_args():
         "--eldricht-invocations",
         nargs="+",
         help=(
-            "Space separated <lang>:<invocation-slug> items. " "Example: fr:arme-de-pacte-amelioree"
+            "Space separated <lang>:<invocation-slug> items. Example: fr:arme-de-pacte-amelioree"
         ),
         required=False,
         default=[],
@@ -101,8 +99,8 @@ def parse_args():
         "--class-features",
         nargs="+",
         help=(
-            "Space separated <class>:<feature title> items. "
-            "Example: 'clerc:Conduit divin : renvoi des morts-vivants'"
+            "Space separated <lang>:<class>:<feature title> items. "
+            "Example: 'fr:clerc:Conduit divin : renvoi des morts-vivants'"
         ),
         required=False,
         default=[],
