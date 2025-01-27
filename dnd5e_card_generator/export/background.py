@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.config import Config
 
 
 @dataclass
@@ -14,7 +13,7 @@ class Background(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon=Config.ICONS["background"]),
+            self.title_text,
             self.format_subtitle(self.subtitle),
             self.format_header_separator(),
             self.format_card_type("background"),

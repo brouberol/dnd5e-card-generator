@@ -206,6 +206,17 @@ class BaseCardTextFormatter(FormatterProtocol):
     def contents_text(self) -> list[str]:
         return [""]
 
+    @property
+    def icon(self) -> str | None:
+        return Config.ICONS.get(pascal_case_to_snake_case(self.__class__.__name__))
+
+    @property
+    def title_text(self) -> str:
+        return self.format_title(
+            title=self.title,
+            icon=self.icon,
+        )
+
     def to_card(self) -> dict:
         card = Card(
             color=self.color,
@@ -247,10 +258,7 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(
-                title=self.title,
-                icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
-            ),
+            self.title_text,
             self.format_card_type(self.__class__.__name__.lower()),
             self.format_header_separator(),
             self.prerequisite_text,

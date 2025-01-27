@@ -53,19 +53,12 @@ class MagicItem(BaseCardTextFormatter):
         return [self.format_fill(), self.format_boxes(self.recharges)]
 
     @property
-    def title_text(self) -> str:
-        return self.format_title(self.title, self.icon)
-
-    @property
     def subtitle_text(self) -> str:
         return self.format_subtitle(self.subtitle)
 
     @property
     def item_text(self) -> list[str]:
-        return [
-            self.format_text(self.highlight_die_value(text_part))
-            for text_part in self.text
-        ]
+        return [self.format_text(self.highlight_die_value(text_part)) for text_part in self.text]
 
     @property
     def contents_text(self) -> list[str]:

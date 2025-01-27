@@ -2,8 +2,6 @@ from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
 from dnd5e_card_generator.utils import human_readable_class_name
-from dnd5e_card_generator.config import Config
-from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
 
 @dataclass
@@ -32,10 +30,7 @@ class AncestryFeature(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(
-                title=self.title_text,
-                icon=Config.ICONS[pascal_case_to_snake_case(self.__class__.__name__)],
-            ),
+            self.title_text,
             self.format_card_type("ancestry"),
             self.format_header_separator(),
             self.text_parts,

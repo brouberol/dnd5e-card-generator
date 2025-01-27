@@ -33,9 +33,13 @@ class ClassFeature(BaseCardTextFormatter):
         return " ".join(parts)
 
     @property
+    def icon(self) -> str:
+        return self.class_name.icon
+
+    @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.format_title(title=self.title, icon=self.class_name.icon),
+            self.title_text,
             self.format_subtitle(self.subtitle_text),
             self.format_header_separator(),
             self.format_card_type(self.class_name.value),
