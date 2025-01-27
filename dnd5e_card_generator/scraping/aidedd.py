@@ -122,13 +122,17 @@ class SpellFilter:
 
 class BaseAideDDScraper:
     model = None
-    base_url: str = ""
+    model_url: str = ""
     tags_to_unwrap_from_description = ["a", "em", "ul", "li", "strong"]
 
     def __init__(self, slug: str, lang: str):
         self.slug = slug
         self.lang = lang
         self.soup, self.div_content = self.parse_page()
+
+    @property
+    def base_url(self) -> str:
+        return self.model_url
 
     def fetch_data(self):
         cached_file = Path(f"{tempfile.gettempdir()}/{self.lang}:{self.slug}.html")
@@ -225,7 +229,7 @@ class TitleDescriptionPrerequisiteScraper(BaseItemPageScraper):
 
 
 class SpellScraper(BaseItemPageScraper):
-    base_url = AIDEDD_SPELLS_URL
+    model_url = AIDEDD_SPELLS_URL
     # We surround these indicators with underscores as the text appears in italics
     # in the text, and this is our way to signal the card formatter to display this
     # text in italics in the end.
@@ -387,7 +391,7 @@ class SpellScraper(BaseItemPageScraper):
 
 
 class MagicItemScraper(BaseItemPageScraper):
-    base_url = AIDEDD_MAGIC_ITEMS_URL
+    model_url = AIDEDD_MAGIC_ITEMS_URL
 
     attunement_text_by_lang = {
         "fr": "nécessite un lien",
@@ -434,12 +438,12 @@ class MagicItemScraper(BaseItemPageScraper):
 
 
 class FeatScraper(TitleDescriptionPrerequisiteScraper):
-    base_url = AIDEDD_FEATS_ITEMS_URL
+    model_url = AIDEDD_FEATS_ITEMS_URL
     model = Feat
 
 
 class EldrichInvocationScraper(TitleDescriptionPrerequisiteScraper):
-    base_url = AIDEDD_ELDRICHT_INVOCATIONS_URL
+    model_url = AIDEDD_ELDRICHT_INVOCATIONS_URL
     model = EldrichtInvocation
 
 
@@ -466,7 +470,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
         super().__init__(slug=title, lang=lang)
 
     @property
-    def base_url(self) -> str:  # pyright: ignore
+    def base_url(self) -> str:
         if self.class_name == CharacterClass.artificer:
             return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name.translate(self.lang))
         return AIDEDD_CLASS_RULES_URL[self.lang].format(class_=self.class_name.translate(self.lang))
@@ -527,7 +531,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
 
 
 class MonsterScraper(BaseAideDDScraper):
-    base_url = AIDEDD_MONSTERS_ITEMS_URL
+    model_url = AIDEDD_MONSTERS_ITEMS_URL
     model = Monster
 
     armor_class_indicator_per_lang = {"fr": "Classe d'armure", "en": "Armor Class"}
@@ -742,7 +746,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
         super().__init__(slug=ancestry, lang=lang)
 
     @property
-    def base_url(self) -> str:  # pyright: ignore
+    def base_url(self) -> str:
         return AIDEDD_RACE_RULES_URL[self.lang].format(ancestry=self.ancestry)
 
     def find_feature_section(self) -> Tag:
@@ -799,7 +803,7 @@ class BackgroundScraper(BaseAideDDScraper):
     marker = {"fr": "Capacité", "en": "Feature"}
 
     @property
-    def base_url(self) -> str:  # pyright: ignore
+    def base_url(self) -> str:
         return AIDEDD_BACKGROUND_URL[self.lang].format(background=self.slug)
 
     def scrape_subtitle(self) -> str:
