@@ -115,8 +115,8 @@ class Spell(BaseCardTextFormatter):
         return text
 
     def highlight_spell_text(self, text: str) -> str:
-        text = self.highlight_damage_formula(text, self.lang)
-        text = self.highlight_saving_throw(text, self.lang)
+        text = self.highlight_damage_formula(text)
+        text = self.highlight_saving_throw(text)
         return text
 
     def highlight_extra_targets(self, text: str) -> str:
@@ -211,10 +211,17 @@ class Spell(BaseCardTextFormatter):
     def render_spell_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)
         text_parts = self.fix_text_with_bullet_points(text_parts)
-        text_parts = [self.highlight_spell_text(part) for part in text_parts]
-        text_parts = [self.fix_translation_mistakes(part) for part in text_parts]
-        text_parts = [self.highlight_italic_words(part) for part in text_parts]
-        return text_parts
+        return [
+            self.map_string_transformations(
+                part,
+                [
+                    self.highlight_spell_text,
+                    self.fix_translation_mistakes,
+                    self.highlight_italic_words,
+                ],
+            )
+            for part in text_parts
+        ]
 
     @property
     def spell_parts(self) -> list[str]:

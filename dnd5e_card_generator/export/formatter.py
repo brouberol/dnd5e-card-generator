@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, Callable
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType
@@ -18,6 +18,13 @@ class FormatterProtocol(Protocol):
 
 
 class BaseCardTextFormatter(FormatterProtocol):
+
+    @staticmethod
+    def map_string_transformations(s: str, functions: list[Callable[[str], str]]) -> str:
+        for func in functions:
+            s = func(s)
+        return s
+
     def _li(self, text: str) -> str:
         return f"<li>{text}</li>"
 
@@ -97,12 +104,12 @@ class BaseCardTextFormatter(FormatterProtocol):
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
         return re.sub(die_value_pattern, lambda match: self._strong(match.group(0)), text)
 
-    def highlight_damage_formula(self, text: str, lang: str) -> str:
+    def highlight_damage_formula(self, text: str) -> str:
         die_value_pattern = (
             r"(?P<prefix>(one |un )?)(?P<num_die>\d+)?(?P<die_type>d\d+)( (?P<dmg_extra>\+ "
-            + self.spell_carac_text(lang)
+            + self.spell_carac_text(self.lang)
             + r")| "
-            + self.damage_type_text(lang)
+            + self.damage_type_text(self.lang)
             + r")?"
         )
         matches = list(re.finditer(die_value_pattern, text))
@@ -113,9 +120,9 @@ class BaseCardTextFormatter(FormatterProtocol):
             parts = match.groupdict()
             damage_type_1, damage_type_2 = None, None
             if parts.get("damage_type_1"):
-                damage_type_1 = DamageType.from_str(parts["damage_type_1"].rstrip("s"), lang)
+                damage_type_1 = DamageType.from_str(parts["damage_type_1"].rstrip("s"), self.lang)
             if parts.get("damage_type_2"):
-                damage_type_2 = DamageType.from_str(parts["damage_type_2"].rstrip("s"), lang)
+                damage_type_2 = DamageType.from_str(parts["damage_type_2"].rstrip("s"), self.lang)
 
             damage_formula = DamageFormula(
                 num_die=int(parts.get("num_die") or 1),
@@ -129,7 +136,7 @@ class BaseCardTextFormatter(FormatterProtocol):
             )
         return text
 
-    def highlight_saving_throw(self, text: str, lang: str) -> str:
+    def highlight_saving_throw(self, text: str) -> str:
         saving_throw_patterns_by_lang = {
             "fr": [
                 r"jet(s)? de sauvegarde de [A-Z]\w+",
@@ -207,9 +214,12 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
     def render_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)
         text_parts = self.fix_text_with_bullet_points(text_parts)
-        text_parts = [self.highlight_saving_throw(part, self.lang) for part in text]
-        text_parts = [self.highlight_italic_words(part) for part in text_parts]
-        return text_parts
+        return [
+            self.map_string_transformations(
+                part, [self.highlight_saving_throw, self.highlight_italic_words]
+            )
+            for part in text_parts
+        ]
 
     @property
     def text_parts(self) -> list[str]:

@@ -16,19 +16,13 @@ class ClassFeature(BaseCardTextFormatter):
     def text_parts(self) -> list[str]:
         text = self.fix_text_with_subparts(self.text)
         text = self.fix_text_with_bullet_points(text)
-        text = [
-            self.format_text(
-                self.highlight_damage_formula(
-                    self.highlight_saving_throw(
-                        self.highlight_italic_words(self.highlight_level(part)),
-                        self.lang,
-                    ),
-                    self.lang,
-                )
-            )
-            for part in text
+        formatters = [
+            self.highlight_damage_formula,
+            self.highlight_saving_throw,
+            self.highlight_italic_words,
+            self.highlight_level,
         ]
-        return text
+        return [self.map_string_transformations(part, formatters) for part in text]
 
     @property
     def subtitle_text(self) -> str:
