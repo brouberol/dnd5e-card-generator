@@ -30,7 +30,7 @@ class AncestryFeature(BaseCardTextFormatter):
     @property
     def contents_text(self) -> list[str]:
         return self.assemble_text_contents(
-            self.title_text,
+            self.format_title(self.title_text),
             self.format_card_type("ancestry"),
             self.format_header_separator(),
             self.text_parts,
