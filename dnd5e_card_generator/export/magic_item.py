@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.models import Card, MagicItemKind, MagicItemRarity
+from dnd5e_card_generator.models import MagicItemKind, MagicItemRarity
 from dnd5e_card_generator.utils import game_icon
 
 
@@ -75,13 +75,3 @@ class MagicItem(BaseCardTextFormatter):
             self.item_text,
             self.recharges_text,
         )
-
-    def to_card(self) -> dict:
-        card = Card(
-            color=self.color,
-            title=self.format_title_for_card_list(),
-            icon=self.icon,
-            contents=self.contents_text,
-            background_image=self.image_url,
-        )
-        return card.to_dict()

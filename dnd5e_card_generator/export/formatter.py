@@ -222,12 +222,17 @@ class BaseCardTextFormatter(FormatterProtocol):
             icon=self.icon,
         )
 
+    @property
+    def image(self) -> str | None:
+        return getattr(self, "image_url", None)
+
     def to_card(self) -> dict:
         card = Card(
             color=self.color,
             title=self.format_title_for_card_list(),
-            icon=None,
+            icon=self.icon,
             contents=self.contents_text,
+            background_image=self.image,
         )
         return card.to_dict()
 
