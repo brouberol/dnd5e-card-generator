@@ -58,7 +58,13 @@ class MagicItem(BaseCardTextFormatter):
 
     @property
     def item_text(self) -> list[str]:
-        return [self.format_text(self.highlight_die_value(text_part)) for text_part in self.text]
+        formatters = [
+            self.highlight_die_value,
+            self.highlight_saving_throw,
+            self.highlight_damage_formula,
+            self.format_text,
+        ]
+        return [self.map_string_transformations(part, formatters) for part in self.text]
 
     @property
     def contents_text(self) -> list[str]:
