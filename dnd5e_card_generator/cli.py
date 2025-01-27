@@ -30,11 +30,14 @@ from .scraping.aidedd import SpellFilter
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Scrape spell details from aidedd.org")
+    parser = argparse.ArgumentParser(
+        description="Scrape spell details from aidedd.org",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
     parser.add_argument(
         "--spells",
         nargs="+",
-        help=("Space separated <lang>:<spell-slug> items. " "Example: fr:lumiere en:toll-the-dead"),
+        help=("Space separated <lang>:<spell-slug> items.\nExample: fr:lumiere en:toll-the-dead"),
         required=False,
         default=[],
         type=CliSpell.from_str,
@@ -44,7 +47,7 @@ def parse_args():
         nargs="+",
         help=(
             "Space separated hexadecimal colors associated with spells. If provided, a gradient "
-            "palette will be generated from these colors, and associated with each spell level. "
+            "palette will be generated from these colors, and associated with each spell level.\n"
             "Example: '#646fe1' '#e16492'"
         ),
         required=False,
@@ -53,7 +56,7 @@ def parse_args():
     parser.add_argument(
         "--spell-filter",
         help=(
-            "Filter resolved to a list of spells, of form <lang>:<class>:<start-lvl>:<end-level>. "
+            "Filter resolved to a list of spells, of form <lang>:<class>:<start-lvl>:<end-level>.\n"
             "Example: fr:clerc:0:1"
         ),
         required=False,
@@ -61,7 +64,7 @@ def parse_args():
     )
     parser.add_argument(
         "--include-spell-legend",
-        help=("Include a card with the legend of spell pictograms"),
+        help="Include a card with the legend of spell pictograms",
         required=False,
         action="store_true",
         default=False,
@@ -70,7 +73,7 @@ def parse_args():
         "--items",
         nargs="+",
         help=(
-            "Space separated <lang>:<object-slug> items. "
+            "Space separated <lang>:<item-slug> items.\n"
             "Example: fr:balai-volant fr:armure-de-vulnerabilite"
         ),
         required=False,
@@ -80,7 +83,7 @@ def parse_args():
     parser.add_argument(
         "--feats",
         nargs="+",
-        help="Space separated <lang>:<feat-slug> items. Example: fr:mage-de-guerre fr:sentinelle",
+        help="Space separated <lang>:<feat-slug> items.\nExample: fr:mage-de-guerre fr:sentinelle",
         required=False,
         default=[],
         type=CliFeat.from_str,
@@ -89,7 +92,7 @@ def parse_args():
         "--eldricht-invocations",
         nargs="+",
         help=(
-            "Space separated <lang>:<invocation-slug> items. Example: fr:arme-de-pacte-amelioree"
+            "Space separated <lang>:<invocation-slug> items.\nExample: fr:arme-de-pacte-amelioree"
         ),
         required=False,
         default=[],
@@ -99,7 +102,7 @@ def parse_args():
         "--class-features",
         nargs="+",
         help=(
-            "Space separated <lang>:<class>:<feature title> items. "
+            "Space separated <lang>:<class>:<feature title> items.\n"
             "Example: 'fr:clerc:Conduit divin : renvoi des morts-vivants'"
         ),
         required=False,
@@ -110,7 +113,7 @@ def parse_args():
         "--ancestry-features",
         nargs="+",
         help=(
-            "Space separated <lang>:<ancestry>:[sub_ancestry]. "
+            "Space separated <lang>:<ancestry>:[sub_ancestry].\n"
             "Examples: 'fr:nain', 'fr:elfe:Elfe Noir"
         ),
         required=False,
@@ -120,7 +123,7 @@ def parse_args():
     parser.add_argument(
         "--backgrounds",
         nargs="+",
-        help="Space separated <lang>:<background>. Examples: fr:voyageur",
+        help="Space separated <lang>:<background>.\nExamples: fr:voyageur",
         required=False,
         default=[],
         type=CliBackground.from_str,
