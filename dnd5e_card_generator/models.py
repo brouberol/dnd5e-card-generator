@@ -52,7 +52,7 @@ class CliClassFeature(BaseDataclass):
 
     @classmethod
     def from_str(cls, s: str) -> "CliClassFeature":
-        lang, class_name, title = s.split(":")
+        lang, class_name, title = s.split(":", 2)  # The title itself can contain semicolumns
         return cls(title=title, class_name=class_name, lang=lang)
 
 
