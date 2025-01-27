@@ -1,11 +1,25 @@
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Optional, Self, cast
+from typing import Optional, Self, cast, Literal, get_args as get_type_args
+
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
 from .utils import game_icon
+
+Language = Literal["en", "fr"]
+
+
+def validate_language(lang: str):
+    supported_languages = get_type_args(Language)
+    if lang not in supported_languages:
+        msg = (
+            f"Unsupported language {lang}. Only {', '.join(supported_languages[:-1])} "
+            f"and {supported_languages[-1]} are supported."
+        )
+        print(f"ERROR: {msg}")  # The exception is gobbled up by argparse, so we print the message
+        raise ValueError(msg)
 
 
 class BaseDataclass:
@@ -21,6 +35,7 @@ class CliArg(BaseDataclass):
     @classmethod
     def from_str(cls, s: str) -> "CliArg":
         lang, slug = s.split(":")
+        validate_language(lang)
         return cls(lang=lang, slug=slug)
 
 
@@ -51,6 +66,7 @@ class CliClassFeature(BaseDataclass):
     @classmethod
     def from_str(cls, s: str) -> "CliClassFeature":
         lang, class_name, title = s.split(":", 2)  # The title itself can contain semicolumns
+        validate_language(lang)
         return cls(title=title, class_name=class_name, lang=lang)
 
 
@@ -67,6 +83,7 @@ class CliAncestryFeature(BaseDataclass):
             sub_ancestry = ""
         else:
             lang, ancestry, sub_ancestry = s.split(":")
+        validate_language(lang)
         return cls(ancestry=ancestry, sub_ancestry=sub_ancestry, lang=lang)
 
 
@@ -80,8 +97,12 @@ class CliSpellFilter(BaseDataclass):
     @classmethod
     def from_str(cls, s: str) -> "CliSpellFilter":
         lang, class_name, min_level, max_level = s.split(":")
+        validate_language(lang)
         return cls(
-            lang=lang, class_name=class_name, min_level=int(min_level), max_level=int(max_level)
+            lang=lang,
+            class_name=class_name,
+            min_level=int(min_level),
+            max_level=int(max_level),
         )
 
 
