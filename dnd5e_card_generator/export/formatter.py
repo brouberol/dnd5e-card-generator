@@ -100,6 +100,40 @@ class BaseCardTextFormatter(FormatterProtocol):
                 contents.append(part)
         return contents
 
+    def fix_text_with_subparts(self, text: list[str]) -> list[str]:
+        text_copy = text.copy()
+        for i, part in enumerate(text):
+            if part.startswith(". "):
+                text_copy[i - 1] = self._strong(text_copy[i - 1]) + part
+                text_copy[i] = ""
+        return [part for part in text_copy if part]
+
+    def fix_text_with_bold(self, text: list[str]) -> list[str]:
+        text_copy = text.copy()
+        for i, part in enumerate(text):
+            if match := re.match(r"\*([\w. ]+)\*", part):
+                text_copy[i] = part.replace(
+                    match.group(), f"<b>{match.group(1).strip().rstrip('.').strip()}</b>: "
+                )
+        return text_copy
+
+    def fix_text_with_bullet_points(self, text: list[str]) -> list[str]:
+        out = []
+        in_ul = False
+        for part in text:
+            if not part.startswith("• "):
+                if in_ul:
+                    out[-1] += "</ul>"
+                out.append(part)
+            elif not out:
+                out.append("<ul>" + self.format_bullet_point(part))
+            else:
+                if not in_ul:
+                    in_ul = True
+                    out[-1] += "<ul>"
+                out[-1] += self.format_bullet_point(part)
+        return out
+
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
         return re.sub(die_value_pattern, lambda match: self._strong(match.group(0)), text)
@@ -144,20 +178,15 @@ class BaseCardTextFormatter(FormatterProtocol):
             ],
             "en": [r"\w+ saving throw", "half as much damage on a successful one"],
         }
-        for pattern in saving_throw_patterns_by_lang[lang]:
+        for pattern in saving_throw_patterns_by_lang[self.lang]:
             text = self._highlight(pattern, text)
         return text
 
     def highlight_italic_words(self, text: str) -> str:
         return re.sub(r"_([^_]+)_", lambda m: self._em(m.group(1)), text)
 
-    def fix_text_with_subparts(self, text: list[str]) -> list[str]:
-        text_copy = text.copy()
-        for i, part in enumerate(text):
-            if part.startswith(". "):
-                text_copy[i - 1] = self._strong(text_copy[i - 1]) + part
-                text_copy[i] = ""
-        return [part for part in text_copy if part]
+    def highlight_action_name(self, text: str) -> str:
+        return re.sub(Action.as_pattern(self.lang), lambda m: self._em(m.group(1)), text)
 
     def highlight_level(self, text: str) -> str:
         level_pattern_by_lang = {"fr": r"niveau \d+", "en": r"\d+(st|nd|rd|th) level"}
@@ -168,23 +197,6 @@ class BaseCardTextFormatter(FormatterProtocol):
         if m := re.match(r"((\w+)\s)+(?=:)", text):
             text = text.replace(m.group(), self._strong(m.group()))
         return self._li(text)
-
-    def fix_text_with_bullet_points(self, text: list[str]) -> list[str]:
-        out = []
-        in_ul = False
-        for part in text:
-            if not part.startswith("• "):
-                if in_ul:
-                    out[-1] += "</ul>"
-                out.append(part)
-            elif not out:
-                out.append("<ul>" + self.format_bullet_point(part))
-            else:
-                if not in_ul:
-                    in_ul = True
-                    out[-1] += "<ul>"
-                out[-1] += self.format_bullet_point(part)
-        return out
 
     @property
     def color(self) -> str:

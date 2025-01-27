@@ -1,4 +1,3 @@
-import re
 from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
@@ -24,15 +23,6 @@ class AncestryFeature(BaseCardTextFormatter):
         if self.sub_ancestry:
             return self.sub_ancestry
         return self.title
-
-    def fix_text_with_bold(self, text: list[str]) -> list[str]:
-        text_copy = text.copy()
-        for i, part in enumerate(text):
-            if match := re.match(r"\*([\w. ]+)\*", part):
-                text_copy[i] = part.replace(
-                    match.group(), f"<b>{match.group(1).strip().rstrip('.').strip()}</b>: "
-                )
-        return text_copy
 
     @property
     def text_parts(self) -> list[str]:
