@@ -16,9 +16,7 @@ def game_icon(icon_name: str) -> str:
 
 
 def strip_accents(s: str) -> str:
-    return "".join(
-        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
-    )
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
 
 
 def damage_type_text(lang):
@@ -38,3 +36,7 @@ def pascal_case_to_snake_case(pascal_string: str) -> str:
 
 def human_readable_class_name(cls_name: str) -> str:
     return pascal_case_to_snake_case(cls_name).replace("_", " ")
+
+
+def slugify(s: str) -> str:
+    return s.lower().replace(" ", "-")

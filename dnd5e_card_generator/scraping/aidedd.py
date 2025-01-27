@@ -46,7 +46,7 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
 )
-from dnd5e_card_generator.utils import human_readable_class_name
+from dnd5e_card_generator.utils import human_readable_class_name, slugify
 
 
 class ScrapingError(Exception): ...
@@ -54,6 +54,7 @@ class ScrapingError(Exception): ...
 
 @dataclass
 class SpellFilter:
+    lang: str
     class_name: str
     min_level: int
     max_level: int
@@ -98,6 +99,7 @@ class SpellFilter:
                 "colI": "on",
                 "colC": "on",
                 "colR": "on",
+                "colVO": "on",
                 "filtrer": "FILTRER",
             },
         )
@@ -108,15 +110,20 @@ class SpellFilter:
         out = []
         resp = self.request()
         soup = BeautifulSoup(resp.text, features="html.parser")
-        td = soup.find("table")
-        if not td:
-            raise ScrapingError("no td found in table")
-        td = cast(Tag, td)
-        spell_cells = td.find_all("td", class_="item") or []
-        for spell_cell in spell_cells:
-            link = spell_cell.find("a")
-            query = parse_qs(urlparse(link.attrs["href"]).query)
-            out.append(f"fr:{query['vf'][0]}")
+        table = soup.find("table")
+        if not table:
+            raise ScrapingError("no table found in page")
+        table = cast(Tag, table)
+        spell_rows = table.find_all("tr") or []
+        for spell_row in spell_rows[1:]:  # skip headers
+            if self.lang == "fr":
+                link = spell_row.find("a")
+                query = parse_qs(urlparse(link.attrs["href"]).query)
+                out.append(f"{self.lang}:{query['vf'][0]}")
+            elif self.lang == "en":
+                en_title = cast(Tag, spell_row.find("td", class_="colVO")).text
+                en_slug = slugify(en_title)
+                out.append(f"{self.lang}:{en_slug}")
         return out
 
 
@@ -362,7 +369,12 @@ class SpellScraper(BaseItemPageScraper):
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
-            damage_type = DamageType.from_str(damage_type_str, self.lang)
+            try:
+                damage_type = DamageType.from_str(damage_type_str, self.lang)
+            # sometimes, the text can be confusing and we get something like `former damage`
+            # instead of a damage type, like `fire damage`. We just ignore them.
+            except KeyError:
+                damage_type = None
         else:
             damage_type = None
 

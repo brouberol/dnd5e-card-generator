@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 poetry run dnd5e-card-generator \
-    --spell-filter cleric:0:1 \
+    --spell-filter fr:cleric:0:1 \
     --spells fr:boule-de-feu en:toll-the-dead \
     --include-spell-legend \
     --items fr:cape-d-invisibilite fr:anneau-de-regeneration \

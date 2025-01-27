@@ -74,14 +74,17 @@ class CliAncestryFeature(BaseDataclass):
 
 @dataclass
 class CliSpellFilter(BaseDataclass):
+    lang: str
     class_name: str
     min_level: int
     max_level: int
 
     @classmethod
     def from_str(cls, s: str) -> "CliSpellFilter":
-        class_name, min_level, max_level = s.split(":")
-        return cls(class_name=class_name, min_level=int(min_level), max_level=int(max_level))
+        lang, class_name, min_level, max_level = s.split(":")
+        return cls(
+            lang=lang, class_name=class_name, min_level=int(min_level), max_level=int(max_level)
+        )
 
 
 class BaseModel(StrEnum):
