@@ -172,7 +172,7 @@ class BaseAideDDScraper:
     def _find_in_tag(self, tag: Tag | NavigableString | BeautifulSoup, *args, **kwargs) -> Tag:
         match = tag.find(*args, **kwargs)
         if not match:
-            raise ScrapingError(f"No match were found for {args}, {kwargs}")
+            raise ScrapingError(f"No match were found for {args}, {kwargs} ({self.slug})")
         return cast(Tag, match)
 
     def find_in_content(self, *args, **kwargs):
