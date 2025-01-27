@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Protocol, Callable
 
 from dnd5e_card_generator.config import Config
-from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType, Action
+from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType, Action, Language
 from dnd5e_card_generator.utils import (
     damage_type_text,
     game_icon,
@@ -14,7 +14,7 @@ from dnd5e_card_generator.utils import (
 
 class FormatterProtocol(Protocol):
     title: str
-    lang: str
+    lang: Language
 
 
 class BaseCardTextFormatter(FormatterProtocol):
@@ -40,7 +40,7 @@ class BaseCardTextFormatter(FormatterProtocol):
     def format_title_for_card_list(self):
         return f"{human_readable_class_name(self.__class__.__name__).capitalize()} - {self.title}"
 
-    def damage_type_text(self, lang) -> str:
+    def damage_type_text(self, lang: Language) -> str:
         # 2d8 dégâts de foudre ou de tonnerre
         if lang == "fr":
             return (
@@ -48,7 +48,7 @@ class BaseCardTextFormatter(FormatterProtocol):
             )
         return r"(?P<damage_type_1>\w+) (or (?P<damage_type_2>\w+) )?damage"
 
-    def spell_carac_text(self, lang: str) -> str:
+    def spell_carac_text(self, lang: Language) -> str:
         if lang == "fr":
             return "le modificateur de votre caractéristique d'incantation"
         return "your spellcasting ability modifier"
@@ -242,7 +242,7 @@ class TitleDescriptionPrerequisiteFormatter(BaseCardTextFormatter):
     title: str
     prerequesite: str
     text: list[str]
-    lang: str
+    lang: Language
 
     def render_parts_text(self, text: list[str]) -> list[str]:
         text_parts = self.fix_text_with_subparts(text)

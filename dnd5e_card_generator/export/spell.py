@@ -14,6 +14,7 @@ from dnd5e_card_generator.models import (
     MagicSchool,
     SpellShape,
     SpellType,
+    Language,
 )
 from dnd5e_card_generator.utils import game_icon, humanize_level, strip_accents
 
@@ -22,7 +23,7 @@ from dnd5e_card_generator.utils import game_icon, humanize_level, strip_accents
 class Spell(BaseCardTextFormatter):
     title: str
     en_title: str
-    lang: str
+    lang: Language
     level: int
     school: MagicSchool
     casting_time: str
@@ -359,7 +360,7 @@ class Spell(BaseCardTextFormatter):
 
 
 class SpellLegend(BaseCardTextFormatter):
-    def __init__(self, lang: str):
+    def __init__(self, lang: Language):
         self.lang = lang
         self.title = ""
 

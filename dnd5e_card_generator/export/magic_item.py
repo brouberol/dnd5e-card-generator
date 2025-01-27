@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.models import MagicItemKind, MagicItemRarity
+from dnd5e_card_generator.models import MagicItemKind, MagicItemRarity, Language
 from dnd5e_card_generator.utils import game_icon
 
 
@@ -15,7 +15,7 @@ class MagicItem(BaseCardTextFormatter):
     rarity: MagicItemRarity
     attunement: bool
     text: list[str]
-    lang: str
+    lang: Language
     image_url: str
     recharges: int
 

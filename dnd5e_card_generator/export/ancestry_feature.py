@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
+from dnd5e_card_generator.models import Language
 
 
 @dataclass
 class AncestryFeature(BaseCardTextFormatter):
     title: str
-    lang: str
+    lang: Language
     sub_ancestry: str
     text: list[str]
 

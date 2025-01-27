@@ -37,6 +37,7 @@ from dnd5e_card_generator.models import (
     MagicItemRarity,
     MagicSchool,
     SpellShape,
+    Language,
 )
 from dnd5e_card_generator.utils import human_readable_class_name, slugify
 
@@ -124,7 +125,7 @@ class BaseAideDDScraper:
     model_url: str = ""
     tags_to_unwrap_from_description = ["a", "em", "ul", "li", "strong"]
 
-    def __init__(self, slug: str, lang: str):
+    def __init__(self, slug: str, lang: Language):
         self.slug = slug
         self.lang = lang
         self.soup, self.div_content = self.parse_page()
@@ -468,7 +469,7 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
         CharacterClass.wizard: "Tradition",
     }
 
-    def __init__(self, class_name: str, title: str, lang: str):
+    def __init__(self, class_name: str, title: str, lang: Language):
         self.class_name = CharacterClass.from_str(class_name, lang)
         self.title = title
         super().__init__(slug=title, lang=lang)
@@ -538,7 +539,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
     model = AncestryFeature
     title_indicator = "Traits"
 
-    def __init__(self, ancestry: str, sub_ancestry: str, lang: str):
+    def __init__(self, ancestry: str, sub_ancestry: str, lang: Language):
         self.ancestry = ancestry
         self.sub_ancestry = sub_ancestry
         super().__init__(slug=ancestry, lang=lang)

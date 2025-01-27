@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
+from dnd5e_card_generator.models import Language
 
 
 @dataclass
@@ -8,7 +9,7 @@ class Background(BaseCardTextFormatter):
     title: str
     subtitle: str
     text: list[str]
-    lang: str
+    lang: Language
 
     @property
     def contents_text(self) -> list[str]:

@@ -1,6 +1,6 @@
 from dataclasses import asdict, dataclass, field
 from enum import StrEnum
-from typing import Optional, Self, cast, Literal, get_args as get_type_args
+from typing import Optional, Self, cast
 
 
 from dnd5e_card_generator.config import Config
@@ -8,11 +8,14 @@ from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
 from .utils import game_icon
 
-Language = Literal["en", "fr"]
+
+class Language(StrEnum):
+    en = "en"
+    fr = "fr"
 
 
-def validate_language(lang: str):
-    supported_languages = get_type_args(Language)
+def validate_language(lang: str) -> Language:
+    supported_languages = Language._member_names_
     if lang not in supported_languages:
         msg = (
             f"Unsupported language {lang}. Only {', '.join(supported_languages[:-1])} "
@@ -20,6 +23,7 @@ def validate_language(lang: str):
         )
         print(f"ERROR: {msg}")  # The exception is gobbled up by argparse, so we print the message
         raise ValueError(msg)
+    return Language(lang)
 
 
 class BaseDataclass:
@@ -29,13 +33,13 @@ class BaseDataclass:
 
 @dataclass
 class CliArg(BaseDataclass):
-    lang: str
+    lang: Language
     slug: str
 
     @classmethod
     def from_str(cls, s: str) -> "CliArg":
         lang, slug = s.split(":")
-        validate_language(lang)
+        lang = validate_language(lang)
         return cls(lang=lang, slug=slug)
 
 
@@ -61,12 +65,12 @@ class CliBackground(CliArg): ...
 class CliClassFeature(BaseDataclass):
     class_name: str
     title: str
-    lang: str
+    lang: Language
 
     @classmethod
     def from_str(cls, s: str) -> "CliClassFeature":
         lang, class_name, title = s.split(":", 2)  # The title itself can contain semicolumns
-        validate_language(lang)
+        lang = validate_language(lang)
         return cls(title=title, class_name=class_name, lang=lang)
 
 
@@ -74,7 +78,7 @@ class CliClassFeature(BaseDataclass):
 class CliAncestryFeature(BaseDataclass):
     ancestry: str
     sub_ancestry: str
-    lang: str
+    lang: Language
 
     @classmethod
     def from_str(cls, s: str) -> "CliAncestryFeature":
@@ -83,13 +87,13 @@ class CliAncestryFeature(BaseDataclass):
             sub_ancestry = ""
         else:
             lang, ancestry, sub_ancestry = s.split(":")
-        validate_language(lang)
+        lang = validate_language(lang)
         return cls(ancestry=ancestry, sub_ancestry=sub_ancestry, lang=lang)
 
 
 @dataclass
 class CliSpellFilter(BaseDataclass):
-    lang: str
+    lang: Language
     class_name: str
     min_level: int
     max_level: int
@@ -97,7 +101,7 @@ class CliSpellFilter(BaseDataclass):
     @classmethod
     def from_str(cls, s: str) -> "CliSpellFilter":
         lang, class_name, min_level, max_level = s.split(":")
-        validate_language(lang)
+        lang = validate_language(lang)
         return cls(
             lang=lang,
             class_name=class_name,

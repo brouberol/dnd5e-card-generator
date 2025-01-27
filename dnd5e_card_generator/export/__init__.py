@@ -8,6 +8,7 @@ from dnd5e_card_generator.models import (
     CliSpell,
     CliAncestryFeature,
     CliBackground,
+    Language,
 )
 from dnd5e_card_generator.scraping.aidedd import (
     CharacterClassFeatureScraper,
@@ -50,7 +51,7 @@ def export_spells_to_cards(spell_names: list[CliSpell], include_legend: bool) ->
         sorting_func=lambda spell: (spell.level, spell.title),
     )
     if include_legend:
-        cards.append(SpellLegend("fr").to_card())
+        cards.append(SpellLegend(lang=Language("fr")).to_card())
     return cards
 
 
