@@ -160,20 +160,13 @@ def main():
         spells = [CliSpell.from_str(spell_str) for spell_str in spells_str]
 
     spells = args.spells + spells
-    if spells:
-        cards.extend(export_spells_to_cards(spells, include_legend=args.include_spell_legend))
-    if args.items:
-        cards.extend(export_items_to_cards(args.items))
-    if args.feats:
-        cards.extend(export_feats_to_cards(args.feats))
-    if args.eldricht_invocations:
-        cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))
-    if args.class_features:
-        cards.extend(export_class_features_to_cards(args.class_features))
-    if args.ancestry_features:
-        cards.extend(export_ancestry_features_to_cards(args.ancestry_features))
-    if args.backgrounds:
-        cards.extend(export_backgrounds_to_cards(args.backgrounds))
+    cards.extend(export_spells_to_cards(spells, include_legend=args.include_spell_legend))
+    cards.extend(export_items_to_cards(args.items))
+    cards.extend(export_feats_to_cards(args.feats))
+    cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))
+    cards.extend(export_class_features_to_cards(args.class_features))
+    cards.extend(export_ancestry_features_to_cards(args.ancestry_features))
+    cards.extend(export_backgrounds_to_cards(args.backgrounds))
 
     cards_json = json.dumps(cards, indent=2, ensure_ascii=False)
     if args.output:
