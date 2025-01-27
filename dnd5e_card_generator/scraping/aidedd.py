@@ -414,7 +414,7 @@ class MagicItemScraper(BaseItemPageScraper):
             requires_attunement = True
         else:
             requires_attunement = False
-        img_elt = self.find_in_soup("img")
+        img_elt = cast(Tag | None, self.soup.find("img"))
         image_url = img_elt.attrs["src"] if img_elt else ""
         rarity = MagicItemRarity.from_str(item_rarity, self.lang)
         item_description = list(self.find_in_content("div", class_="description").strings)
