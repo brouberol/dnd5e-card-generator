@@ -133,17 +133,6 @@ def parse_args():
         help="Bypass local cache to force the scrapers to issue HTTP requests (default: False)",
         default=False,
     )
-    # parser.add_argument(
-    #     "--monsters",
-    #     nargs="+",
-    #     help=(
-    #         "Space separated <lang>:<monster slug> items. "
-    #         "Example: 'fr:ankheg fr:babouin"
-    #     ),
-    #     required=False,
-    #     default=[],
-    #     type=CliMonster.from_str,
-    # )
     parser.add_argument(
         "-o",
         "--output",
@@ -185,9 +174,6 @@ def main():
         cards.extend(export_ancestry_features_to_cards(args.ancestry_features))
     if args.backgrounds:
         cards.extend(export_backgrounds_to_cards(args.backgrounds))
-
-    # if args.monsters:
-    #     cards.extend(export_monsters_to_cards(args.monsters))
 
     cards_json = json.dumps(cards, indent=2, ensure_ascii=False)
     if args.output:

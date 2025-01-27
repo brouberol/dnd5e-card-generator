@@ -17,7 +17,6 @@ from dnd5e_card_generator.const import (
     AIDEDD_ELDRICHT_INVOCATIONS_URL,
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
-    AIDEDD_MONSTERS_ITEMS_URL,
     AIDEDD_SPELLS_FILTER_URL,
     AIDEDD_SPELLS_URL,
     AIDEDD_UNEARTHED_ARCANA_URL,
@@ -29,18 +28,11 @@ from dnd5e_card_generator.export.ancestry_feature import AncestryFeature
 from dnd5e_card_generator.export.eldricht_invocation import EldrichtInvocation
 from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
-from dnd5e_card_generator.export.monster import Monster
 from dnd5e_card_generator.export.spell import Spell
 from dnd5e_card_generator.export.background import Background
 from dnd5e_card_generator.models import (
-    Attribute,
     CharacterClass,
-    CreatureAttributes,
-    CreatureSize,
-    CreatureSpeed,
-    CreatureType,
     DamageType,
-    HitPointsFormula,
     MagicItemKind,
     MagicItemRarity,
     MagicSchool,
@@ -539,212 +531,6 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
             lang=self.lang,
             class_name=self.class_name,
             class_variant=class_variant,
-        )
-
-
-class MonsterScraper(BaseAideDDScraper):
-    model_url = AIDEDD_MONSTERS_ITEMS_URL
-    model = Monster
-
-    armor_class_indicator_per_lang = {"fr": "Classe d'armure", "en": "Armor Class"}
-    hit_points_indicator_per_lang = {"fr": "Points de vie", "en": "Hit Points"}
-    speed_indicator_per_lang = {"fr": "Vitesse", "en": "Speed"}
-    senses_indicator_per_lang = {"fr": "Sens", "en": "Senses"}
-    languages_indicator_per_lang = {"fr": "Langues", "en": "Languages"}
-    saving_throws_indicator_per_lang = {
-        "fr": "Jets de sauvegarde",
-        "en": "Saving Throws",
-    }
-    skills_indicator_per_lang = {"fr": "Compétences", "en": "Skills"}
-    damage_resistances_indicator_per_lang = {
-        "fr": "Résistances aux dégâts",
-        "en": "Damage Resistances",
-    }
-    challenge_indicator_per_lang = {"fr": "Puissance", "en": "Challenge"}
-
-    @cached_property
-    def creature_type_text(self) -> str:
-        return self.find_in_content("div", class_="type").text
-
-    @cached_property
-    def creature_red_text_div(self) -> Tag:
-        return self.find_in_content("div", class_="red")
-
-    def scrape_creature_size(self) -> CreatureSize:
-        match = re.search(
-            CreatureSize.as_pattern(self.lang),
-            self.creature_type_text,
-            flags=re.IGNORECASE,
-        )
-        if not match:
-            raise ScrapingError(f"{CreatureSize} not found in text")
-        return CreatureSize.from_str(match.group(), self.lang)
-
-    def scrape_creature_type(self) -> CreatureType:
-        match = re.search(
-            CreatureType.possible_values_as_pattern(self.lang),
-            self.creature_type_text,
-            flags=re.IGNORECASE,
-        )
-        if not match:
-            raise ScrapingError(f"{CreatureType} not found in text")
-        return CreatureType.from_str(match.group(), self.lang)
-
-    def _scrape_element_after_str(self, div: Tag, str_marker: str) -> str:
-        text_iter = div.strings
-        for text in text_iter:
-            if text == str_marker:
-                return next(text_iter).strip()  # pyright: ignore
-        return ""
-
-    def _find_tag_after_tag_containing(self, div: Tag, tag_name: str, content: str) -> Tag | None:
-        for tag in div.find_all(tag_name):
-            if content in tag.text:
-                return tag
-
-    def scrape_armor_class(self) -> str:
-        return self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.armor_class_indicator_per_lang[self.lang],
-        )
-
-    def scrape_hit_points(self) -> int:
-        hit_points_and_formula = self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.hit_points_indicator_per_lang[self.lang],
-        )
-        return int(hit_points_and_formula.split()[0])
-
-    def scrape_hit_points_formula(self) -> HitPointsFormula:
-        hit_points_and_formula = self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.hit_points_indicator_per_lang[self.lang],
-        )
-        _, _, formula = hit_points_and_formula.partition(" ")
-        return HitPointsFormula.from_str(formula.lstrip("(").rstrip(")"))
-
-    def scrape_speeds(self) -> list[CreatureSpeed]:
-        speeds_text = self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.speed_indicator_per_lang[self.lang],
-        )
-        return [CreatureSpeed.from_str(s.strip()) for s in speeds_text.split(",")]
-
-    def _scrape_attribute(self, div: Tag) -> Attribute:
-        return Attribute(value=int(list(div.strings)[1].split()[0]))
-
-    def scrape_attributes(self) -> CreatureAttributes:
-        attribute_divs = self.creature_red_text_div.find_all("div", class_="carac")
-        return CreatureAttributes(
-            strength=self._scrape_attribute(attribute_divs[0]),
-            dexterity=self._scrape_attribute(attribute_divs[1]),
-            constitution=self._scrape_attribute(attribute_divs[2]),
-            intelligence=self._scrape_attribute(attribute_divs[3]),
-            wisdom=self._scrape_attribute(attribute_divs[4]),
-            charisma=self._scrape_attribute(attribute_divs[5]),
-        )
-
-    def scrape_senses(self) -> list[str]:
-        return self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.senses_indicator_per_lang[self.lang],
-        ).split(", ")
-
-    def scrape_languages(self) -> str:
-        languages_text = self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.languages_indicator_per_lang[self.lang],
-        )
-        if languages_text == "—":
-            return ""
-        return languages_text.capitalize()
-
-    def scrape_saving_throws(self) -> list[str]:
-        if text := self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.saving_throws_indicator_per_lang[self.lang],
-        ):
-            return text.split(", ")
-        return []
-
-    def scrape_skills(self) -> list[str]:
-        if text := self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.skills_indicator_per_lang[self.lang],
-        ):
-            return text.split(", ")
-        return []
-
-    def scrape_damage_resistances(self) -> list[str]:
-        if text := self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.damage_resistances_indicator_per_lang[self.lang],
-        ):
-            return [DamageType.from_str(t, self.lang) for t in text.split(", ")]
-        return []
-
-    def scrape_challenge(self) -> str:
-        return self._scrape_element_after_str(
-            div=self.creature_red_text_div,
-            str_marker=self.challenge_indicator_per_lang[self.lang],
-        ).split()[0]
-
-    def scrape_features(self) -> list[str]:
-        # We find the red line after the Languages property, and collect all <p> content
-        # before the div containing "Actions". Phew.
-        language_div = self._find_tag_after_tag_containing(
-            self.creature_red_text_div,
-            "strong",
-            self.languages_indicator_per_lang[self.lang],
-        )
-        if not language_div:
-            raise ScrapingError(
-                f"No div found after text '{self.languages_indicator_per_lang[self.lang]}'"
-            )
-        # We get the next red line
-        redline = language_div.find_next("svg")
-        if not redline:
-            raise
-        features = []
-        for p in redline.find_all_next("p"):
-            if p.find_next("div", class_="rub"):  # The Actions title
-                features.append(p.text)
-            else:
-                return features
-        return []
-
-    def scrape_actions(self) -> list[str]:
-        actions_div = self.find_in_content("div", class_="rub")
-        return [p.text for p in actions_div.find_all_next("p")]
-
-    def scrape_image_url(self) -> str:
-        if picture_div := self.find_in_content("div", class_="picture"):
-            if picture_img := picture_div.find("img"):
-                picture_img = cast(Tag, picture_img)
-                return picture_img.attrs["src"]
-        return ""
-
-    def scrape(self) -> Monster:
-        return Monster(
-            title=self.scrape_title(),
-            lang=self.lang,
-            size=self.scrape_creature_size(),
-            type=self.scrape_creature_type(),
-            armor_class=self.scrape_armor_class(),
-            hit_points=self.scrape_hit_points(),
-            hit_points_formula=self.scrape_hit_points_formula(),
-            speeds=self.scrape_speeds(),
-            attributes=self.scrape_attributes(),
-            senses=self.scrape_senses(),
-            saving_throws=self.scrape_saving_throws(),
-            skills=self.scrape_skills(),
-            damage_resistances=self.scrape_damage_resistances(),
-            challenge_rating=self.scrape_challenge(),
-            features=self.scrape_features(),
-            actions=self.scrape_actions(),
-            description=self.scrape_description(),
-            languages=self.scrape_languages(),
-            image_url=self.scrape_image_url(),
         )
 
 
