@@ -365,7 +365,7 @@ class CharacterAncestry(BaseModel):
 class DamageFormula:
     """Representation of a damage formula.
 
-    Ex: 2d10 radiant damages
+    Ex: 2d10 radiant damage
 
     """
 
