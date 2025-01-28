@@ -355,7 +355,7 @@ class CharacterAncestry(BaseModel):
     elf = "elf"
     gnome = "gnome"
     half_elf = "half-elf"
-    half_orc = "half_orc"
+    half_orc = "half-orc"
     halfling = "halfling"
     human = "human"
     tieflin = "tieflin"
