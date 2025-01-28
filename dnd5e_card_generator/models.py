@@ -328,7 +328,7 @@ class DamageDie(StrEnum):
         return [
             (name, cast(DamageDie, value))
             for name, value in cls._member_map_.items()
-            if value != "d100"
+            if name != value
         ]
 
     @classmethod
