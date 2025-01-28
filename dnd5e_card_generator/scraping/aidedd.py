@@ -324,7 +324,9 @@ class SpellScraper(BaseItemPageScraper):
         else:
             ritual = False
         effect_duration = self.scrape_effect_duration()
-        if concentration_match := re.search(self.concentration_pattern, effect_duration):
+        if concentration_match := re.search(
+            self.concentration_pattern, effect_duration, flags=re.I
+        ):
             effect_duration = effect_duration.replace(concentration_match.group(0), "").strip()
             concentration = True
         else:
