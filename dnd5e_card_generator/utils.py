@@ -39,4 +39,4 @@ def human_readable_class_name(cls_name: str) -> str:
 
 
 def slugify(s: str) -> str:
-    return s.lower().replace(" ", "-")
+    return s.lower().replace(" ", "-").replace("/", "-")
