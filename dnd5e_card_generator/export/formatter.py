@@ -162,7 +162,14 @@ class BaseCardTextFormatter(FormatterProtocol):
             parts = match.groupdict()
             damage_type_1, damage_type_2 = None, None
             if parts.get("damage_type_1"):
-                damage_type_1 = DamageType.from_str(parts["damage_type_1"].rstrip("s"), self.lang)
+                try:
+                    damage_type_1 = DamageType.from_str(
+                        parts["damage_type_1"].rstrip("s"), self.lang
+                    )
+                except KeyError:
+                    # Some weird formulation could happen, like `1d4 extra damage`
+                    # that we can just ignore
+                    continue
             if parts.get("damage_type_2"):
                 damage_type_2 = DamageType.from_str(parts["damage_type_2"].rstrip("s"), self.lang)
 
