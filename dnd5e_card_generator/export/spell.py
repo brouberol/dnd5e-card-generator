@@ -246,7 +246,7 @@ class Spell(BaseCardTextFormatter):
         shape_name = self.shape.translate(self.lang)
         casting_shape_dimension_pattern = {
             "fr": r"(?P<distance>\d+)[,\.]\d+? (?P<unit>m\w+)",
-            "en": r"(?P<distance>\d+)-(?P<unit>f\w+)",
+            "en": r"(?P<distance>\d+)-(?P<unit>f\w+)(?=\-radius)?",
         }
         # Sometimes, when a spell shape is a circle or a sphere, the radius is specified
         # but not the shape
