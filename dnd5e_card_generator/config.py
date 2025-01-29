@@ -101,7 +101,7 @@ class Config:
         "spell_default": "scroll-unfurled",
         "spell_properties": {
             "casting_time": "ink-swirl",
-            "casting_range": "hand",
+            "casting_range": "path-distance",
             "effect_duration": "sands-of-time",
             "casting_components": "drink-me",
             "concentration": "eye-target",
