@@ -110,7 +110,7 @@ class Spell(BaseCardTextFormatter):
         return "".join((prefix, self.reaction_condition))
 
     def fix_translation_mistakes(self, text: str) -> str:
-        replacements = {"fr": {"de un dé": "d'un dé", " [E]": ""}}
+        replacements = {"fr": {"de un dé": "d'un dé", " [E]": ""}, "en": {"(/lvl)": "per level"}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
@@ -150,19 +150,25 @@ class Spell(BaseCardTextFormatter):
         return text
 
     def shorten_effect_duration_text(self, text: str) -> str:
-        replacements = {"fr": {"Jusqu'à": "", "(voir ci-dessous)": ""}}
+        replacements = {"fr": {"Jusqu'à": "", "(voir ci-dessous)": ""}, "en": {"Up to": ""}}
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return self.shorten_time_text(text).strip().capitalize()
 
     def shorten_distance_text(self, text: str) -> str:
-        replacements = {"fr": {"mètres": "m", "mètre": "m", "Personnelle": "Perso.", "kilom": "km"}}
+        replacements = {
+            "fr": {"mètres": "m", "mètre": "m", "Personnelle": "Perso.", "kilom": "km"},
+            "en": {"feet": "ft", "foot": "ft"},
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
 
     def shorten_casting_time_text(self, text: str) -> str:
-        replacements = {"fr": {"1 action bonus": "a. bonus", "1 action": "action"}}
+        replacements = {
+            "fr": {"1 action bonus": "a. bonus", "1 action": "action"},
+            "en": {"1 action": "action", "1 bonus action": "bonus"},
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text.capitalize()
@@ -229,26 +235,40 @@ class Spell(BaseCardTextFormatter):
         text_parts = self.render_spell_parts_text(self.text)
         return [self.format_text(text_part) for text_part in text_parts]
 
+    def format_spell_distance(self, distance: str, unit: str) -> str:
+        return f"{distance} {self.shorten_distance_text(unit)}"
+
     @property
     def casting_shape_text(self) -> str:
         if not self.shape:
             return ""
-        shape_name = self.shape.translate(self.lang)
-        casting_shape_dimension_pattern = r"(?P<dim>\d+([,\.]\d+)? m\w+)"
 
+        shape_name = self.shape.translate(self.lang)
+        casting_shape_dimension_pattern = {
+            "fr": r"(?P<distance>\d+)[,\.]\d+? (?P<unit>m\w+)",
+            "en": r"(?P<distance>\d+)-(?P<unit>f\w+)",
+        }
         # Sometimes, when a spell shape is a circle or a sphere, the radius is specified
         # but not the shape
         if self.radius_specified_for_circle_or_sphere_shape():
             if casting_shape_dimension_match := re.search(
-                casting_shape_dimension_pattern, self.casting_range
+                casting_shape_dimension_pattern[self.lang], self.casting_range
             ):
-                return casting_shape_dimension_match.group("dim").strip().capitalize()
+                return self.format_spell_distance(
+                    casting_shape_dimension_match.group("distance"),
+                    casting_shape_dimension_match.group("unit"),
+                )
 
         for text in [self.casting_range] + self.spell_parts:
             if shape_name not in text:
                 continue
-            if casting_shape_dimension_match := re.search(casting_shape_dimension_pattern, text):
-                return casting_shape_dimension_match.group("dim").strip().capitalize()
+            if casting_shape_dimension_match := re.search(
+                casting_shape_dimension_pattern[self.lang], text
+            ):
+                return self.format_spell_distance(
+                    casting_shape_dimension_match.group("distance"),
+                    casting_shape_dimension_match.group("unit"),
+                )
         return ""
 
     @property
