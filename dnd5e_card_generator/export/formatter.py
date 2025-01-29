@@ -238,13 +238,17 @@ class BaseCardTextFormatter(FormatterProtocol):
         return getattr(self, "image_url", None)
 
     def to_card(self) -> dict:
-        card = Card(
-            color=self.color,
-            title=self.format_title_for_card_list(),
-            icon=self.icon,
-            contents=self.assemble_text_contents(self.contents_text),
-            background_image=self.image,
-        )
+        try:
+            card = Card(
+                color=self.color,
+                title=self.format_title_for_card_list(),
+                icon=self.icon,
+                contents=self.assemble_text_contents(self.contents_text),
+                background_image=self.image,
+            )
+        except Exception as exc:
+            print(f"ERROR: failed generating card for {self.title}")
+            raise exc
         return card.to_dict()
 
 
