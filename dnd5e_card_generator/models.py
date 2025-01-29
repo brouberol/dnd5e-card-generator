@@ -409,3 +409,12 @@ class Action(BaseModel):
     def pattern_options(cls, lang: str) -> list[str]:
         values = super().pattern_options(lang)
         return [val.capitalize() for val in values]
+
+
+class Attribute(BaseModel):
+    charisma = "charisma"
+    constitution = "constitution"
+    dexterity = "dexterity"
+    intelligence = "intelligence"
+    strength = "strength"
+    wisdom = "wisdom"

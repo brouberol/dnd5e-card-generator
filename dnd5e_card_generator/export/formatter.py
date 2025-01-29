@@ -3,7 +3,15 @@ from dataclasses import dataclass
 from typing import Protocol, Callable
 
 from dnd5e_card_generator.config import Config
-from dnd5e_card_generator.models import Card, DamageDie, DamageFormula, DamageType, Action, Language
+from dnd5e_card_generator.models import (
+    Card,
+    DamageDie,
+    DamageFormula,
+    DamageType,
+    Action,
+    Language,
+    Attribute,
+)
 from dnd5e_card_generator.utils import (
     damage_type_text,
     game_icon,
@@ -35,7 +43,7 @@ class BaseCardTextFormatter(FormatterProtocol):
         return f"<b>{text}</b>"
 
     def _highlight(self, pattern: str, text: str) -> str:
-        return re.sub(pattern, lambda match: self._strong(match.group(0)), text)
+        return re.sub(pattern, lambda match: self._strong(match.group(0)), text, flags=re.I)
 
     def format_title_for_card_list(self):
         return f"{human_readable_class_name(self.__class__.__name__).capitalize()} - {self.title}"
@@ -171,12 +179,13 @@ class BaseCardTextFormatter(FormatterProtocol):
         return text
 
     def highlight_saving_throw(self, text: str) -> str:
+        attributes = Attribute.as_pattern(self.lang)
         saving_throw_patterns_by_lang = {
             "fr": [
-                r"jet(s)? de sauvegarde de [A-Z]\w+",
+                r"jet(s)? de sauvegarde de %s" % (attributes),
                 "la moitié de ces dégâts en cas de réussite",
             ],
-            "en": [r"\w+ saving throw", "half as much damage on a successful one"],
+            "en": [r"%s saving throw" % (attributes), "half as much damage on a successful one"],
         }
         for pattern in saving_throw_patterns_by_lang[self.lang]:
             text = self._highlight(pattern, text)

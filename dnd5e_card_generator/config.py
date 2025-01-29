@@ -209,4 +209,12 @@ class Config:
             "ready": "préparer",
             "search": "chercher",
         },
+        "attribute": {
+            "charisma": "charisme",
+            "constitution": "constitution",
+            "dexterity": "dextérité",
+            "intelligence": "intelligence",
+            "strength": "force",
+            "wisdom": "sagesse",
+        },
     }
