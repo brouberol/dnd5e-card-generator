@@ -553,7 +553,7 @@ class AncestryFeatureScraper(BaseAideDDScraper):
     def find_feature_section(self) -> Tag:
         if self.sub_ancestry:
             for tag in self.soup.find_all(["h4"]):
-                if tag.text.endswith(self.sub_ancestry):
+                if tag.text.replace("’", "'").endswith(self.sub_ancestry):
                     break
             else:
                 raise ScrapingError(f"Ancestry feature {self.sub_ancestry} not found")
