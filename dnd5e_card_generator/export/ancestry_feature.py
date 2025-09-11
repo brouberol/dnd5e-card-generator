@@ -20,7 +20,12 @@ class AncestryFeature(BaseCardTextFormatter):
     @property
     def text_parts(self) -> list[str]:
         text = self.fix_text_with_bold(self.text)
-        return [self.format_text(part) for part in text]
+        text = self.fix_text_with_bullet_points(text)
+        formatters = [
+            self.highlight_italic_words,
+            self.format_text,
+        ]
+        return [self.map_string_transformations(part, formatters) for part in text]
 
     @property
     def contents_text(self) -> list[str | list[str]]:
