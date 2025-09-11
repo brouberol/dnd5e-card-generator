@@ -12,32 +12,32 @@ from bs4.element import NavigableString, Tag
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.const import (
+    AIDEDD_BACKGROUND_URL,
     AIDEDD_CLASS_RULES_URL,
-    AIDEDD_RACE_RULES_URL,
     AIDEDD_ELDRICHT_INVOCATIONS_URL,
     AIDEDD_FEATS_ITEMS_URL,
     AIDEDD_MAGIC_ITEMS_URL,
+    AIDEDD_RACE_RULES_URL,
     AIDEDD_SPELLS_FILTER_URL,
     AIDEDD_SPELLS_URL,
     AIDEDD_UNEARTHED_ARCANA_URL,
     FIVE_E_SHEETS_SPELLS,
-    AIDEDD_BACKGROUND_URL,
 )
-from dnd5e_card_generator.export.class_feature import ClassFeature
 from dnd5e_card_generator.export.ancestry_feature import AncestryFeature
+from dnd5e_card_generator.export.background import Background
+from dnd5e_card_generator.export.class_feature import ClassFeature
 from dnd5e_card_generator.export.eldricht_invocation import EldrichtInvocation
 from dnd5e_card_generator.export.feat import Feat
 from dnd5e_card_generator.export.magic_item import MagicItem
 from dnd5e_card_generator.export.spell import Spell
-from dnd5e_card_generator.export.background import Background
 from dnd5e_card_generator.models import (
     CharacterClass,
     DamageType,
+    Language,
     MagicItemKind,
     MagicItemRarity,
     MagicSchool,
     SpellShape,
-    Language,
 )
 from dnd5e_card_generator.utils import human_readable_class_name, slugify
 
@@ -147,7 +147,9 @@ class BaseAideDDScraper:
     def parse_page(self) -> tuple[BeautifulSoup, Tag]:
         html = self.fetch_data()
         soup = BeautifulSoup(html, features="html.parser")
-        div_content = soup.find("div", class_="col1") or soup.find("div", class_="content")
+        div_content = soup.find("div", class_="col1") or soup.find(
+            "div", class_="content"
+        )
         if div_content is None:
             raise ScrapingError(f"{self.slug} not found!")
         return soup, cast(Tag, div_content)
@@ -173,10 +175,14 @@ class BaseAideDDScraper:
         new_soup = BeautifulSoup(string_soup, features="html.parser")
         return new_soup
 
-    def _find_in_tag(self, tag: Tag | NavigableString | BeautifulSoup, *args, **kwargs) -> Tag:
+    def _find_in_tag(
+        self, tag: Tag | NavigableString | BeautifulSoup, *args, **kwargs
+    ) -> Tag:
         match = tag.find(*args, **kwargs)
         if not match:
-            raise ScrapingError(f"No match were found for {args}, {kwargs} ({self.slug})")
+            raise ScrapingError(
+                f"No match were found for {args}, {kwargs} ({self.slug})"
+            )
         return cast(Tag, match)
 
     def find_in_content(self, *args, **kwargs):
@@ -208,13 +214,11 @@ class BaseAideDDScraper:
 
 
 class BaseItemPageScraper(BaseAideDDScraper):
-
     def scrape_title(self) -> str:
         return self.find_in_content("h1").text.strip()
 
 
 class TitleDescriptionPrerequisiteScraper(BaseItemPageScraper):
-
     def scrape(self):
         print(
             f"Scraping data for {human_readable_class_name(self.model.__name__)} {self.slug}"  # pyright: ignore
@@ -282,13 +286,20 @@ class SpellScraper(BaseItemPageScraper):
 
         upcasting_text_element_index = text.index(upcasting_indicator)
         upcasting_text_parts = text[upcasting_text_element_index + 1 :]
-        upcasting_text_parts = [re.sub(r"^\. ", "", part) for part in upcasting_text_parts]
+        upcasting_text_parts = [
+            re.sub(r"^\. ", "", part) for part in upcasting_text_parts
+        ]
         upcasting_text = "\n".join(upcasting_text_parts)
         text = text[:upcasting_text_element_index]
         return text, upcasting_text
 
     def scrape_school_text(self) -> str:
-        return self.find_in_content("div", class_="ecole").text.split(" - ")[1].strip().capitalize()
+        return (
+            self.find_in_content("div", class_="ecole")
+            .text.split(" - ")[1]
+            .strip()
+            .capitalize()
+        )
 
     def scrape_casting_range(self) -> str:
         return self._scrape_property("r", list(self.casting_range_by_lang.values()))
@@ -327,7 +338,9 @@ class SpellScraper(BaseItemPageScraper):
         if concentration_match := re.search(
             self.concentration_pattern, effect_duration, flags=re.I
         ):
-            effect_duration = effect_duration.replace(concentration_match.group(0), "").strip()
+            effect_duration = effect_duration.replace(
+                concentration_match.group(0), ""
+            ).strip()
             concentration = True
         else:
             concentration = False
@@ -353,14 +366,17 @@ class SpellScraper(BaseItemPageScraper):
                 components_text = components_match.group(1)
                 paying_components = (
                     components_text.capitalize()
-                    if self.paying_components_indicator_by_lang[self.lang] in components_text
+                    if self.paying_components_indicator_by_lang[self.lang]
+                    in components_text
                     else ""
                 )
                 if paying_components and not paying_components.endswith("."):
                     paying_components = f"{paying_components}."
 
         search_text = "\n".join(spell_text)
-        if damage_type_match := re.search(self.spell_damage_by_lang[self.lang], search_text):
+        if damage_type_match := re.search(
+            self.spell_damage_by_lang[self.lang], search_text
+        ):
             damage_type_str = damage_type_match.group("dmg")
             if damage_type_str.endswith("s"):
                 damage_type_str = damage_type_str.rstrip("s")
@@ -420,7 +436,9 @@ class MagicItemScraper(BaseItemPageScraper):
             item_type = MagicItemKind.from_str(item_type_text.lower(), self.lang)
 
         if attunement_text in item_rarity:
-            requires_attunement_pattern = r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
+            requires_attunement_pattern = (
+                r"\(" + attunement_text + r"([\s\w\,]+)?" + r"\)"
+            )
             item_rarity = re.sub(requires_attunement_pattern, "", item_rarity).strip()
             requires_attunement = True
         else:
@@ -428,7 +446,9 @@ class MagicItemScraper(BaseItemPageScraper):
         img_elt = cast(Tag | None, self.soup.find("img"))
         image_url = img_elt.attrs["src"] if img_elt else ""
         rarity = MagicItemRarity.from_str(item_rarity, self.lang)
-        item_description = list(self.find_in_content("div", class_="description").strings)
+        item_description = list(
+            self.find_in_content("div", class_="description").strings
+        )
         recharges_match = re.search(r"(\d+) charges", " ".join(item_description))
         recharges = int(recharges_match.group(1) if recharges_match else 0)
         magic_item = MagicItem(
@@ -479,8 +499,12 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
     @property
     def base_url(self) -> str:
         if self.class_name == CharacterClass.artificer:
-            return AIDEDD_UNEARTHED_ARCANA_URL.format(class_=self.class_name.translate(self.lang))
-        return AIDEDD_CLASS_RULES_URL[self.lang].format(class_=self.class_name.translate(self.lang))
+            return AIDEDD_UNEARTHED_ARCANA_URL.format(
+                class_=self.class_name.translate(self.lang)
+            )
+        return AIDEDD_CLASS_RULES_URL[self.lang].format(
+            class_=self.class_name.translate(self.lang)
+        )
 
     def find_feature_section(self) -> Tag:
         for tag in self.soup.find_all(["h3", "h4"]):
@@ -514,7 +538,9 @@ class CharacterClassFeatureScraper(BaseAideDDScraper):
         last_seen_h3: Tag | None = None
         for t in cast(list[Tag], self.soup.find_all(["h2", "h3", tag.name])):
             if t == tag and last_seen_h2 is not None and last_seen_h3 is not None:
-                if last_seen_h2.text.startswith(self.class_variant_indicator[self.class_name]):
+                if last_seen_h2.text.startswith(
+                    self.class_variant_indicator[self.class_name]
+                ):
                     return last_seen_h3.text
                 else:
                     return
@@ -590,7 +616,9 @@ class AncestryFeatureScraper(BaseAideDDScraper):
         return out
 
     def scrape(self) -> AncestryFeature:
-        print(f"Scraping data for ancestry feature {self.sub_ancestry or self.ancestry}")
+        print(
+            f"Scraping data for ancestry feature {self.sub_ancestry or self.ancestry}"
+        )
         return AncestryFeature(
             title=self.scrape_title(),
             lang=self.lang,
