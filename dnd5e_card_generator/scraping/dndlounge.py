@@ -17,7 +17,8 @@ class DndLoungeScraper:
         soup = self.parse_html(url)
         tbl = soup.find("table")
         return [
-            tr.find("td").text.replace("’", "'") for tr in tbl.find_all("tr")[1:]  # pyright: ignore
+            tr.find("td").text.replace("’", "'")
+            for tr in tbl.find_all("tr")[1:]  # pyright: ignore
         ]
 
     def scrape_spells_by_spells_type(self) -> dict[str, str]:

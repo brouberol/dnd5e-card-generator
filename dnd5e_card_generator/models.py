@@ -2,7 +2,6 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 from typing import Optional, Self, cast
 
-
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.utils import pascal_case_to_snake_case
 
@@ -66,7 +65,9 @@ class CliClassFeature(BaseDataclass):
 
     @classmethod
     def from_str(cls, s: str) -> "CliClassFeature":
-        lang, class_name, title = s.split(":", 2)  # The title itself can contain semicolumns
+        lang, class_name, title = s.split(
+            ":", 2
+        )  # The title itself can contain semicolumns
         lang = Language.from_str(lang)
         return cls(title=title, class_name=class_name, lang=lang)
 
@@ -253,7 +254,11 @@ class DamageType(BaseModel):
 
     @classmethod
     def as_pattern(cls, lang: str) -> str:
-        return r"dégâts (de (type )?|d')?(" + r"|".join(cls.translations()[lang].values()) + r")s?"
+        return (
+            r"dégâts (de (type )?|d')?("
+            + r"|".join(cls.translations()[lang].values())
+            + r")s?"
+        )
 
 
 class SpellShape(BaseModel):

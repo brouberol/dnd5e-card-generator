@@ -8,23 +8,23 @@ from pathlib import Path
 from .color import generate_palette
 from .config import Config
 from .export import (
+    export_ancestry_features_to_cards,
+    export_backgrounds_to_cards,
     export_class_features_to_cards,
     export_eldricht_invocations_to_cards,
     export_feats_to_cards,
     export_items_to_cards,
     export_spells_to_cards,
-    export_ancestry_features_to_cards,
-    export_backgrounds_to_cards,
 )
 from .models import (
+    CliAncestryFeature,
+    CliBackground,
     CliClassFeature,
     CliEldrichtInvocation,
     CliFeat,
     CliMagicItem,
     CliSpell,
     CliSpellFilter,
-    CliAncestryFeature,
-    CliBackground,
 )
 from .scraping.aidedd import SpellFilter
 
@@ -37,7 +37,9 @@ def parse_args():
     parser.add_argument(
         "--spells",
         nargs="+",
-        help=("Space separated <lang>:<spell-slug> items.\nExample: fr:lumiere en:toll-the-dead"),
+        help=(
+            "Space separated <lang>:<spell-slug> items.\nExample: fr:lumiere en:toll-the-dead"
+        ),
         required=False,
         default=[],
         type=CliSpell.from_str,
@@ -152,7 +154,8 @@ def main():
 
     if args.spell_colors:
         Config.COLORS["spell"] = {
-            lvl: color for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
+            lvl: color
+            for lvl, color in enumerate(generate_palette(args.spell_colors, 10))
         }
 
     if args.spell_filter:
@@ -161,7 +164,9 @@ def main():
         spells = [CliSpell.from_str(spell_str) for spell_str in spells_str]
 
     spells = args.spells + spells
-    cards.extend(export_spells_to_cards(spells, include_legend=args.include_spell_legend))
+    cards.extend(
+        export_spells_to_cards(spells, include_legend=args.include_spell_legend)
+    )
     cards.extend(export_items_to_cards(args.items))
     cards.extend(export_feats_to_cards(args.feats))
     cards.extend(export_eldricht_invocations_to_cards(args.eldricht_invocations))

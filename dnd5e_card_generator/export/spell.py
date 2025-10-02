@@ -11,10 +11,10 @@ from dnd5e_card_generator.models import (
     Card,
     DamageDie,
     DamageType,
+    Language,
     MagicSchool,
     SpellShape,
     SpellType,
-    Language,
 )
 from dnd5e_card_generator.utils import game_icon, humanize_level, strip_accents
 
@@ -110,7 +110,10 @@ class Spell(BaseCardTextFormatter):
         return "".join((prefix, self.reaction_condition))
 
     def fix_translation_mistakes(self, text: str) -> str:
-        replacements = {"fr": {"de un dé": "d'un dé", " [E]": ""}, "en": {"(/lvl)": "per level"}}
+        replacements = {
+            "fr": {"de un dé": "d'un dé", " [E]": ""},
+            "en": {"(/lvl)": "per level"},
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return text
@@ -150,7 +153,10 @@ class Spell(BaseCardTextFormatter):
         return text
 
     def shorten_effect_duration_text(self, text: str) -> str:
-        replacements = {"fr": {"Jusqu'à": "", "(voir ci-dessous)": ""}, "en": {"Up to": ""}}
+        replacements = {
+            "fr": {"Jusqu'à": "", "(voir ci-dessous)": ""},
+            "en": {"Up to": ""},
+        }
         for term, replacement in replacements.get(self.lang, {}).items():
             text = text.replace(term, replacement)
         return self.shorten_time_text(text).strip().capitalize()
@@ -210,7 +216,10 @@ class Spell(BaseCardTextFormatter):
         if not self.shape:
             return self.casting_range
         shape_name = self.shape.translate(self.lang)
-        if shape_name in self.casting_range or self.radius_specified_for_circle_or_sphere_shape():
+        if (
+            shape_name in self.casting_range
+            or self.radius_specified_for_circle_or_sphere_shape()
+        ):
             return re.sub(r"\([^\)]+\)", "", self.casting_range).strip()
         else:
             return self.casting_range
@@ -415,7 +424,9 @@ class SpellLegend(BaseCardTextFormatter):
                     icon=game_icon(element.icon),
                 )
             )
-        properties = sorted(properties, key=lambda line: strip_accents(line.split("|")[1]))
+        properties = sorted(
+            properties, key=lambda line: strip_accents(line.split("|")[1])
+        )
         properties += [self.format_property_inline(text="", icon="")] * (
             columns - (len(elements) % (columns))
         )
@@ -432,7 +443,9 @@ class SpellLegend(BaseCardTextFormatter):
             batch = []
             for damage_die_name, damage_die in damage_die_batch:
                 batch.append(
-                    self.format_property_inline(text=damage_die_name, icon=damage_die.render())
+                    self.format_property_inline(
+                        text=damage_die_name, icon=damage_die.render()
+                    )
                 )
             batch.append(self.format_fill())
             out.extend(batch)
@@ -454,7 +467,9 @@ class SpellLegend(BaseCardTextFormatter):
     def spell_shape_legend(self) -> list[str]:
         out = [self.format_section(self.spell_shapes_section_text)]
         shapes = [
-            shape for shape in SpellShape if shape not in (SpellShape.radius, SpellShape.hemisphere)
+            shape
+            for shape in SpellShape
+            if shape not in (SpellShape.radius, SpellShape.hemisphere)
         ]
         return out + self.to_table(shapes, columns=4)
 

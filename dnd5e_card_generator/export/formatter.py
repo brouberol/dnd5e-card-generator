@@ -1,16 +1,16 @@
 import re
 from dataclasses import dataclass
-from typing import Protocol, Callable
+from typing import Callable, Protocol
 
 from dnd5e_card_generator.config import Config
 from dnd5e_card_generator.models import (
+    Action,
+    Attribute,
     Card,
     DamageDie,
     DamageFormula,
     DamageType,
-    Action,
     Language,
-    Attribute,
 )
 from dnd5e_card_generator.utils import (
     damage_type_text,
@@ -28,7 +28,9 @@ class FormatterProtocol(Protocol):
 class BaseCardTextFormatter(FormatterProtocol):
 
     @staticmethod
-    def map_string_transformations(s: str, functions: list[Callable[[str], str]]) -> str:
+    def map_string_transformations(
+        s: str, functions: list[Callable[[str], str]]
+    ) -> str:
         for func in functions:
             s = func(s)
         return s
@@ -43,7 +45,9 @@ class BaseCardTextFormatter(FormatterProtocol):
         return f"<b>{text}</b>"
 
     def _highlight(self, pattern: str, text: str) -> str:
-        return re.sub(pattern, lambda match: self._strong(match.group(0)), text, flags=re.I)
+        return re.sub(
+            pattern, lambda match: self._strong(match.group(0)), text, flags=re.I
+        )
 
     def format_title_for_card_list(self):
         return f"{human_readable_class_name(self.__class__.__name__).capitalize()} - {self.title}"
@@ -51,9 +55,7 @@ class BaseCardTextFormatter(FormatterProtocol):
     def damage_type_text(self, lang: Language) -> str:
         # 2d8 dégâts de foudre ou de tonnerre
         if lang == "fr":
-            return (
-                r"(de )?dégâts (de |d')?(?P<damage_type_1>\w+)( ou (de |d')(?P<damage_type_2>\w+))?"
-            )
+            return r"(de )?dégâts (de |d')?(?P<damage_type_1>\w+)( ou (de |d')(?P<damage_type_2>\w+))?"
         return r"(?P<damage_type_1>\w+) (or (?P<damage_type_2>\w+) )?damage"
 
     def spell_carac_text(self, lang: Language) -> str:
@@ -121,7 +123,8 @@ class BaseCardTextFormatter(FormatterProtocol):
         for i, part in enumerate(text):
             if match := re.match(r"\*([\w. ]+)\*", part):
                 text_copy[i] = part.replace(
-                    match.group(), f"<b>{match.group(1).strip().rstrip('.').strip()}</b>: "
+                    match.group(),
+                    f"<b>{match.group(1).strip().rstrip('.').strip()}</b>: ",
                 )
         return text_copy
 
@@ -144,7 +147,9 @@ class BaseCardTextFormatter(FormatterProtocol):
 
     def highlight_die_value(self, text) -> str:
         die_value_pattern = r"\dd\d+ " + damage_type_text(self.lang)
-        return re.sub(die_value_pattern, lambda match: self._strong(match.group(0)), text)
+        return re.sub(
+            die_value_pattern, lambda match: self._strong(match.group(0)), text
+        )
 
     def highlight_damage_formula(self, text: str) -> str:
         die_value_pattern = (
@@ -171,7 +176,9 @@ class BaseCardTextFormatter(FormatterProtocol):
                     # that we can just ignore
                     continue
             if parts.get("damage_type_2"):
-                damage_type_2 = DamageType.from_str(parts["damage_type_2"].rstrip("s"), self.lang)
+                damage_type_2 = DamageType.from_str(
+                    parts["damage_type_2"].rstrip("s"), self.lang
+                )
 
             damage_formula = DamageFormula(
                 num_die=int(parts.get("num_die") or 1),
@@ -192,7 +199,10 @@ class BaseCardTextFormatter(FormatterProtocol):
                 r"jet(s)? de sauvegarde de %s" % (attributes),
                 "la moitié de ces dégâts en cas de réussite",
             ],
-            "en": [r"%s saving throw" % (attributes), "half as much damage on a successful one"],
+            "en": [
+                r"%s saving throw" % (attributes),
+                "half as much damage on a successful one",
+            ],
         }
         for pattern in saving_throw_patterns_by_lang[self.lang]:
             text = self._highlight(pattern, text)
@@ -202,7 +212,9 @@ class BaseCardTextFormatter(FormatterProtocol):
         return re.sub(r"_([^_]+)_", lambda m: self._em(m.group(1)), text)
 
     def highlight_action_name(self, text: str) -> str:
-        return re.sub(Action.as_pattern(self.lang), lambda m: self._em(m.group(1)), text)
+        return re.sub(
+            Action.as_pattern(self.lang), lambda m: self._em(m.group(1)), text
+        )
 
     def highlight_level(self, text: str) -> str:
         level_pattern_by_lang = {"fr": r"niveau \d+", "en": r"\d+(st|nd|rd|th) level"}

@@ -1,23 +1,23 @@
 import concurrent.futures
 
 from dnd5e_card_generator.models import (
+    CliAncestryFeature,
+    CliBackground,
     CliClassFeature,
     CliEldrichtInvocation,
     CliFeat,
     CliMagicItem,
     CliSpell,
-    CliAncestryFeature,
-    CliBackground,
     Language,
 )
 from dnd5e_card_generator.scraping.aidedd import (
+    AncestryFeatureScraper,
+    BackgroundScraper,
     CharacterClassFeatureScraper,
     EldrichInvocationScraper,
     FeatScraper,
     MagicItemScraper,
     SpellScraper,
-    AncestryFeatureScraper,
-    BackgroundScraper,
 )
 
 from .spell import SpellLegend
@@ -38,7 +38,9 @@ def export_elements_to_cards(elements, ScraperCls, sorting_func):
     return [model.to_card() for model in models]
 
 
-def export_spells_to_cards(spell_names: list[CliSpell], include_legend: bool) -> list[dict]:
+def export_spells_to_cards(
+    spell_names: list[CliSpell], include_legend: bool
+) -> list[dict]:
     """Scrape Aidedd for the provided spells and export them as cards data.
 
     If include_legend=True, then a legend card will be generated and added at the end
@@ -91,7 +93,9 @@ def export_eldricht_invocations_to_cards(
     )
 
 
-def export_ancestry_features_to_cards(ancestry_features: list[CliAncestryFeature]) -> list[dict]:
+def export_ancestry_features_to_cards(
+    ancestry_features: list[CliAncestryFeature],
+) -> list[dict]:
     return export_elements_to_cards(
         elements=ancestry_features,
         ScraperCls=AncestryFeatureScraper,

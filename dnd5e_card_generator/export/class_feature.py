@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 
 from dnd5e_card_generator.export.formatter import BaseCardTextFormatter
-from dnd5e_card_generator.models import CharacterClass
-from dnd5e_card_generator.models import Language
+from dnd5e_card_generator.models import CharacterClass, Language
 
 
 @dataclass

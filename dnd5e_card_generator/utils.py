@@ -16,7 +16,9 @@ def game_icon(icon_name: str) -> str:
 
 
 def strip_accents(s: str) -> str:
-    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn"
+    )
 
 
 def damage_type_text(lang):
