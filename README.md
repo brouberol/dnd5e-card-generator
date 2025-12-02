@@ -1,3 +1,6 @@
+> [!WARNING]  
+> Moved to https://git.balthazar-rouberol.com/brouberol/dnd5e-card-generator
+
 # dnd5e-card-generator
 
 Scrape data from https://aidedd.org to generate spell and items cards with https://rpg-cards.vercel.app
